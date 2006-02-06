@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+  properties.xml - Common ant properties for AspectProgramming/Contract4J software.
+  See common.xml for usage details.
+-->
+
+<!--  
+  Copyright 2005 Dean Wampler. All rights reserved.
+  http://www.aspectprogramming.com
+ 
+  Licensed under the Eclipse Public License - v 1.0; you may not use this
+  software except in compliance with the License. You may obtain a copy of the 
+  License at
+ 
+	  http://www.eclipse.org/legal/epl-v10.html
+ 
+  A copy is also included with this distribution. See the "LICENSE" file.
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  @author Dean Wampler  dean@aspectprogramming.com
+-->
+
+<!-- Properties that are derived from environment variables. They can
+	be overridden by "-Dprop=value" options to "ant" or the various build
+	driver scripts.
+	You must define several "project.*" in the project build file.
+	See $CONTRACT4J_HOME/build.xml for examples.
+-->
+<property environment="environ"/>
+<property name="ant.home"        value="${environ.ANT_HOME}"/>
+<property name="aspectj.home"    value="${environ.ASPECTJ_HOME}"/>
+<property name="contract4j.home" value="${environ.CONTRACT4J_HOME}"/>
+<property name="java.home"       value="${environ.JAVA_HOME}"/>
+<property name="junit.home"      value="${environ.JUNIT_HOME}"/>
+<property name="jexl.home"      value="${environ.JEXL_HOME}"/>
+
+<!-- Directories -->
+<property name="classes.reldir"  value="classes"/>
+<property name="src.reldir"      value="src"/>
+<property name="test.reldir"     value="test"/>
+<property name="javadocs.reldir" value="doc/api"/>
+

@@ -1,0 +1,8 @@
+src.includes = src/,\
+               test/
+src.excludes = src/org/contract4j/util/debug/ReportThrows.aj,\
+               test/org/contract4j/test/BaseInterfaceTest.java,\
+               test/org/contract4j/test/BaseTestClassTest.java,\
+               test/org/contract4j/test/BasicContactTest.java,\
+               test/org/contract4j/test/ClassNoContractTest.java,\
+               test/org/contract4j/test/InterfaceNoContractTest.java

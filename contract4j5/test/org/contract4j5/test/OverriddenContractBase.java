@@ -1,0 +1,60 @@
+/**
+ * 
+ */
+package org.contract4j5.test;
+
+import org.contract4j5.Contract;
+import org.contract4j5.Invar;
+import org.contract4j5.Post;
+import org.contract4j5.Pre;
+
+@Contract
+@Invar("$this.field1 != null")
+public class OverriddenContractBase {
+	String field1 = null;
+	public String getField1() {
+		return field1;
+	}
+	public void setField1(String field1) {
+		this.field1 = field1;
+	}
+
+	@Invar String field2 = null;
+	public String getField2() {
+		return field2;
+	}
+	public void setField2(String field2) {
+		this.field2 = field2;
+	}
+	
+	String field3 = null;
+	@Post("$this.field.equals(\"foo\") || $this.field.equals(\"bar\")")
+	public String getField3() {
+		return field3;
+	}
+	@Pre ("$args[0] != null && $args[0].length() >= 3")
+	public void setField3(String field3) {
+		this.field3 = field3;
+	}
+	
+	int invarFlagMethod = 0;
+	public int getInvarFlagMethod() { return invarFlagMethod; }
+	@Invar("$this.invarFlagMethod == 0")
+	public void doNothing() {}
+	
+	int invarFlagCtor = 0;
+	public int getInvarFlagCtor() { return invarFlagCtor; }
+	int postFlag  = 0;
+	public int  getPostFlag() { return postFlag; }
+	public void setPostFlag(int f) { postFlag = f; }
+
+	@Invar("$this.invarFlagCtor == 0")
+	@Pre  ("$args[0] != null && $args[1] != null && $args[2] != null")
+	@Post ("$this.postFlag > 0")
+	public OverriddenContractBase (String f1, String f2, String f3) {
+		this.field1 = f1;  // Avoid setters and their tests!
+		this.field2 = f2;  
+		this.field3 = f3;
+		postFlag = 1;
+	}
+}

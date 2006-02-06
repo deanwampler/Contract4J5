@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+  targets.xml - Common ant targets for AspectProgramming software.
+  See common.xml for usage details.
+-->
+
+<!--  
+  Copyright 2005 Dean Wampler. All rights reserved.
+  http://www.aspectprogramming.com
+	 
+  Licensed under the Eclipse Public License - v 1.0; you may not use this
+  software except in compliance with the License. You may obtain a copy of the 
+  License at
+	 
+	  http://www.eclipse.org/legal/epl-v10.html
+	 
+  A copy is also included with this distribution. See the "LICENSE" file.
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  @author Dean Wampler  dean@aspectprogramming.com
+-->
+
+<!-- A pattern set for common exclusions.
+     Note that "project.debug" is flag; is this a debug or non-debug ("release") build?
+	 See below for further information.
+-->
+<patternset id="common.exclusions">
+    <exclude name="**/save/**" />
+    <exclude name="**/CVS/*" />
+    <exclude name="**/*Test.java" unless="project.debug" />
+    <exclude name="**/test/**"    unless="project.debug" />
+</patternset>
+
+<!-- Define a <patternset> for files in class (output) directories. -->
+<patternset id="classfiles.patternset">
+    <include name="**/*.class" />
+    <include name="**/*.properties" />
+</patternset>
+
+<!-- Define a <patternset> used to clean up "detritus" in directories,
+	 such as editor backups.  Note that some of these patterns are
+	 also in the default exclusion list of some <fileset>'s, meaning the
+	 are ignored by default.  Therefore, clean targets that actually want
+	 to remove them use this patternset in the corresponding <fileset> and
+	 include the defaultexcludes="no" attribute in the <fileset> tag.
+-->
+<patternset id="detritus.patternset">
+    <include name="**/*toss*" />
+    <include name="**/tmp*" />
+    <include name="**/*.bak" />
+    <include name="**/*.save" />
+    <include name="**/*~" />
+    <include name="**/#*#" />
+</patternset>
+
+<!-- Define some paths before the rest of the targets. -->
+<path id="aspectj.classpath">
+	<fileset dir="${aspectj.home}/lib">
+		<include name="**/aspectjrt.jar"/>
+		<include name="**/aspectjtools.jar"/>
+	</fileset>
+</path>
+	
+<path id="junit.classpath">
+	<fileset dir="${junit.home}">
+		<include name="**/junit.jar"/>
+	</fileset>
+</path>
+
+<path id="jexl.classpath">
+	<fileset dir="${jexl.home}">
+		<include name="**/commons-jexl*.jar"/>
+	</fileset>
+</path>
+
+<path id="ant.classpath">
+	<fileset dir="${ant.home}/lib">
+		<include name="**/*.jar"/>
+	</fileset>
+</path>
+
+<path id="project.classpath">
+	<path refid="aspectj.classpath" />
+	<path refid="junit.classpath" />
+	<path refid="jexl.classpath" />
+</path>
+
+
+<!-- "init-debug" and "init-nondebug" set miscellaneous build properties.
+   "init-debugflag" is a bit of a hack. It gets the environment variable
+   and sets a property. It's a dependent of "init", before "init-debug" and
+   "init-nondebug".
+--> 
+<target name="init-debugflag">
+	<property name="project.debug" value="${environ.PROJECT_DEBUG}"/>
+</target>
+
+<target name="init-debug" if="project.debug"
+	  description="Define properties for debug builds.">
+    <tstamp>
+        <format property="touch.time" pattern="MM/dd/yyyy hh:mm:ss.SS" />
+    </tstamp>
+	<property name="build.compiler.debug"      value="true"/>
+	<property name="build.compiler.debuglevel" value="lines,vars,source"/>
+	<property name="build.compiler.optimize"   value="false"/>
+	<property name="build.compiler.verbose"    value="false"/>
+	<property name="build.compiler.emacssym"   value="false"/>
+	<echo>-- Project: ${ant.project.name} (${touch.time}) --</echo>
+	<echo>   Debug Build: </echo>
+	<echo>     Debugging:         ${build.compiler.debug}</echo>
+	<echo>     Debugging Level:   ${build.compiler.debuglevel}</echo>
+	<echo>     Optimization:      ${build.compiler.optimize}</echo>
+</target>
+
+<target name="init-nondebug" unless="project.debug"
+	  description="Define properties for nondebug builds.">
+    <tstamp>
+        <format property="touch.time" pattern="MM/dd/yyyy hh:mm:ss.SS" />
+    </tstamp>
+	<property name="build.compiler.debug"      value="false"/>
+	<property name="build.compiler.debuglevel" value=""/>
+	<property name="build.compiler.optimize"   value="true"/>
+	<property name="build.compiler.verbose"    value="false"/>
+	<property name="build.compiler.emacssym"   value="false"/>
+	<echo>-- Project: ${ant.project.name} (${touch.time}) --</echo>
+	<echo>   Nondebug Build: </echo>
+	<echo>     Debugging:         ${build.compiler.debug}</echo>
+	<echo>     Debugging Level:   ${build.compiler.debuglevel}</echo>
+	<echo>     Optimization:      ${build.compiler.optimize}</echo>
+</target>
+
+<!-- Template target for compilation of Java files using javac.
+     See the description for compileAspectJTemplate, most of which applies here.
+     This target is rarely used; AspectJ is typically used instead all
+	 Java and AspectJ code.
+-->
+<target name="compileJavaCTemplate">
+	<mkdir dir="${classes.reldir}"/>
+	<javac
+		destdir="${classes.reldir}"
+		debug="${build.compiler.debug}"
+		debuglevel="${build.compiler.debuglevel}"
+		optimize="${build.compiler.optimize}">
+		<classpath refid="project.classpath"/>
+		<include name="**/*.java" />
+		<patternset refid="common.exclusions" />
+		<patternset refid="java.exclusions" />
+        <srcdir>
+		    <pathelement location="${src.reldir}" />
+		    <pathelement location="${test.reldir}" />
+        </srcdir>
+	</javac>
+</target>
+
+<!-- Template target for compilation of AspectJ code using iajc. 
+	 Project-specific build.xml files must define the following:
+		  java.exclusions (a patternset)
+		  aspectj.exclusions (a patternset)
+	 They list the java and aspectj files, respectively, to skip during the 
+	 build. Also the following are required: 
+		  src.reldir 
+		  test.reldir
+	 They are relative directories for "regular" and test source code.
+	 The exclusions are a way of keeping files in the repository but selectively 
+	 adding and removing them from the build.
+	 Note: <iajc> does not yet have options for all AspectJ5 options. So, we
+	 use the workaround of putting them in a file (.../ajc.args.list) and
+	 including them through the "argfiles" option.
+-->
+<target name="compileAspectJTemplate">
+	<!-- Define AspectJ tasks -->
+	<taskdef
+		resource="org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties"
+		classpathref="aspectj.classpath" />
+	
+	<mkdir dir="${classes.reldir}"/>
+    <!-- We use an ajc.args.lst file to handle the ajc options that aren't yet 
+         supported by the ant task.-->
+	<iajc
+		destdir="${classes.reldir}"
+		aspectpath="${aspectpath}"  
+		debug="${build.compiler.debug}"
+		debuglevel="${build.compiler.debuglevel}"
+		deprecation="true"
+		verbose="${build.compiler.verbose}"
+		argfiles="${contract4j.home}/ant/ajc.args.lst">
+        <srcdir>
+		    <pathelement location="${src.reldir}" />
+        </srcdir>
+		<classpath>
+			<path refid="project.classpath"/>
+		</classpath>
+        <include name="**/*.java" />
+		<include name="**/*.aj" />
+		<patternset refid="common.exclusions" />
+		<patternset refid="java.exclusions" />
+		<patternset refid="aspectj.exclusions" />
+	</iajc>
+</target>
+
+<!-- Template for JUnit tests.
+     Must invoke with the following defined parameters:
+	   test.jar      The relative path to the jar that contains the driver.
+	   test.fileset  The name of the fileset with tests to run.
+-->
+<target name="junitTemplate">
+	<tstamp>
+		<format property="start" pattern="MM/dd/yyyy hh:mm:ss.SS" />
+	</tstamp>
+	<echo>  Test start time: ${start}</echo>
+	<junit printsummary="yes" haltonfailure="yes" showoutput="true" fork="yes">
+		<jvmarg value="-ea"/>
+		<formatter type="brief" usefile="false"/>
+		<classpath>
+			<pathelement location="${test.jar}"/>
+			<pathelement location="${project.jar}"/>
+			<path refid="project.classpath"/>
+		</classpath>
+		<batchtest>
+			<fileset refid="test.fileset" />
+		</batchtest>
+	</junit>
+	<tstamp>
+		<format property="stop" pattern="MM/dd/yyyy hh:mm:ss.SS" />
+	</tstamp>
+	<echo>  Test finish time: ${stop}</echo>
+	<echo>  Test start  time: ${start}</echo>
+</target>
+	
+<!-- Template to build ajdocs. 
+	 For some reason, there doesn't appear to be an ajdoc task
+	 defined in org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties, even
+	 though there appears to be an ajdoc class in the the package! So, we use
+	 the <apply> target. 
+	 Unfortunately, this doesn't work very well; it doesn't appear to understand
+	 Java 5 syntax yet. So, it's not part of the "all" target build. 
+-->
+<path id="ajdoc.classpath">    <!-- First, we define a classpath. -->
+	<pathelement location="contract4j.jar"/>
+	<path refid="project.classpath"/>
+</path>
+<target name="ajdocsTemplate" depends="javadocsdir">
+    <apply executable="ajdoc">
+		<fileset dir="${src.path}">
+		    <patternset>
+			    <include name="**/*.java"/>
+			    <include name="**/*.aj"/>
+		    </patternset>
+		</fileset>
+		<arg line="-d ${javadocs.reldir} -classpath" />
+		<arg pathref="ajdoc.classpath" />
+		<arg line="-package -sourcepath" />
+		<arg path="${src.path}" />
+<!--
+		<arg line='-author -version -use -windowtitle "${ant.project.name} API" -doctitle "Aspect Programming: ${ant.project.name}" -bottom "Copyright &#169; 2005 Aspect Programming. All Rights Reserved."' />
+		<arg line='-tag note:all:Note -tag todo:all:TODO' />
+		<arg line='-link "http://java.sun.com/j2se/1.5.0/docs/api/"' />
+		<arg value="org.contract4j"/> 
+-->
+    </apply>
+</target>
+
+<!-- Template to build javadocs. Invoke with "src.reldir" and "test.reldir"
+     defined, as for target compileAspectJTemplate above.
+-->
+<target name="javadocsTemplate" depends="javadocsdir">
+	<javadoc packagenames="org.contract4j.*"
+		 destdir="${javadocs.reldir}"
+		 author="true"
+		 version="true"
+		 use="true"
+		 windowtitle="${ant.project.name} API"
+		 doctitle="Aspect Programming: ${ant.project.name}"
+		 bottom="Copyright &#169; 2005 Aspect Programming. All Rights Reserved.">
+        <sourcepath>
+		    <pathelement location="${src.reldir}" />
+		    <pathelement location="${test.reldir}" />
+        </sourcepath>
+		<classpath>
+			<path refid="project.classpath"/>
+			<fileset dir="${java.home}/.."> <!-- java.home may be the jre subdir -->
+				<include name="**/tools.jar"/>
+			</fileset>
+		</classpath>
+		<tag name="note"  scope="all" description="Note:" />
+		<tag name="todo"  scope="all" description="TODO:" />
+		<link href="http://java.sun.com/j2se/1.5.0/docs/api/" />
+	</javadoc>
+</target>
+
+<target name="javadocsdir">
+	<mkdir dir="${javadocs.reldir}" />
+</target>
+	
+<target name="clean" depends="init, clean-detritus">
+	<delete dir="${javadocs.reldir}" />
+	<delete dir="${gensrc.reldir}" />
+	<delete dir="${classes.reldir}" />
+	<delete>
+		<fileset dir="." includes="${project.jar}" />
+		<fileset dir="." includes="${project.test.jar}" />
+	</delete>
+</target>
+
+<target name="clean-detritus" depends="init"
+	  description="Clean up the editor backup files, etc.">
+	<delete>
+		<fileset dir="." defaultexcludes="no">
+			<patternset refid="detritus.patternset" />
+		</fileset>
+	</delete>
+</target>
+
+	
+	
+	

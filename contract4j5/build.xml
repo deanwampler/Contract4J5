@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!--
+  build.xml - "Ant" build file for AspectProgramming's "Contract4J5" library.
+
+  Copyright 2005 Dean Wampler. All rights reserved.
+  http://www.aspectprogramming.com
+ 
+  Licensed under the Eclipse Public License - v 1.0; you may not use this
+  software except in compliance with the License. You may obtain a copy of the 
+  License at
+ 
+      http://www.eclipse.org/legal/epl-v10.html
+ 
+  A copy is also included with this distribution. See the "LICENSE" file.
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  @author Dean Wampler  dean@aspectprogramming.com
+-->
+
+<!-- The conventional targets, "all", "build", etc. work only with the core Contract4J5 code
+	 rooted in the "src" and "test" directories. To build the optional "configurator" and
+	 "spring" packages, build the targets "all-configurator" or "all-spring", respectively.
+-->
+<!-- Include some "common" files. Actually, since we only use them here, their contents
+     could be merged in... -->
+<!DOCTYPE project [
+	<!ENTITY common     SYSTEM "file:ant/common.xml">
+	<!ENTITY properties SYSTEM "file:ant/properties.xml">
+	<!ENTITY targets    SYSTEM "file:ant/targets.xml">
+]>
+
+<project name="Contract4J5" default="all" basedir=".">
+
+	&common;     <!-- Include the common stuff -->
+
+	<!-- Pattern sets for compilation exclusions. -->
+	<patternset id="java.exclusions" />
+	<patternset id="aspectj.exclusions" />
+
+	<target name="init" depends="common-init">
+		<!-- "contract4J5.jar" contains the runtime deployment aspects and classes -->
+        <property name="project.jar"      value="contract4j5.jar" />
+		<!-- "contract4J5-test.jar" contains the test/example aspects and classes -->
+        <property name="project.test.jar" value="contract4j5-test.jar" />
+		<!-- "configurator.jar" contains the deprecated "configurator" code (See the README) -->
+        <property name="configurator.jar" value="configurator.jar" />
+		<!-- "configurator-test.jar" contains the tests for the "configurator" code -->
+        <property name="configurator.test.jar" value="configurator-test.jar" />
+	</target>
+
+	<target name="all" depends="init, clean, build, test, docs" />
+	<target name="all-configurator" depends="init">
+		<antcall target="all">
+			<param name="src.reldir"       value="${configurator/src}" />
+			<param name="test.reldir"      value="${configurator/test}" />
+			<param name="classes.reldir"   value="${configurator/classes}" />
+			<param name="project.jar"      value="${configurator.jar}" />
+			<param name="project.test.jar" value="${configurator.test.jar}" />
+		</antcall>
+	</target>
+	<target name="all-spring" depends="init">
+		<antcall target="all">
+			<param name="src.reldir"       value="${spring/src}" />
+			<param name="test.reldir"      value="${spring/test}" />
+			<param name="classes.reldir"   value="${spring/classes}" />
+			<param name="project.jar"      value="${spring.jar}" />
+			<param name="project.test.jar" value="${spring.test.jar}" />
+		</antcall>
+	</target>
+
+	<target name="build" depends="init, jar" />
+
+	<target name="jar" depends="project.jar, project-test.jar" />
+	
+	<target name="project.jar" depends="compile">
+		<jar destfile="${project.jar}">  
+			<fileset dir="${classes.reldir}"
+			    excludes="**/test/**" />
+			<fileset dir="${src.reldir}"
+				includes="**/*.properties" />
+		</jar>
+	</target>
+	<target name="project-test.jar" depends="compile-test">
+		<jar destfile="${project.test.jar}">  
+			<fileset dir="${classes.reldir}"
+			    includes="**/test/**" />
+			<fileset dir="${test.reldir}"
+				includes="**/*.properties" />
+		</jar>
+	</target>
+	
+	<!-- Compile the library's java and aj files with ajc -->
+	<target name="compile" depends="init">
+		<antcall target="compileAspectJTemplate">
+			<param name="aspectpath" value="" />
+		</antcall>
+	</target>
+	
+	<!-- Compile the test java and aj files with ajc. The output will include the library code. -->
+	<target name="compile-test" depends="init">
+		<antcall target="compileAspectJTemplate">
+			<param name="src.reldir"  value="${test.reldir}" />
+			<param name="aspectpath"  value="${project.jar}" />
+		</antcall>
+	</target>
+	
+	<target name="test" depends="test-setup">
+		<fileset dir="${test.reldir}" id="test.fileset">
+		    <include name="org/contract4j/**/test/*Test.java" />
+		</fileset>
+		<antcall target="junitTemplate">
+			<param name="test.jar"     value="${project.test.jar}" />
+			<!--param name="test.fileset" value="${test.fileset}" /-->
+		</antcall>
+	</target>
+
+	<!-- Make sure the correct property file for TestDefaultTestMethodFinder is installed. -->
+	<target name="test-setup">
+		<!-- TODO fix for reorg.
+		<property name="prop.file" value="test/org/contract4j/test/DefaultTestMethodFinder.properties"/>
+		<copy file="${prop.file}.golden" tofile="${prop.file}" overwrite="true" /> 
+		-->
+	</target>
+
+     <!-- TODO: Use or add AJDoc. See notes in ant/targets.xml for target "ajdocsTemplate". -->
+	<target name="docs" depends="init">
+        <echo>Expect a few warnings when Javadoc encounters imports of AspectJ code (e.g., "Contract4J5"), which Javadoc doesn't know how to handle....</echo>
+		<antcall target="javadocsTemplate">
+			<param name="src.path" value="${src.reldir}" />
+		</antcall>
+	</target>
+	
+</project>
+
