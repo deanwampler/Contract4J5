@@ -323,7 +323,7 @@ On Windows systems, Unzip the zip file to an appropriate location.
 You will need Java 5, AspectJ 5, Jakarta Commons Jexl 1.0 to use Contract4J5.
 If you build it yourself, you will also need JUnit.
 
-You can use the installed "contract4j5.jar" file as is. If you want to rebuild
+You can use the installed "contract4j5_XYZ.jar" file as is. If you want to rebuild
 Contract4J, use the ant driver script "build.sh" or "build.bat", edit the file 
 and change the environment variable definitions to point to appropriate 
 locations for your environment. Or, you can define the appropriate environment
@@ -347,10 +347,10 @@ demonstrate usage and they contain comments about tests the demonstrate known
 idiosyncrasies or limitations of C4J5 and Jexl evaluation.
 classes - where build artifacts (except the jars) are stored
 doc - Where Javadocs are written
-contract4j5.jar - The runtime deployment jar. It contains the build products 
+contract4j5_XYZ.jar - The runtime deployment jar. It contains the build products 
 from "src".
-contract4j5-test.jar - The jar containing the build products from "test". Not 
-part of the normal runtime deployment.
+contract4j5_XYZ-test.jar - The jar containing the build products from "test". 
+Not part of the normal runtime deployment.
 
 If you want to build Contract4J:
 
@@ -359,7 +359,7 @@ If you want to build Contract4J:
 or
 	6c) ant all
 
-The jar files "contract4j5.jar" and "contract4j-test.jar" in the current
+The jar files "contract4j5_XYZ.jar" and "contract4j_XYZ-test.jar" in the current
 directory will be built and the unit/acceptance tests will be executed. The
 tests generate a LOT of output, but they should all pass.
 
@@ -370,7 +370,7 @@ configuring Contract4J5.
 
 Here is a large example showing how to define Contract4J5 tests in your code 
 so that Contract4J5 can discover and execute them at runtime. It is the file
-"test/org/contract4j5.test/BaseTestClass.java" (with some superfluous details
+"test/org/contract4j5/test/BaseTestClass.java" (with some superfluous details
 omitted). See additional examples in the unit/acceptance suite under the "test"
 directory.
 
@@ -755,18 +755,17 @@ $this    The "this" object under test
 $target  A field in an invariant test
 $result  The return result of a method; only valid in postconditions
 $args[n] The "nth" argument in a parameter list
-$old(..) The "old" value (before a method is actually executed) of the contents
-         of the expression, which can be a "$this", "$target", a "bare" field 
-         reference on either or a method call on either. For example:
-         $old($this)   Not recommended, because only the reference is saved and
-                       the object pointed to by "this" may change! Use fields
-                       or method calls instead.
+$old(..) The "old" value (before a method is actually executed) of the 
+         contents of the expression, which can be one of the following:
+         $old($this)   Not recommended, because only the reference is saved 
+                       and the object pointed to by "this" may change! Use 
+                       fields or method calls instead.
          $old($target) equal to $old($this.field). Be careful if "field" is
                        mutable; the value is not saved, just the reference to
                        the object!
-         $old($this.field) Recommended usage, if "field" is primitive, in which 
-                       case the value is captured, or it refers to an immutable
-                       object. Same for $old($target.field) 
+         $old($this.field) Recommended usage, if "field" is primitive, in 
+                       which case the value is captured, or it refers to an 
+                       immutable object. Same for $old($target.field) 
          $old($this.method(x,y))  The returned value is saved. Due to parser
                        limitations, method calls may not contain nested method
                        calls.
@@ -779,13 +778,177 @@ objects like strings.
 6) Test Expression Best Practices
 
 This section outlines the right way to write test expressions, reflecting the
-limitations of Contract4J5 and Jexl.
+limitations of Contract4J5 and Jexl. For detailed examples, see the code in 
+the test suite.
 
-TODO
+** Default Test Expressions
+
+If a contract annotation is used with no test expression, a default expression
+will be inferred with possible. For cases where no test can be inferred, it
+is considered an error, but this can be overridden with an API call:
+  ExpressionInterpreter.setTreatEmptyTestExpressionAsValidTest(boolean);
+
+If the test is on an element with no superclass equivalent, the following
+default rules apply:
+
+@Pre   All arguments are expected to be non-null, which means there is no
+       meaningful default test for primitive arguments
+@Post  The return value is expected to be non-null, unless the method
+       returns void.
+@Invar There is no default expression except for field invariants, where the
+       field is expected to be non-null.
+
+For elements with superclass equivalents, the following rules apply.
+First, recall that preconditions and postconditions can only be used on
+methods and constructors. Also, because Java5 method annotations are never
+inherited, you MUST annotate any method with the same annotations found on
+its parent. However, the test expressions can be empty and if so, the 
+corresponding test defined in the parent element will be used. Note that if
+you don't put the annotations on derived class overrides, if they call the
+parent methods, the parent methods will be tested, but not anything the
+override does (including constructors).
+
+API calls exist in the org.contract4j5.aspects.*.aj aspects to specify
+customized objects for calculating a default expression at runtime. These 
+objects must implement
+  org.contract4j5.testexpression.DefaultTestExpressionMaker.
+
+** Inheritance Rules for Annotation Test Expressions.
+
+This was discussed in depth above, in the section titled "How Does Contract4J 
+Support Design by Contract?".
+
+** $this refers to the object being tested. You can call any public method on 
+the object in the test expression; Jexl will resolve the type. Additionally,
+if you refer to a bare field that is not public, Jexl will convert the 
+expression to the corresponding getter call.
+
+** $target currently is used only to refer to the field in a field invariant
+test. Future use may include any context associated with the "target()" 
+pointcut expression. As for $this, you can reference any method or field 
+defined for the object.
+
+** $return is the value returned by a method. It is only valid in 
+postcondition tests. As for $this, you can reference any method or field 
+defined for the object.
+
+** $args[] are the arguments passed to a method, indexed starting at zero. 
+You can also use the declared argument name. However, if the name shadows an
+instance field, the parser may confuse the two; use the appropriate $arg[n] in
+this case. As for $this, you can reference any method or field defined for the
+objects in the array.
+
+** Use of the "$old(..)" Keyword
+
+The "old" $old(..) keyword tells Contract4J5 to remember the value of the
+contained expression before evaluating evaluating the join point, so that 
+value can be compared to the "new" value after evaluating the join point.
+It can only be used in @Invar and @Post condition tests and the saved value
+is forgotten once the test completes.
+
+The most important thing to remember about "$old(..)" is that Contract4J5 only
+remembers the value, which may be a reference to a mutable object. Since
+"clone()" is not guaranteed by Java to be publicly available on an object, we
+can't clone it and it was deemed too "obscure" to only permit, for example
+"$old($this)" on objects where clone is publicly available. Hence, you should
+try to use the $old keyword only with primitives or references to immutable
+like strings.
+
+Here are the allowed expressions.
+  $old($this)   
+    Not recommended, since only the reference is saved. 
+  $old($target) 
+    Equal to $old($this.field). Be careful if "field" is a reference to a
+    mutable object!
+  $old($this.field) 
+    Recommended usage, if "field" is primitive. A synonym for
+    $old($target.field). 
+  $old($this.method(x,y))  
+    Method call where the returned value is saved. Due to current parser
+    limitations, nested method calls are not supported. So, the following
+    is okay:
+      $old($this.getFoo().doIt(1))
+    but this is not
+      $old($this.getFoo().doIt(getIntI()))
+
+** References to Instance Fields
+
+For fields, Jexl will automatically convert a "bare" field reference to its
+accessor, even if the field is private. Hence, an expression like
+  $this.foo.bar.baz.doIt(1)
+is allowed and will be translated to
+  $this.getFoo().getBar().getBaz().doIt(1)
+assuming fields "foo", "bar", and "baz" are not public, but they have getter 
+methods.
+
+Normally, you should prepend "$this." before a "bare" field reference as the
+parser does not always correctly resolve the reference to an instance field.
+As an alternative in field invariant tests, "$target" can be used to refer to
+the field.
+
+** Tests Defined on Interfaces
+
+You can define tests on interfaces and their methods. In fact, you are urged
+to do so. Unfortunately, for reasons discussed previously, you must include
+the same annotations, although not their test expressions, on the declarations
+of the method implementations in implementing classes. Contract4J5 will find
+the test expressions in the interfaces.
+
+Unfortunately, you can't define contract tests for constructors, since they
+don't exist in an interface. You may be able to work around this using class
+invariants and tests on instance methods. Note that you can also implicitly 
+define field invariant tests, either on declared accessor methods or as 
+invariants on the class itself. You can refer to the (implied) bare field in
+the test, as long as you declare an appropriate accessor method for it.
+
+** Miscellaneous Notes
+
+*** All test expressions must evaluate to a boolean value. 
+
+*** Test expressions that fail to be evaluated by Jexl will be treated as test
+failures, on the grounds that they expression is buggy in this case! (This
+behavior is configurable with an API call.)
+
+*** Avoid expressions with side effects. Since tests will usually be turned 
+off in production, test expressions with side effects, e.g., assignments, will
+not be evaluated, thereby changing the logical behavior of the application.
+
+*** Because runtime expression evaluation is very slow compared to compiled
+code, consider embedding non-trivial tests in "validation" methods and calling
+them from the test expression. (Prepend instance tests with "$this.")
+
+*** White space follows the same rules for Java. For the "$" keywords, white
+space is not allowed between the '$' and the word.
+
+*** Jexl can't parse literal floats and doubles with the 'f' and 'd' appended,
+respectively. Leave them off in both cases.
+
+*** Most other Java expressions, like comparisons and arithmetic expressions can be used. See the Jexl website for more information on allowed expressions,
+  http://jakarta.apache.org/commons/jexl/.
+
+*** Before passing the expressions to Jexl, substitutions are made. Normally,
+you shouldn't case, but when debugging, you may see strings with these 
+substitutions. All the '$' keywords are changed. For example, 
+	$this         -> c4jThis
+	$target       -> c4jTarget
+	$old($this)   -> c4jOldThis
+	$old($target) -> c4jOldTarget
+etc.
+
+*** Turn on DEBUG logging to see what expressions are being evaluated and
+some of the substitutions that are made.
+
+*** Some common expression errors have "canned" strings defined for them in
+  org.contract4j5.interpreter.ExpressionInterpreter.java
+Most of the heavy lifting of expression evaluation BEFORE sending it to Jexl 
+is done in
+  org.contract4j5.interpreter.ExpressionInterpreterHelper.java
+The wrapper for Jexl itself is 
+  org.contract4j5.interpreter.jexl.JexlExpressionInterpreter.java
 
 ----- Configuring the Behavior
 
-For this v0.5.0 release, the behavior of Contract4J can only be configured 
+For this v0.5.0 release, the behavior of Contract4J5 can only be configured 
 through API calls. Some limited support for configuration using property files
 is planned for subsequent release. Most of the previous support for property
 file configuration and the ad hoc "configurator" used previously have been
@@ -793,6 +956,8 @@ deprecated and won't be supported further (unless interest is high enough...).
 We believe you should use a standard mechanism like Spring's Dependency 
 Injection (DI) rather than have to manage yet another proprietary "wiring" 
 approach.
+
+However, Contract4J5 will use reasonable defaults if you don't do any wiring.
 
 An example of using Spring DI for configuration is planned for a subsequent 
 release before v1.0 final. This release demonstrates using API calls to 
@@ -811,7 +976,7 @@ contract tests application-wide using the API:
 This example turns on all three test types. 
 
 NOTE: To completely disable contract checking, build the application without
-"contract4j5.jar" in your path. This is recommended for "production" builds 
+"contract4j5_XYZ.jar" in your path. This is recommended for "production" builds 
 when you don't want any test overhead.
 
 The ManualSetup.wireC4J() methods demonstrate that there are several components
@@ -852,7 +1017,7 @@ classes:
 Note: For all properties currently defined, if a value is empty, it is ignored!
 
    
---- Invocation and Configuration of Contract4J
+--- Invocation and Configuration of Contract4J5
 
 To build Contract4J5 the following third-party tools are required, along with 
 corresponding "HOME" environment variable definitions needed by the ant build 
@@ -864,7 +1029,7 @@ scripts:
 3) Ant 1.6.X (ANT_HOME)
 4) Jexl 1.0 (JEXL_HOME)
 
-Also define "CONTRACT4J_HOME" to be the ".../contract4j5_0_5_0/contract4j5"
+Also define "CONTRACT4J5_HOME" to be the ".../contract4j5_050/contract4j5"
 directory where you installed it.
 
 For your convenience, you can use the build driver script "build.sh". Edit the 
@@ -875,6 +1040,9 @@ Only Java, AspectJ, and Jexl are required if you simply use the binary
 compiles with AspectJ or weaves your precompiled jars or class files with 
 "contract4j5.jar". Follow the instructions provided with AspectJ (or AJDT if 
 you use eclipse) for doing this. 
+
+Follow the example of the build.xml file (and the ant/*.xml files it includes) 
+to incorporate the Contract4J5 jars into your build.
 
 ** TODO Items:
 
@@ -898,6 +1066,7 @@ to conform to the emerging conventions for that library. However, this process
 *should* have only a small impact on users.
 4) Exploit aspects to manage the "Reporter" objects, which are hard-coded in
 classes that use them.
+5) Refine test handling. For example, field invariants are evaluated for reads, but this probably only makes sense for the very first read, in case it is uninitialized.
 
 
 ** Notes for Each Release
@@ -905,11 +1074,27 @@ classes that use them.
 *** v0.5.0 February 7, 2006
 
 Combined the best features of V1 and V2; the annotation syntax of V1 without
-the precompilation step. To do this, Contract4J now uses the Jakarta Commons
+the precompilation step. To do this, Contract4J5 now uses the Jakarta Commons
 JEXL expression parser to evaluate contract tests dynamically at runtime.
 
 The package structure has been changed from com.aspectprogramming.* to
-org.contract4j.*.
+	org.contract4j5.*.
+	
+Deprecated three features; they aren't supported in this milestone release.
+
+1) Ad hoc configuration API and full support for configuration through 
+property files. Subsequent releases will have limited support for property 
+file configuration, for convenience, but the preferred way to configure
+Contract4J5 is through a dependency injection (DI) solution like Spring.
+
+2) The "alwaysActive" property of the V0.1 annotations, which allowed you to
+mark an annotation as always on even if all other annotations of the same time
+have been disabled globally. The complexity of implementing this feature in
+the new architecture outweighed the benefits.
+
+3) Annotations on method parameters. This is a current AspectJ5 limitation; 
+it doesn't support annotations on method parameters. The workaround is to
+put all parameter tests in a method precondition test.
 
 *** v0.1.1.0 October 4, 2005
 
@@ -933,11 +1118,13 @@ Minor bug fixes.
 
 ** For Further Information...
 
-http://www.contract4j.org/ is the home page for Contract4J. It is hosted by 
-Aspect Research Associates, which also manage the Aspect Programming web site,
-http://www.aspectprogramming.com/. There you will find more
-information and whitepapers on Contract4J and Aspect-Oriented Software 
-Development (AOSD), in general. 
+http://www.contract4j.org/ is the home page for Contract4J5 and Contract4JBeans.
+It is hosted by Aspect Research Associates (ARA)
+(http://www.aspectresearchassociates.com/), a consulting company specializing
+in Aspect-Oriented Programming, enterprise Java, and Ruby on Rails. ARA also
+manages the Aspect Programming web site, http://www.aspectprogramming.com/. 
+There you will find more information and whitepapers on Contract4J and 
+Aspect-Oriented Software Development (AOSD), in general. 
 
 The definitive site on AOSD is http://www.aosd.net.
 

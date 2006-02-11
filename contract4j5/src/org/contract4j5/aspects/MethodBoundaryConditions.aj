@@ -18,7 +18,7 @@
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 
-package org.contract4j.aspects;
+package org.contract4j5.aspects;
 
 import java.lang.annotation.Annotation;
 
@@ -26,32 +26,32 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.aspectj.lang.reflect.SourceLocation;
-import org.contract4j.ContractEnforcer;
-import org.contract4j.Instance;
-import org.contract4j.Post;
-import org.contract4j.Pre;
-import org.contract4j.TestContext;
-import org.contract4j.TestContextImpl;
-import org.contract4j.interpreter.TestResult;
-import org.contract4j.testexpression.DefaultPostTestExpressionMaker;
-import org.contract4j.testexpression.DefaultPreTestExpressionMaker;
-import org.contract4j.testexpression.DefaultTestExpressionMaker;
-import org.contract4j.testexpression.ParentTestExpressionFinder;
-import org.contract4j.testexpression.ParentTestExpressionFinderImpl;
-import org.contract4j.testexpression.SimpleStringDefaultTestExpressionMaker;
-import org.contract4j.util.MiscUtils;
+import org.contract4j5.ContractEnforcer;
+import org.contract4j5.Instance;
+import org.contract4j5.Post;
+import org.contract4j5.Pre;
+import org.contract4j5.TestContext;
+import org.contract4j5.TestContextImpl;
+import org.contract4j5.interpreter.TestResult;
+import org.contract4j5.testexpression.DefaultPostTestExpressionMaker;
+import org.contract4j5.testexpression.DefaultPreTestExpressionMaker;
+import org.contract4j5.testexpression.DefaultTestExpressionMaker;
+import org.contract4j5.testexpression.ParentTestExpressionFinder;
+import org.contract4j5.testexpression.ParentTestExpressionFinderImpl;
+import org.contract4j5.testexpression.SimpleStringDefaultTestExpressionMaker;
+import org.contract4j5.util.MiscUtils;
 
 /**
  * Test the method preconditions and postconditions.
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 public aspect MethodBoundaryConditions extends Contract4J {
-	private DefaultTestExpressionMaker defaultPreTestExpressionMaker = null;
+	private static DefaultTestExpressionMaker defaultPreTestExpressionMaker = null;
 	
 	/**
 	 * @return the DefaultTestExpressionMaker for preconditions tests for methods
 	 */
-	public DefaultTestExpressionMaker getDefaultPreTestExpressionMaker() { 
+	public static DefaultTestExpressionMaker getDefaultPreTestExpressionMaker() { 
 		if (defaultPreTestExpressionMaker == null) {
 			defaultPreTestExpressionMaker = new DefaultPreTestExpressionMaker();
 		}
@@ -61,17 +61,17 @@ public aspect MethodBoundaryConditions extends Contract4J {
 	/**
 	 * @param maker DefaultTestExpressionMaker for preconditions tests for methods
 	 */
-	public void setDefaultPreTestExpressionMaker (DefaultTestExpressionMaker maker) { 
+	public static void setDefaultPreTestExpressionMaker (DefaultTestExpressionMaker maker) { 
 		defaultPreTestExpressionMaker = maker; 
 	}
 
-	private DefaultTestExpressionMaker defaultPostTestExpressionMaker = null;
+	private static DefaultTestExpressionMaker defaultPostTestExpressionMaker = null;
 	
 	/**
 	 * @return the DefaultTestExpressionMaker for postcondition tests for
 	 * methods not returning void
 	 */
-	public DefaultTestExpressionMaker getDefaultPostTestExpressionMaker() { 
+	public static DefaultTestExpressionMaker getDefaultPostTestExpressionMaker() { 
 		if (defaultPostTestExpressionMaker == null) {
 			defaultPostTestExpressionMaker = new DefaultPostTestExpressionMaker();
 		}
@@ -82,17 +82,17 @@ public aspect MethodBoundaryConditions extends Contract4J {
 	 * @param maker DefaultTestExpressionMaker for postcondition tests for
 	 * methods not returning void
 	 */
-	public void setDefaultPostTestExpressionMaker (DefaultTestExpressionMaker maker) { 
+	public static void setDefaultPostTestExpressionMaker (DefaultTestExpressionMaker maker) { 
 		defaultPostTestExpressionMaker = maker; 
 	}
 
-	private DefaultTestExpressionMaker defaultPostReturningVoidTestExpressionMaker = null;
+	private static DefaultTestExpressionMaker defaultPostReturningVoidTestExpressionMaker = null;
 	
 	/**
 	 * @return the DefaultTestExpressionMaker for postcondition tests for
 	 * methods returning void. (By default, the test expression itself will be "".)
 	 */
-	public DefaultTestExpressionMaker getDefaultPostReturningVoidTestExpressionMaker() { 
+	public static DefaultTestExpressionMaker getDefaultPostReturningVoidTestExpressionMaker() { 
 		if (defaultPostReturningVoidTestExpressionMaker == null) {
 			defaultPostReturningVoidTestExpressionMaker = new SimpleStringDefaultTestExpressionMaker();
 		}
@@ -103,17 +103,17 @@ public aspect MethodBoundaryConditions extends Contract4J {
 	 * @param maker DefaultTestExpressionMaker for postcondition tests for
 	 * methods returning void
 	 */
-	public void setDefaultPostReturningVoidTestExpressionMaker (DefaultTestExpressionMaker maker) { 
+	public static void setDefaultPostReturningVoidTestExpressionMaker (DefaultTestExpressionMaker maker) { 
 		defaultPostReturningVoidTestExpressionMaker = maker; 
 	}
 
-	private ParentTestExpressionFinder parentTestExpressionFinder = null;
+	private static ParentTestExpressionFinder parentTestExpressionFinder = null;
 	
 	/**
 	 * @return the parentTestExpressionFinder used to determine the text expression
 	 * used by the corresponding annotation on the corresponding parent method, if any.
 	 */
-	public ParentTestExpressionFinder getParentTestExpressionFinder() {
+	public static ParentTestExpressionFinder getParentTestExpressionFinder() {
 		if (parentTestExpressionFinder == null) {
 			parentTestExpressionFinder = new ParentTestExpressionFinderImpl();
 		}
@@ -123,9 +123,9 @@ public aspect MethodBoundaryConditions extends Contract4J {
 	/**
 	 * @param parentTestExpressionFinder to use.
 	 */
-	public void setParentTestExpressionFinder(
-			ParentTestExpressionFinder parentTestExpressionFinder) {
-		this.parentTestExpressionFinder = parentTestExpressionFinder;
+	public static void setParentTestExpressionFinder(
+			ParentTestExpressionFinder finder) {
+		parentTestExpressionFinder = finder;
 	}
 
 	/**
@@ -160,23 +160,25 @@ public aspect MethodBoundaryConditions extends Contract4J {
 	 * Before advice for methods, including methods returning void.
 	 */
 	before (Pre pre, ContractMarker obj) : preMethod (pre, obj) {
-		ExprAndContext eandc = 
-			doBeforeTest (thisJoinPoint, obj, pre, "Pre", pre.value(), pre.message(),
+		TestContext context = new TestContextImpl();
+		String testExpr = 
+			doBeforeTest (context, thisJoinPoint, obj, pre, "Pre", pre.value(), pre.message(),
 				getDefaultPreTestExpressionMaker());
-		getContractEnforcer().invokeTest(eandc.testExpr, "Pre", pre.message(), eandc.context);
+		getContractEnforcer().invokeTest (testExpr, "Pre", pre.message(), context);
 	}
 
 	/**
 	 * After advice for methods, excluding methods returning void.
 	 */
 	Object around (Post post, ContractMarker obj) : postMethod (post, obj) {
-		ExprAndContext eandc = 
-			doBeforeTest (thisJoinPoint, obj, post, "Post", post.value(), post.message(),
+		TestContext context = new TestContextImpl();
+		String testExpr = 
+			doBeforeTest (context, thisJoinPoint, obj, post, "Post", post.value(), post.message(),
 				getDefaultPostTestExpressionMaker());
-		eandc.context.setOldValuesMap (determineOldValues (eandc.testExpr, eandc.context));
+		context.setOldValuesMap (determineOldValues (testExpr, context));
 		Object result = proceed (post, obj);
-		eandc.context.getMethodResult().setValue(result);
-		getContractEnforcer().invokeTest(eandc.testExpr, "Post", post.message(), eandc.context);
+		context.getMethodResult().setValue(result);
+		getContractEnforcer().invokeTest (testExpr, "Post", post.message(), context);
 		return result;
 	}
 
@@ -184,26 +186,29 @@ public aspect MethodBoundaryConditions extends Contract4J {
 	 * After advice for methods returning void.
 	 */
 	void around (Post post, ContractMarker obj) : postVoidMethod (post, obj) {
-		ExprAndContext eandc = 
-			doBeforeTest (thisJoinPoint, obj, post, "Post", post.value(), post.message(),
+		TestContext context = new TestContextImpl();
+		String testExpr = 
+			doBeforeTest (context, thisJoinPoint, obj, post, "Post", post.value(), post.message(),
 				getDefaultPostReturningVoidTestExpressionMaker());
-		eandc.context.setOldValuesMap (determineOldValues (eandc.testExpr, eandc.context));
+		context.setOldValuesMap (determineOldValues (testExpr, context));
 		proceed (post, obj);
-		getContractEnforcer().invokeTest(eandc.testExpr, "Post", post.message(), eandc.context);
+		getContractEnforcer().invokeTest (testExpr, "Post", post.message(), context);
 	}
 	
 	/**
 	 * Need to pass both the annotation and the fields extracted from our contract annotations, because
 	 * Java won't let us have our annotations implement an interface with these fields, nor any common
 	 * interface, so we have to pass everything in.
+	 * @return the test expression
 	 */
-	protected ExprAndContext doBeforeTest (
-			JoinPoint  thisJoinPoint, 
-			Object     obj,
-			Annotation anno,
-			String     testTypeName,
-			String     annoTestExpr, 
-			String     testMessage,
+	protected String doBeforeTest (
+			TestContext context,
+			JoinPoint   thisJoinPoint, 
+			Object      obj,
+			Annotation  anno,
+			String      testTypeName,
+			String      annoTestExpr, 
+			String      testMessage,
 			DefaultTestExpressionMaker maker) {
 		Signature   signature  = thisJoinPoint.getSignature();
 		MethodSignature ms     = (MethodSignature) signature;
@@ -218,9 +223,12 @@ public aspect MethodBoundaryConditions extends Contract4J {
 		// The returned value is set in the advice for post tests for 
 		// functions not returning void.
 		Instance    returnz    = new Instance ("", ms.getReturnType(), null);
-		TestContext context    = 
-			new TestContextImpl (methodName, instance, null, args, returnz, null,
-					loc.getFileName(), loc.getLine());
+		context.setItemName(methodName);
+		context.setInstance(instance);
+		context.setMethodResult(returnz);
+		context.setLineNumber(loc.getLine());
+		context.setFileName(loc.getFileName());
+		context.setMethodArgs(args);
 		TestResult result = 
 			getParentTestExpressionFinder().findParentMethodTestExpressionIfEmpty(
 				annoTestExpr, anno, ms.getMethod(), context);
@@ -231,6 +239,6 @@ public aspect MethodBoundaryConditions extends Contract4J {
 		}
 		String testExpr = result.getMessage(); 
 		testExpr = maker.makeDefaultTestExpressionIfEmpty(testExpr, context);
-		return new ExprAndContext (testExpr, context);
+		return testExpr;
 	}
 }

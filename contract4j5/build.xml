@@ -42,14 +42,17 @@
 	<patternset id="aspectj.exclusions" />
 
 	<target name="init" depends="common-init">
+		<!-- This release version -->
+		<property name="version"          value="050" />
 		<!-- "contract4J5.jar" contains the runtime deployment aspects and classes -->
-        <property name="project.jar"      value="contract4j5.jar" />
+        <property name="project.jar"      value="contract4j5_${version}.jar" />
 		<!-- "contract4J5-test.jar" contains the test/example aspects and classes -->
-        <property name="project.test.jar" value="contract4j5-test.jar" />
-		<!-- "configurator.jar" contains the deprecated "configurator" code (See the README) -->
+        <property name="project.test.jar" value="contract4j5_${version}-test.jar" />
+		<!-- "configurator.jar" contains the deprecated "configurator" code.
+		  Some support will be re-added in a subsequent pre-1.0 release. (See the README)
         <property name="configurator.jar" value="configurator.jar" />
-		<!-- "configurator-test.jar" contains the tests for the "configurator" code -->
         <property name="configurator.test.jar" value="configurator-test.jar" />
+		-->
 	</target>
 
 	<target name="all" depends="init, clean, build, test, docs" />
@@ -110,7 +113,7 @@
 	
 	<target name="test" depends="test-setup">
 		<fileset dir="${test.reldir}" id="test.fileset">
-		    <include name="org/contract4j/**/test/*Test.java" />
+		    <include name="org/contract4j5/**/test/*Test.java" />
 		</fileset>
 		<antcall target="junitTemplate">
 			<param name="test.jar"     value="${project.test.jar}" />
@@ -118,12 +121,8 @@
 		</antcall>
 	</target>
 
-	<!-- Make sure the correct property file for TestDefaultTestMethodFinder is installed. -->
+	<!-- Do any required test setup. -->
 	<target name="test-setup">
-		<!-- TODO fix for reorg.
-		<property name="prop.file" value="test/org/contract4j/test/DefaultTestMethodFinder.properties"/>
-		<copy file="${prop.file}.golden" tofile="${prop.file}" overwrite="true" /> 
-		-->
 	</target>
 
      <!-- TODO: Use or add AJDoc. See notes in ant/targets.xml for target "ajdocsTemplate". -->

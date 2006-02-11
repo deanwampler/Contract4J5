@@ -18,16 +18,18 @@
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 
-package org.contract4j.aspects;
+package org.contract4j5.aspects;
 
 import java.util.Map;
-import org.contract4j.Contract;
-import org.contract4j.ContractEnforcer;
-import org.contract4j.NullContractEnforcer;
-import org.contract4j.TestContext;
-import org.contract4j.util.reporter.Reporter;
-import org.contract4j.util.reporter.Severity;
-import org.contract4j.util.reporter.WriterReporter;
+import org.contract4j5.Contract;
+import org.contract4j5.ContractEnforcer;
+import org.contract4j5.ContractEnforcerImpl;
+import org.contract4j5.interpreter.ExpressionInterpreter;
+import org.contract4j5.interpreter.jexl.JexlExpressionInterpreter;
+import org.contract4j5.TestContext;
+import org.contract4j5.util.reporter.Reporter;
+import org.contract4j5.util.reporter.Severity;
+import org.contract4j5.util.reporter.WriterReporter;
 
 /**
  * An abstract aspect that supports Design by Contract tests by advising classes,
@@ -65,10 +67,10 @@ abstract public aspect Contract4J {
 	 * Keys for property files. 
 	 */
 	public static final String[] enabledPropertyKeys = new String[] {
-			"org.contract4j.Contract",
-			"org.contract4j.Pre",
-			"org.contract4j.Post",
-			"org.contract4j.Invar",
+			"org.contract4j5.Contract",
+			"org.contract4j5.Pre",
+			"org.contract4j5.Post",
+			"org.contract4j5.Invar",
 	};
 	
 	/**
@@ -160,14 +162,21 @@ abstract public aspect Contract4J {
 		Contract4J.contractEnforcer = contractEnforcer;
 	}
 	/**
-	 * Get the ContractEnforcer that the aspect uses. Reports an error if the enforcer 
-	 * isn't initialized and sets the value to a {@link NullContractEnforcer}.
-	 * @return ContractEnforcer, which could be a {@link NullContractEnforcer}
+	 * Get the ContractEnforcer that the aspect uses. Reports a warning if the 
+	 * enforcer object isn't initialized and then creates a default 
+	 * {@link ContractEnforcerImpl} object with a {@link JexlExpressionEvaluator}.
+	 * @return the ContractEnforcer
 	 */
 	public static ContractEnforcer getContractEnforcer () { 
 		if (contractEnforcer == null) {
-			contractEnforcer = new NullContractEnforcer();
-			getReporter().report (Severity.FATAL, Contract4J.class, "Contract4J.aj has no ContractEnforcer defined");
+			ExpressionInterpreter ei = new JexlExpressionInterpreter();
+			contractEnforcer = new ContractEnforcerImpl(ei, false);
+			contractEnforcer.setReporter(getReporter());
+			ei.setReporter(getReporter());
+
+			getReporter().report (Severity.WARN, Contract4J.class, 
+					"Contract4J.aj has no ContractEnforcer defined. Using a ContractEnforcerImpl"+
+					"with a JexlExpressionInterpreter()");
 		}
 		return contractEnforcer;
 	}

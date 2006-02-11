@@ -44,7 +44,7 @@ case "$osname" in
 		;;
 esac
 
-: ${CONTRACT4J_HOME:=$HOME/src/java/contract4j5_0_5_0/contract4j5}
+: ${CONTRACT4J5_HOME:=$HOME/src/java/contract4j5_0_5_0/contract4j5}
 : ${ANT_HOME:=$TOOL_HOME/Apache/apache-ant-1.6.2}
 : ${ASPECTJ_HOME:=$TOOL_HOME/aspectj1.5}
 : ${JAVA_HOME:=$TOOL_HOME/jdk$VERSION}
@@ -58,7 +58,7 @@ case "$osname" in
 	PATH="$JAVA_HOME/bin:$ASPECTJ_HOME/bin:$ANT_HOME/bin:$PATH"
 	HOME=`cygpath --windows --path "$HOME"`
 	TOOL_HOME=c:/tools/javatools
-	CONTRACT4J_HOME=`cygpath --windows --path "$CONTRACT4J_HOME"`
+	CONTRACT4J5_HOME=`cygpath --windows --path "$CONTRACT4J5_HOME"`
 	ANT_HOME=`cygpath --windows --path "$ANT_HOME"`
 	ASPECTJ_HOME=`cygpath --windows --path "$ASPECTJ_HOME"`
 	JAVA_HOME=`cygpath --windows --path "$JAVA_HOME"`
@@ -75,7 +75,7 @@ esac
 
 export ANT_HOME
 export ASPECTJ_HOME
-export CONTRACT4J_HOME
+export CONTRACT4J5_HOME
 export JAVA_HOME
 export JUNIT_HOME
 export JEXL_HOME

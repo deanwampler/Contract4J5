@@ -18,7 +18,7 @@
  * @author deanwampler <dean@aspectprogramming.com>
  */
 
-package org.contract4j.aspects;
+package org.contract4j5.aspects;
 
 /** Declare precedence of advice: See documentation for why we use this order.
  */

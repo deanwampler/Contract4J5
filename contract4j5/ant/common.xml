@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!--
-  common.xml - Ant "common" build file for AspectProgramming/Contract4J software.
+  common.xml - Ant "common" build file for AspectProgramming/Contract4J5 software.
 
   Include in your "build.xml" files as follows:
 	<!DOCTYPE project [
@@ -14,7 +14,7 @@
 		...
 	</project>
   Where the ENTITY definition should include the appropriate relative or absolute
-  path. For usage examples, see $CONTRACT4J_HOME/build.xml.
+  path. For usage examples, see $CONTRACT4J5_HOME/build.xml.
 -->
 
 <!--

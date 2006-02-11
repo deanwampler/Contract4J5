@@ -1,8 +1,8 @@
-package org.contract4j.policies;
+package org.contract4j5.policies;
 
-import org.contract4j.aspects.Contract4J;
-import org.contract4j.util.reporter.Reporter;
-import org.contract4j.util.reporter.Severity;
+import org.contract4j5.aspects.Contract4J;
+import org.contract4j5.util.reporter.Reporter;
+import org.contract4j5.util.reporter.Severity;
 
 /**
  * Report when {@link IllegalAccessException}'s are caught.

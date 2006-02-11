@@ -18,7 +18,7 @@
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 
-package org.contract4j.aspects;
+package org.contract4j5.aspects;
 
 import java.lang.annotation.Annotation;
 
@@ -26,19 +26,19 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.ConstructorSignature;
 import org.aspectj.lang.reflect.SourceLocation;
-import org.contract4j.ContractEnforcer;
-import org.contract4j.Instance;
-import org.contract4j.Post;
-import org.contract4j.Pre;
-import org.contract4j.TestContext;
-import org.contract4j.TestContextImpl;
-import org.contract4j.interpreter.TestResult;
-import org.contract4j.testexpression.DefaultPreTestExpressionMaker;
-import org.contract4j.testexpression.DefaultTestExpressionMaker;
-import org.contract4j.testexpression.ParentTestExpressionFinder;
-import org.contract4j.testexpression.ParentTestExpressionFinderImpl;
-import org.contract4j.testexpression.SimpleStringDefaultTestExpressionMaker;
-import org.contract4j.util.MiscUtils;
+import org.contract4j5.ContractEnforcer;
+import org.contract4j5.Instance;
+import org.contract4j5.Post;
+import org.contract4j5.Pre;
+import org.contract4j5.TestContext;
+import org.contract4j5.TestContextImpl;
+import org.contract4j5.interpreter.TestResult;
+import org.contract4j5.testexpression.DefaultPreTestExpressionMaker;
+import org.contract4j5.testexpression.DefaultTestExpressionMaker;
+import org.contract4j5.testexpression.ParentTestExpressionFinder;
+import org.contract4j5.testexpression.ParentTestExpressionFinderImpl;
+import org.contract4j5.testexpression.SimpleStringDefaultTestExpressionMaker;
+import org.contract4j5.util.MiscUtils;
 
 /**
  * Test the constructor preconditions and postconditions. Note that when
@@ -49,14 +49,12 @@ import org.contract4j.util.MiscUtils;
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 public aspect ConstructorBoundaryConditions extends Contract4J {
-	private
-	DefaultTestExpressionMaker defaultPreTestExpressionMaker = null;
+	private static DefaultTestExpressionMaker defaultPreTestExpressionMaker = null;
 	
 	/**
 	 * @return the DefaultTestExpressionMaker for preconditions tests for methods
 	 */
-	public
-	DefaultTestExpressionMaker getDefaultPreTestExpressionMaker() { 
+	public static DefaultTestExpressionMaker getDefaultPreTestExpressionMaker() { 
 		if (defaultPreTestExpressionMaker == null) {
 			defaultPreTestExpressionMaker = new DefaultPreTestExpressionMaker();
 		}
@@ -66,19 +64,17 @@ public aspect ConstructorBoundaryConditions extends Contract4J {
 	/**
 	 * @param maker DefaultTestExpressionMaker for preconditions tests for methods
 	 */
-	public
-	void setDefaultPreTestExpressionMaker (DefaultTestExpressionMaker maker) { 
+	public static void setDefaultPreTestExpressionMaker (DefaultTestExpressionMaker maker) { 
 		defaultPreTestExpressionMaker = maker; 
 	}
 
-	private 
-	DefaultTestExpressionMaker defaultPostReturningVoidTestExpressionMaker = null;
+	private static DefaultTestExpressionMaker defaultPostReturningVoidTestExpressionMaker = null;
 	
 	/**
 	 * @return the DefaultTestExpressionMaker for postcondition tests for
 	 * methods returning void. (By default, the test expression itself will be "".)
 	 */
-	public DefaultTestExpressionMaker getDefaultPostReturningVoidTestExpressionMaker() { 
+	public static DefaultTestExpressionMaker getDefaultPostReturningVoidTestExpressionMaker() { 
 		if (defaultPostReturningVoidTestExpressionMaker == null) {
 			defaultPostReturningVoidTestExpressionMaker = new SimpleStringDefaultTestExpressionMaker();
 		}
@@ -89,18 +85,17 @@ public aspect ConstructorBoundaryConditions extends Contract4J {
 	 * @param maker DefaultTestExpressionMaker for postcondition tests for
 	 * methods returning void
 	 */
-	public
-	void setDefaultPostReturningVoidTestExpressionMaker (DefaultTestExpressionMaker maker) { 
+	public static void setDefaultPostReturningVoidTestExpressionMaker (DefaultTestExpressionMaker maker) { 
 		defaultPostReturningVoidTestExpressionMaker = maker; 
 	}
 
-	private ParentTestExpressionFinder parentTestExpressionFinder = null;
+	private static ParentTestExpressionFinder parentTestExpressionFinder = null;
 	
 	/**
 	 * @return the parentTestExpressionFinder used to determine the text expression
 	 * used by the corresponding annotation on the corresponding parent method, if any.
 	 */
-	public ParentTestExpressionFinder getParentTestExpressionFinder() {
+	public static ParentTestExpressionFinder getParentTestExpressionFinder() {
 		if (parentTestExpressionFinder == null) {
 			parentTestExpressionFinder = new ParentTestExpressionFinderImpl();
 		}
@@ -110,9 +105,9 @@ public aspect ConstructorBoundaryConditions extends Contract4J {
 	/**
 	 * @param parentTestExpressionFinder to use.
 	 */
-	public void setParentTestExpressionFinder(
-			ParentTestExpressionFinder parentTestExpressionFinder) {
-		this.parentTestExpressionFinder = parentTestExpressionFinder;
+	public static void setParentTestExpressionFinder(
+			ParentTestExpressionFinder finder) {
+		parentTestExpressionFinder = finder;
 	}
 
 	/**

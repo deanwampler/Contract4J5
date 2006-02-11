@@ -77,6 +77,19 @@ public class PrimitiveFieldInvarTest extends TestCase {
 		};
 	}
 	
+	/**
+	 * We must override tearDown() to reset the global static expression makers
+	 * to the normal defaults. Otherwise, while running a set of test cases, 
+	 * subsequent cases may fail because the static makers have unexpected,
+	 * non-default values!
+	 * @see junit.framework.TestCase#tearDown()
+	 */
+	@Override
+	protected void tearDown() throws Exception {
+		super.tearDown();
+		initEnv (false, false);
+	}
+	
 	private void initEnv (boolean empty, boolean allowed) {
 		DefaultTestExpressionMaker maker = empty ?
 				new SimpleStringDefaultTestExpressionMaker() :

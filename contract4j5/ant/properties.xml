@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!--
-  properties.xml - Common ant properties for AspectProgramming/Contract4J software.
+  properties.xml - Common ant properties for AspectProgramming/Contract4J5 software.
   See common.xml for usage details.
 -->
 
@@ -27,15 +27,15 @@
 	be overridden by "-Dprop=value" options to "ant" or the various build
 	driver scripts.
 	You must define several "project.*" in the project build file.
-	See $CONTRACT4J_HOME/build.xml for examples.
+	See $CONTRACT4J5_HOME/build.xml for examples.
 -->
 <property environment="environ"/>
-<property name="ant.home"        value="${environ.ANT_HOME}"/>
-<property name="aspectj.home"    value="${environ.ASPECTJ_HOME}"/>
-<property name="contract4j.home" value="${environ.CONTRACT4J_HOME}"/>
-<property name="java.home"       value="${environ.JAVA_HOME}"/>
-<property name="junit.home"      value="${environ.JUNIT_HOME}"/>
-<property name="jexl.home"      value="${environ.JEXL_HOME}"/>
+<property name="ant.home"         value="${environ.ANT_HOME}"/>
+<property name="aspectj.home"     value="${environ.ASPECTJ_HOME}"/>
+<property name="contract4j5.home" value="${environ.CONTRACT4J5_HOME}"/>
+<property name="java.home"        value="${environ.JAVA_HOME}"/>
+<property name="junit.home"       value="${environ.JUNIT_HOME}"/>
+<property name="jexl.home"        value="${environ.JEXL_HOME}"/>
 
 <!-- Directories -->
 <property name="classes.reldir"  value="classes"/>

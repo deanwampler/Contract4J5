@@ -213,9 +213,6 @@ public class JexlExpressionInterpreterTest extends TestCase {
 	/*
 	 * Test method for 'org.contract4j5.interpreter.jexl.JexlExpressionInterpreter.test(String, String, Object, Object[], Object)'
 	 */
-	/**
-	 * 
-	 */
 	public void testTest2() {
 		Instance object = new Instance ("Foo",    Foo.class, new Foo("value1", "value2", 1));
 		Instance target = new Instance ("target", String.class, "target");

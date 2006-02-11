@@ -18,7 +18,7 @@
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 
-package org.contract4j.aspects;
+package org.contract4j5.aspects;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -30,19 +30,19 @@ import org.aspectj.lang.reflect.ConstructorSignature;
 import org.aspectj.lang.reflect.FieldSignature;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.aspectj.lang.reflect.SourceLocation;
-import org.contract4j.Contract;
-import org.contract4j.ContractEnforcer;
-import org.contract4j.Instance;
-import org.contract4j.Invar;
-import org.contract4j.TestContext;
-import org.contract4j.TestContextImpl;
-import org.contract4j.interpreter.TestResult;
-import org.contract4j.testexpression.DefaultFieldInvarTestExpressionMaker;
-import org.contract4j.testexpression.DefaultTestExpressionMaker;
-import org.contract4j.testexpression.ParentTestExpressionFinder;
-import org.contract4j.testexpression.ParentTestExpressionFinderImpl;
-import org.contract4j.testexpression.SimpleStringDefaultTestExpressionMaker;
-import org.contract4j.util.MiscUtils;
+import org.contract4j5.Contract;
+import org.contract4j5.ContractEnforcer;
+import org.contract4j5.Instance;
+import org.contract4j5.Invar;
+import org.contract4j5.TestContext;
+import org.contract4j5.TestContextImpl;
+import org.contract4j5.interpreter.TestResult;
+import org.contract4j5.testexpression.DefaultFieldInvarTestExpressionMaker;
+import org.contract4j5.testexpression.DefaultTestExpressionMaker;
+import org.contract4j5.testexpression.ParentTestExpressionFinder;
+import org.contract4j5.testexpression.ParentTestExpressionFinderImpl;
+import org.contract4j5.testexpression.SimpleStringDefaultTestExpressionMaker;
+import org.contract4j5.util.MiscUtils;
 
 /**
  * Test the type (class, aspect, ...), method, and fields invariants.
@@ -101,37 +101,46 @@ public aspect InvariantConditions extends Contract4J {
 		void around (Invar invar, Object obj, Object arg) : invarSetField (invar, obj, arg) {
 			// Set up the context so we can retrieve any "old" values, if any. Note that we
 			// don't actually invoke any tests until after proceeding.
-			ExprAndContext eandc = 
-				doBeforeTest (thisJoinPoint, obj, arg, "Invar", invar.value(), invar.message(),
+			TestContext context = new TestContextImpl();
+			String testExpr = 
+				doBeforeTest (context, thisJoinPoint, 
+						obj, arg, "Invar", invar.value(), invar.message(),
 						getDefaultFieldInvarTestExpressionMaker());
-			eandc.context.setOldValuesMap (determineOldValues (eandc.testExpr, eandc.context));
+			context.setOldValuesMap (determineOldValues (testExpr, context));
 			proceed (invar, obj, arg);
-			getContractEnforcer().invokeTest(eandc.testExpr, "Invar", invar.message(), eandc.context);
+			getContractEnforcer().invokeTest(testExpr, "Invar", invar.message(), context);
 		}
 
 		Object around (Invar invar, Object obj) : invarGetField (invar, obj) {
 			// Set up the context so we can retrieve any "old" values, if any. 
 			// We can't get the actual field value until after executing the "proceed".
 			// Note that we don't actually invoke any tests until after proceeding.
-			ExprAndContext eandc = 
-				doBeforeTest (thisJoinPoint, obj, null, "Invar", invar.value(), invar.message(),
+			TestContext context = new TestContextImpl();
+			String testExpr = 
+				doBeforeTest (context, thisJoinPoint, 
+						obj, null, "Invar", invar.value(), invar.message(),
 						getDefaultFieldInvarTestExpressionMaker());
-			eandc.context.setOldValuesMap (determineOldValues (eandc.testExpr, eandc.context));
+			context.setOldValuesMap (determineOldValues (testExpr, context));
 			Object fieldValue2 = proceed (invar, obj);
 			// Actually use the "new" value of the field for the test.
-			eandc.context.getField().setValue (fieldValue2);  // The field is the target...
-			eandc.context.setMethodResult (eandc.context.getField());  // ... and the return value!
-			getContractEnforcer().invokeTest(eandc.testExpr, "Invar", invar.message(), eandc.context);
+			context.getField().setValue (fieldValue2);  // The field is the target...
+			context.setMethodResult (context.getField());  // ... and the return value!
+			getContractEnforcer().invokeTest(testExpr, "Invar", invar.message(), context);
 			return fieldValue2;
 		}
 
-		protected ExprAndContext doBeforeTest (
-				JoinPoint thisJoinPoint, 
-				Object    obj,
-				Object    fieldValue,
-				String    testTypeName,
-				String    annoTestExpr, 
-				String    testMessage,
+		/**
+		 * REturns the test expression and sets values appropriately in the input
+		 * TestContext.
+		 */
+		protected String doBeforeTest (
+				TestContext context,
+				JoinPoint   thisJoinPoint, 
+				Object      obj,
+				Object      fieldValue,
+				String      testTypeName,
+				String      annoTestExpr, 
+				String      testMessage,
 				DefaultTestExpressionMaker maker) {
 			Signature sig = thisJoinPoint.getSignature();
 			assert (sig instanceof FieldSignature);
@@ -145,12 +154,14 @@ public aspect InvariantConditions extends Contract4J {
 			Class  fieldClass    = field.getType();
 			Instance i           = new Instance(clazz.getName(), clazz, obj);
 			Instance f           = new Instance(fieldName, fieldClass, fieldValue);
-			TestContext context  = 
-				new TestContextImpl (fieldName, i, f, null, null, null,
-						loc.getFileName(), loc.getLine());
+			context.setItemName(fieldName);
+			context.setInstance(i);
+			context.setField(f);
+			context.setLineNumber(loc.getLine());
+			context.setFileName(loc.getFileName());
 			String testExpr = 
 				getDefaultFieldInvarTestExpressionMaker().makeDefaultTestExpressionIfEmpty(annoTestExpr, context);
-			return new ExprAndContext (testExpr, context);
+			return testExpr;
 		}
 	}
 	
@@ -267,7 +278,7 @@ public aspect InvariantConditions extends Contract4J {
 	 * @note We declare a separate nested aspect so we can define the precedence.
 	 */
 	public static aspect InvariantMethodConditions extends Contract4J {
-		private	DefaultTestExpressionMaker defaultMethodInvarTestExpressionMaker = null;
+		private	static DefaultTestExpressionMaker defaultMethodInvarTestExpressionMaker = null;
 		
 		/**
 		 * Return the default method invariant test expression maker.
@@ -279,7 +290,7 @@ public aspect InvariantConditions extends Contract4J {
 		 * for fields that are mutable references, as they might change!
 		 * @return the DefaultTestExpressionMaker for method invariant tests
 		 */
-		public DefaultTestExpressionMaker getDefaultMethodInvarTestExpressionMaker() { 
+		public static DefaultTestExpressionMaker getDefaultMethodInvarTestExpressionMaker() { 
 			if (defaultMethodInvarTestExpressionMaker == null) {
 				defaultMethodInvarTestExpressionMaker = new SimpleStringDefaultTestExpressionMaker();
 			}
@@ -289,17 +300,17 @@ public aspect InvariantConditions extends Contract4J {
 		/**
 		 * @return the DefaultTestExpressionMaker for method invariant tests
 		 */
-		public void setDefaultMethodInvarTestExpressionMaker (DefaultTestExpressionMaker maker) { 
+		public static void setDefaultMethodInvarTestExpressionMaker (DefaultTestExpressionMaker maker) { 
 			defaultMethodInvarTestExpressionMaker = maker; 
 		}
 
-		private ParentTestExpressionFinder parentTestExpressionFinder = null;
+		private static ParentTestExpressionFinder parentTestExpressionFinder = null;
 		
 		/**
 		 * @return the parentTestExpressionFinder used to determine the text expression
 		 * used by the corresponding annotation on the corresponding parent method, if any.
 		 */
-		public ParentTestExpressionFinder getParentTestExpressionFinder() {
+		public static ParentTestExpressionFinder getParentTestExpressionFinder() {
 			if (parentTestExpressionFinder == null) {
 				parentTestExpressionFinder = new ParentTestExpressionFinderImpl();
 			}
@@ -309,9 +320,9 @@ public aspect InvariantConditions extends Contract4J {
 		/**
 		 * @param parentTestExpressionFinder to use.
 		 */
-		public void setParentTestExpressionFinder(
-				ParentTestExpressionFinder parentTestExpressionFinder) {
-			this.parentTestExpressionFinder = parentTestExpressionFinder;
+		public static void setParentTestExpressionFinder(
+				ParentTestExpressionFinder finder) {
+			parentTestExpressionFinder = finder;
 		}
 
 		/**
@@ -364,13 +375,13 @@ public aspect InvariantConditions extends Contract4J {
 	 * @note We declare a separate nested aspect so we can define the precedence.
 	 */
 	public static aspect InvariantCtorConditions extends Contract4J {
-		private DefaultTestExpressionMaker defaultCtorInvarTestExpressionMaker = null;
+		private static DefaultTestExpressionMaker defaultCtorInvarTestExpressionMaker = null;
 
 		/**
 		 * @return the DefaultTestExpressionMaker for consructor invariant tests. (Defaults to an
 		 * empty string.) 
 		 */
-		public DefaultTestExpressionMaker getDefaultCtorInvarTestExpressionMaker() { 
+		public static DefaultTestExpressionMaker getDefaultCtorInvarTestExpressionMaker() { 
 			if (defaultCtorInvarTestExpressionMaker == null) {
 				defaultCtorInvarTestExpressionMaker = new SimpleStringDefaultTestExpressionMaker();
 			}
@@ -380,17 +391,17 @@ public aspect InvariantConditions extends Contract4J {
 		/**
 		 * @return the DefaultTestExpressionMaker  for consructor invariant tests 
 		 */
-		public void setDefaultCtorInvarTestExpressionMaker (DefaultTestExpressionMaker maker) { 
+		public static void setDefaultCtorInvarTestExpressionMaker (DefaultTestExpressionMaker maker) { 
 			defaultCtorInvarTestExpressionMaker = maker; 
 		}
 
-		private ParentTestExpressionFinder parentTestExpressionFinder = null;
+		private static ParentTestExpressionFinder parentTestExpressionFinder = null;
 		
 		/**
 		 * @return the parentTestExpressionFinder used to determine the text expression
 		 * used by the corresponding annotation on the corresponding parent method, if any.
 		 */
-		public ParentTestExpressionFinder getParentTestExpressionFinder() {
+		public static ParentTestExpressionFinder getParentTestExpressionFinder() {
 			if (parentTestExpressionFinder == null) {
 				parentTestExpressionFinder = new ParentTestExpressionFinderImpl();
 			}
@@ -400,9 +411,9 @@ public aspect InvariantConditions extends Contract4J {
 		/**
 		 * @param parentTestExpressionFinder to use.
 		 */
-		public void setParentTestExpressionFinder(
-				ParentTestExpressionFinder parentTestExpressionFinder) {
-			this.parentTestExpressionFinder = parentTestExpressionFinder;
+		public static void setParentTestExpressionFinder(
+				ParentTestExpressionFinder finder) {
+			parentTestExpressionFinder = finder;
 		}
 
 		/**
@@ -463,13 +474,13 @@ public aspect InvariantConditions extends Contract4J {
 	 * @note We declare a separate nested aspect so we can define the precedence.
 	 */
 	public static aspect InvariantTypeConditions extends Contract4J {
-		private DefaultTestExpressionMaker defaultTypeInvarTestExpressionMaker = null;
+		private static DefaultTestExpressionMaker defaultTypeInvarTestExpressionMaker = null;
 		
 		/**
 		 * @return the DefaultTestExpressionMaker for type invariant tests.
 		 * (By default, the test expression itself will be "".)
 		 */
-		public DefaultTestExpressionMaker getDefaultTypeInvarTestExpressionMaker() { 
+		public static DefaultTestExpressionMaker getDefaultTypeInvarTestExpressionMaker() { 
 			if (defaultTypeInvarTestExpressionMaker == null) {
 				defaultTypeInvarTestExpressionMaker = new SimpleStringDefaultTestExpressionMaker();
 			}
@@ -479,17 +490,17 @@ public aspect InvariantConditions extends Contract4J {
 		/**
 		 * @return the DefaultTestExpressionMaker for type invariant tests
 		 */
-		public void setDefaultTypeInvarTestExpressionMaker (DefaultTestExpressionMaker maker) { 
+		public static void setDefaultTypeInvarTestExpressionMaker (DefaultTestExpressionMaker maker) { 
 			defaultTypeInvarTestExpressionMaker = maker; 
 		}
 
-		private ParentTestExpressionFinder parentTestExpressionFinder = null;
+		private static ParentTestExpressionFinder parentTestExpressionFinder = null;
 		
 		/**
 		 * @return the parentTestExpressionFinder used to determine the text expression
 		 * used by the corresponding annotation on the corresponding parent method, if any.
 		 */
-		public ParentTestExpressionFinder getParentTestExpressionFinder() {
+		public static ParentTestExpressionFinder getParentTestExpressionFinder() {
 			if (parentTestExpressionFinder == null) {
 				parentTestExpressionFinder = new ParentTestExpressionFinderImpl();
 			}
@@ -499,9 +510,9 @@ public aspect InvariantConditions extends Contract4J {
 		/**
 		 * @param parentTestExpressionFinder to use.
 		 */
-		public void setParentTestExpressionFinder(
-				ParentTestExpressionFinder parentTestExpressionFinder) {
-			this.parentTestExpressionFinder = parentTestExpressionFinder;
+		public static void setParentTestExpressionFinder(
+				ParentTestExpressionFinder finder) {
+			parentTestExpressionFinder = finder;
 		}
 
 		/**

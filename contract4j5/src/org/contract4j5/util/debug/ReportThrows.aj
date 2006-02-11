@@ -1,8 +1,8 @@
-package org.contract4j.util.debug;
+package org.contract4j5.util.debug;
 
-import org.contract4j.util.reporter.Reporter;
-import org.contract4j.util.reporter.Severity;
-import org.contract4j.util.reporter.WriterReporter;
+import org.contract4j5.util.reporter.Reporter;
+import org.contract4j5.util.reporter.Severity;
+import org.contract4j5.util.reporter.WriterReporter;
 
 public aspect ReportThrows {
 
@@ -11,7 +11,7 @@ public aspect ReportThrows {
 		!within (ReportThrows) &&
 		this(o) {
 		Class clazz = o != null ? o.getClass() : null;
-		getReporter().report(Severity.Error, clazz, th.toString());
+		getReporter().report(Severity.ERROR, clazz, th.toString());
 		th.printStackTrace();
 	}
 	
