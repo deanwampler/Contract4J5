@@ -33,7 +33,9 @@ import org.contract4j5.Pre;
  * use "this" without the "$" for backwards compatibility reasons - sorry). 
  * Prefixing field names with $this is necessary for Jexl to be able to
  * resolve the variable name. While not required in all cases, as a rule it is
- * best to always refer to fields this way.
+ * best to always refer to fields this way for consistent. The one case where
+ * you don't need the "$this." is when you define an invariant for a field 
+ * itself (See the test for "name" below).
  */
 @Contract
 @Invar("$this.lazyPi==3.14159")	// see comments for "lazyPi" below.
@@ -70,14 +72,17 @@ public class BaseTestClass {
 
     /**
      * A field that should never be null or "". See also comments in
-     * {@link #setName(String)}. "$target" is currently only used to refer
-     * to the particular field being tested (You could also use 
-     * "$this.fieldname"). In the future, it may have other uses in the more 
-     * general AspectJ-sense of the poincut "target()" expression.
+     * {@link #setName(String)}. Note that you can safely use the "bare"
+     * field name "name" here. You can also use "$this.name", which you have
+     * to use in all other types of tests (i.e., tests other than the invariant
+     * test on the field itself). You can also use the keyword "$target", which
+     * currently is only used to refer to a corresponding field when used in a
+     * test expression. (In the future, "$target" may have other uses in the 
+     * more general AspectJ-sense of the poincut "target()" expression.)
      * NOTE: You can specify an optional error message that will be reported
      * with any failure message.
      */
-    @Invar(value="$target != null && $target.length() > 0",
+    @Invar(value="name != null && name.length() > 0",
 		   message="this.name must never be null!")
     private String name;
 

@@ -222,7 +222,7 @@ The "@Contract" annotation tells Contract4J that "MyClass" defines tests. The
 tests are defined using "@Pre", "@Post", and "@Invar" annotations, for 
 precondition, postcondition, and invariant tests respectively. In this example,
 the tests are:
-1) The attribute "name" has an invariant test that it can never be null (after
+1) The field "name" has an invariant test that it can never be null (after
 the object has been constructed...).
 2) The "setName" method has a precondition that the value of the parameter
 cannot be null.
@@ -323,7 +323,7 @@ On Windows systems, Unzip the zip file to an appropriate location.
 You will need Java 5, AspectJ 5, Jakarta Commons Jexl 1.0 to use Contract4J5.
 If you build it yourself, you will also need JUnit.
 
-You can use the installed "contract4j5_XYZ.jar" file as is. If you want to rebuild
+You can use the installed "contract4j5.jar" file as is. If you want to rebuild
 Contract4J, use the ant driver script "build.sh" or "build.bat", edit the file 
 and change the environment variable definitions to point to appropriate 
 locations for your environment. Or, you can define the appropriate environment
@@ -347,9 +347,9 @@ demonstrate usage and they contain comments about tests the demonstrate known
 idiosyncrasies or limitations of C4J5 and Jexl evaluation.
 classes - where build artifacts (except the jars) are stored
 doc - Where Javadocs are written
-contract4j5_XYZ.jar - The runtime deployment jar. It contains the build products 
+contract4j5.jar - The runtime deployment jar. It contains the build products 
 from "src".
-contract4j5_XYZ-test.jar - The jar containing the build products from "test". 
+contract4j5-test.jar - The jar containing the build products from "test". 
 Not part of the normal runtime deployment.
 
 If you want to build Contract4J:
@@ -359,9 +359,13 @@ If you want to build Contract4J:
 or
 	6c) ant all
 
-The jar files "contract4j5_XYZ.jar" and "contract4j_XYZ-test.jar" in the current
+The jar files "contract4j5.jar" and "contract4j-test.jar" in the current
 directory will be built and the unit/acceptance tests will be executed. The
-tests generate a LOT of output, but they should all pass.
+tests generate a LOT of output, but they should all pass. Also, there will some
+warnings which fall into two categories:
+1) Warnings in some unit tests when test annotations are used without the
+required @Contract annotation. This is deliberate for those tests.
+2) Unavoidable unchecked casts involving generics.
 
 Next, we'll look at code examples, then return to a discussion of invoking and
 configuring Contract4J5.
@@ -395,7 +399,9 @@ import org.contract4j5.Pre;
  * use "this" without the "$" for backwards compatibility reasons - sorry). 
  * Prefixing field names with $this is necessary for Jexl to be able to
  * resolve the variable name. While not required in all cases, as a rule it is
- * best to always refer to fields this way.
+ * best to always refer to fields this way for consistent. The one case where
+ * you don't need the "$this." is when you define an invariant for a field 
+ * itself (See the test for "name" below).
  */
 @Contract
 @Invar("$this.lazyPi==3.14159")	// see comments for "lazyPi" below.
@@ -432,14 +438,17 @@ public class BaseTestClass {
 
     /**
      * A field that should never be null or "". See also comments in
-     * {@link #setName(String)}. "$target" is currently only used to refer
-     * to the particular field being tested (You could also use 
-     * "$this.fieldname"). In the future, it may have other uses in the more 
-     * general AspectJ-sense of the poincut "target()" expression.
+     * {@link #setName(String)}. Note that you can safely use the "bare"
+     * field name "name" here. You can also use "$this.name", which you have
+     * to use in all other types of tests (i.e., tests other than the invariant
+     * test on the field itself). You can also use the keyword "$target", which
+     * currently is only used to refer to a corresponding field when used in a
+     * test expression. (In the future, "$target" may have other uses in the 
+     * more general AspectJ-sense of the poincut "target()" expression.)
      * NOTE: You can specify an optional error message that will be reported
      * with any failure message.
      */
-    @Invar(value="$target != null && $target.length() > 0",
+    @Invar(value="name != null && name.length() > 0",
 		   message="this.name must never be null!")
     private String name;
 
@@ -656,7 +665,7 @@ annotations, which aren't inherited and must be added to subclass overrides.
 Examples:
 @Contract
 public class Bar {
-  @Invar("$target != null && $target.length() > 0")
+  @Invar("name != null && name.length() > 0")
   private String name;
   ...
 }
@@ -665,12 +674,17 @@ Note that field invariants can't be defined on interfaces, since they don't have
 mutable fields, but you can simulate the same thing by annotating corresponding
 accessor methods in the interfaces (see below).
 
-The "$target" keyword matches the field under test. Alternatively, you can use
-"$this.name". (In the future, "$target" may be used more generally for objects
-that correspond to AspectJ's "target()" pointcut expression, but currently 
-"$target" is only used in field invariant tests to refer to the field.)
+Note that for the field "name", we are able to use the "bare" field name when
+defining an invariant test for it. You can also use "$this.name" or the
+"$target" keyword.
 
-4) Define Method and Constructor Preconditions, Postconditions, and Invariants
+In the future, "$target" may be used more generally for objects that correspond
+to AspectJ's "target()" pointcut expression, but currently "$target" is only 
+used in field invariant tests to refer to the field.)
+
+4) Define Method and Constructor Preconditions, Postconditions, and Invariants.
+NOTE: we have to use "$this.name" in the following interface example, not just
+"name" by itself, because we are no longer defining a field invariant test!
 
 Examples:
 @Contract
@@ -717,10 +731,10 @@ public class Bar {
 
 The "Foo" interface simulates a field invariant test on an implied name field by
 defining invariant tests on name's accessor methods. The precondition test for
-"incrementI" requires the input amount to be possitive. (You could also write
+"incrementI" requires the input amount to be positive. (You could also write
 this test "amount > 0", but this is actually less robust; it is more likely to 
 trip over parsing idiosyncrasies in Contract4J5 and Jexl.) This test implies an 
-"int i" attribute, as does the post condition test which requires that the new
+"int i" field, as does the post condition test which requires that the new
 value of "i" be equal to the old value (grabbed by the "$old($this.i)" 
 expression) plus the amount.
 
@@ -765,7 +779,7 @@ $old(..) The "old" value (before a method is actually executed) of the
                        the object!
          $old($this.field) Recommended usage, if "field" is primitive, in 
                        which case the value is captured, or it refers to an 
-                       immutable object. Same for $old($target.field) 
+                       immutable object. Same for $old($target.otherField) 
          $old($this.method(x,y))  The returned value is saved. Due to parser
                        limitations, method calls may not contain nested method
                        calls.
@@ -821,11 +835,11 @@ Support Design by Contract?".
 ** $this refers to the object being tested. You can call any public method on 
 the object in the test expression; Jexl will resolve the type. Additionally,
 if you refer to a bare field that is not public, Jexl will convert the 
-expression to the corresponding getter call.
+expression to the corresponding "getter" call.
 
 ** $target currently is used only to refer to the field in a field invariant
 test. Future use may include any context associated with the "target()" 
-pointcut expression. As for $this, you can reference any method or field 
+pointcut expression. Just as for $this, you can reference any method or field 
 defined for the object.
 
 ** $return is the value returned by a method. It is only valid in 
@@ -862,7 +876,7 @@ Here are the allowed expressions.
     mutable object!
   $old($this.field) 
     Recommended usage, if "field" is primitive. A synonym for
-    $old($target.field). 
+    $old($target) when used in a field invariant test. 
   $old($this.method(x,y))  
     Method call where the returned value is saved. Due to current parser
     limitations, nested method calls are not supported. So, the following
@@ -883,8 +897,15 @@ methods.
 
 Normally, you should prepend "$this." before a "bare" field reference as the
 parser does not always correctly resolve the reference to an instance field.
-As an alternative in field invariant tests, "$target" can be used to refer to
-the field.
+The one case where "$this" is unnecessary is inside a field invariant test.
+Using the field's "bare" name will work. As an alternative in field invariant 
+tests, "$target" can be used to refer to the field.
+
+Note the example previously where a field invariant test was written with the 
+bare field called "name", but when a set of "conceptually similar" @Pre and 
+@Post tests were written in an interface on "setNae()" and "getName()" methods,
+it was necessary to use "$this.name". Contract4J may not resolve the field
+correctly in those cases.  
 
 ** Tests Defined on Interfaces
 
@@ -976,7 +997,7 @@ contract tests application-wide using the API:
 This example turns on all three test types. 
 
 NOTE: To completely disable contract checking, build the application without
-"contract4j5_XYZ.jar" in your path. This is recommended for "production" builds 
+"contract4j5.jar" in your path. This is recommended for "production" builds 
 when you don't want any test overhead.
 
 The ManualSetup.wireC4J() methods demonstrate that there are several components
@@ -1014,8 +1035,14 @@ classes:
     It would be very easy to implement a "log4j reporter", for example.
 
 
-Note: For all properties currently defined, if a value is empty, it is ignored!
+Notes: 
 
+1) For all properties currently defined, if a value is empty, it is ignored!
+
+2) Some of the fields in the aspects are actually static (e.g. default test
+expression makers and locators of test expressions in parent classes). Making
+them static was a compromise to permit easy access by pure Java code, such as
+unit tests!
    
 --- Invocation and Configuration of Contract4J5
 
@@ -1066,35 +1093,45 @@ to conform to the emerging conventions for that library. However, this process
 *should* have only a small impact on users.
 4) Exploit aspects to manage the "Reporter" objects, which are hard-coded in
 classes that use them.
-5) Refine test handling. For example, field invariants are evaluated for reads, but this probably only makes sense for the very first read, in case it is uninitialized.
+5) Refine test handling. For example, field invariants are evaluated for reads,
+but this probably only makes sense for the very first read, in case it is 
+uninitialized. The rest of the time, evaluating just field writes makes sense.
+6) Eliminate the requirement to annotate the class with @Contract.
+7) For the keywords:
+a) Allow "this" without the '$'? 
+b) Remove "$target" if it won't be used for anything other than fields, for 
+which it is redundant.
+c) Is "$args" really necessary? Can it be eliminated since the parameter names
+themselves can be used?
 
 
 ** Notes for Each Release
 
 *** v0.5.0 February 7, 2006
 
-Combined the best features of V1 and V2; the annotation syntax of V1 without
-the precompilation step. To do this, Contract4J5 now uses the Jakarta Commons
-JEXL expression parser to evaluate contract tests dynamically at runtime.
+Eliminated the precompilation step, replacing it with runtime teste expression
+evaluation using the Jakarta Commons JEXL expression parser.
 
 The package structure has been changed from com.aspectprogramming.* to
 	org.contract4j5.*.
 	
 Deprecated three features; they aren't supported in this milestone release.
 
-1) Ad hoc configuration API and full support for configuration through 
-property files. Subsequent releases will have limited support for property 
+1) The ad hoc configuration API and full support for configuration through 
+property files. Subsequent releases will "re-add" limited support for property 
 file configuration, for convenience, but the preferred way to configure
-Contract4J5 is through a dependency injection (DI) solution like Spring.
+Contract4J5 is through a standard dependency injection (DI) solution like 
+the Spring Framework.
 
-2) The "alwaysActive" property of the V0.1 annotations, which allowed you to
-mark an annotation as always on even if all other annotations of the same time
-have been disabled globally. The complexity of implementing this feature in
-the new architecture outweighed the benefits.
+2) The "alwaysActive" property of the V0.1 annotations, which kept a test 
+"active" even if all other annotations of the same kind were disabled globally.
+The complexity of implementing this feature in the new architecture outweighed 
+the benefits. Use an alternative implementation like embedded assert statements.
 
 3) Annotations on method parameters. This is a current AspectJ5 limitation; 
-it doesn't support annotations on method parameters. The workaround is to
-put all parameter tests in a method precondition test.
+it doesn't support annotations on method parameters, which were supported in
+Contract4J v0.1. The workaround is to put all parameter tests in a method 
+precondition test.
 
 *** v0.1.1.0 October 4, 2005
 
@@ -1125,6 +1162,17 @@ in Aspect-Oriented Programming, enterprise Java, and Ruby on Rails. ARA also
 manages the Aspect Programming web site, http://www.aspectprogramming.com/. 
 There you will find more information and whitepapers on Contract4J and 
 Aspect-Oriented Software Development (AOSD), in general. 
+
+The forthcoming AOSD.06 Conference in Bonn, Germany (March 19-24) will feature
+a talk in the Industry Track on Contract4J, specifically on the lessoned about
+writing generic, reusable aspects in AspectJ while implementing Contract4J. 
+There will also be a brief presentation on aspect-oriented design patterns in
+Contract4J in the ACP4IS workshop. See http://www.aosd.net/2006/ for more
+information and also check contract4j.org after the conference for information 
+about the corresponding papers. 
+
+An article about Contract4J is in preparation for the AOP@Work series on 
+developerWorks.com. Publication is tentatively planned for April, 2006. 
 
 The definitive site on AOSD is http://www.aosd.net.
 

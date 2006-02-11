@@ -45,9 +45,9 @@
 		<!-- This release version -->
 		<property name="version"          value="050" />
 		<!-- "contract4J5.jar" contains the runtime deployment aspects and classes -->
-        <property name="project.jar"      value="contract4j5_${version}.jar" />
+        <property name="project.jar"      value="contract4j5.jar" />
 		<!-- "contract4J5-test.jar" contains the test/example aspects and classes -->
-        <property name="project.test.jar" value="contract4j5_${version}-test.jar" />
+        <property name="project.test.jar" value="contract4j5-test.jar" />
 		<!-- "configurator.jar" contains the deprecated "configurator" code.
 		  Some support will be re-added in a subsequent pre-1.0 release. (See the README)
         <property name="configurator.jar" value="configurator.jar" />
