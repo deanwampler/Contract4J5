@@ -1,5 +1,5 @@
 /*
- * Copyright 2005 Dean Wampler. All rights reserved.
+ * Copyright 2005, 2006 Dean Wampler. All rights reserved.
  * http://www.aspectprogramming.com
  *
  * Licensed under the Eclipse Public License - v 1.0; you may not use this
@@ -15,12 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @author deanwampler <dean@aspectprogramming.com>
+ * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 
 package org.contract4j5.aspects;
 
-/** Declare precedence of advice: See documentation for why we use this order.
+/** 
+ * Declare precedence of advice: See documentation for why we use this order.
  */
 public aspect DeclareContractPrecedence {
 	declare precedence :

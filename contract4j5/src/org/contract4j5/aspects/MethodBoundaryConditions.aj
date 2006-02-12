@@ -1,5 +1,5 @@
 /*
- * Copyright 2005 Dean Wampler. All rights reserved.
+ * Copyright 2005, 2006 Dean Wampler. All rights reserved.
  * http://www.aspectprogramming.com
  *
  * Licensed under the Eclipse Public License - v 1.0; you may not use this
@@ -42,7 +42,10 @@ import org.contract4j5.testexpression.SimpleStringDefaultTestExpressionMaker;
 import org.contract4j5.util.MiscUtils;
 
 /**
- * Test the method preconditions and postconditions.
+ * Test the method preconditions and postconditions. Note that static methods 
+ * are ignored, because they don't involve object state, the normal purview of
+ * DbC. However, you still might want to use the mechanism to assert global,
+ * static behavior, so a possible extension is to allow aspects on static methods.
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 public aspect MethodBoundaryConditions extends Contract4J {
@@ -129,7 +132,7 @@ public aspect MethodBoundaryConditions extends Contract4J {
 	}
 
 	/**
-	 * Method precondition PCD. Ignore static methods!
+	 * Method precondition PCD. Ignores static methods!
 	 * @note We prevent recursion into the aspect itself.
 	 */
 	pointcut preMethod (Pre pre, ContractMarker obj) :
@@ -138,7 +141,7 @@ public aspect MethodBoundaryConditions extends Contract4J {
 		@annotation (pre) && this (obj);
 
 	/**
-	 * Method returning void w/ postcondition PCD. Ignore static methods!
+	 * Method returning void w/ postcondition PCD. Ignores static methods!
 	 * @note We prevent recursion into the aspect itself.
 	 */
 	pointcut postVoidMethod (Post post, ContractMarker obj) :
@@ -147,7 +150,7 @@ public aspect MethodBoundaryConditions extends Contract4J {
 		@annotation (post) && this (obj);
 
 	/**
-	 * Method postcondition PCD, excluding the void special case. Ignore
+	 * Method postcondition PCD, excluding the void special case. Ignores
 	 * static methods!
 	 * @note We prevent recursion into the aspect itself.
 	 */

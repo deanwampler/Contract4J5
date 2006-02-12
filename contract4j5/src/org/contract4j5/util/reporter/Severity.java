@@ -1,5 +1,5 @@
 /*
- * Copyright 2005 Dean Wampler. All rights reserved.
+ * Copyright 2005, 2006 Dean Wampler. All rights reserved.
  * http://www.aspectprogramming.com
  *
  * Licensed under the Eclipse Public License - v 1.0; you may not use this
@@ -22,8 +22,8 @@ package org.contract4j5.util.reporter;
 
 /**
  * The "level" of severity of an "event", mapped roughly to what you would
- * expect for various 3rd-party logging toolkits, for example. Note that {@link #OFF} 
- * turns off reporting completely.
+ * expect for various 3rd-party logging toolkits, for example. Note that 
+ * {@link #OFF} turns off reporting completely.
  */
 public enum Severity {
 	DEBUG, INFO, WARN, ERROR, FATAL, OFF;

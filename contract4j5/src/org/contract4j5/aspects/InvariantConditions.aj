@@ -1,5 +1,5 @@
 /*
- * Copyright 2005 Dean Wampler. All rights reserved.
+ * Copyright 2005, 2006 Dean Wampler. All rights reserved.
  * http://www.aspectprogramming.com
  *
  * Licensed under the Eclipse Public License - v 1.0; you may not use this
@@ -45,18 +45,22 @@ import org.contract4j5.testexpression.SimpleStringDefaultTestExpressionMaker;
 import org.contract4j5.util.MiscUtils;
 
 /**
- * Test the type (class, aspect, ...), method, and fields invariants.
+ * Test the type (class, aspect, ...), method, constructor, and fields invariants.
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 public aspect InvariantConditions extends Contract4J {
 	/** 
-	 * Test for field invariants in non-ctor contexts.  
-	 * The test is only executed after execution, to allow lazy evaluation, etc. 
+	 * Test for field invariants in non-constructor contexts.  
+	 * The test is only executed after join point execution, to allow lazy 
+	 * evaluation, etc. 
 	 * @note A test expression of the form <code>$old(field).equals(field)</code>
 	 * effectively makes the field final, but it's better to use the <code>final</code>
 	 * keyword explicitly instead!
-	 * @note The advice doesn't need to use a {@lnk ParentTestExpressionFinder} to locate
-	 * a parent's test expression because fields aren't overridden by derived classes!
+	 * @note Unlike other aspects, the advice doesn't need to use a {@link 
+	 * ParentTestExpressionFinder} to locate a parent's test expression because 
+	 * fields aren't overridden by derived classes. The tests only need to be 
+	 * defined in the class once and the inheritance issues with type and method
+	 * tests aren't an issue here.
 	 * @note We declare a separate nested aspect so we can define the precedence.
 	 */
 	public static aspect InvariantFieldConditions extends Contract4J {
@@ -80,9 +84,9 @@ public aspect InvariantConditions extends Contract4J {
 		}
 
 		/**
-		 * Field invariant PCD for non-ctor contexts, which are handled separately
-		 * below because the fields are by definition being initialized within the
-		 * constructor.
+		 * Field invariant PCD for non-constructor contexts, which are handled 
+		 * separately below because the fields are by definition being 
+		 * initialized within the constructor, so special handling is required.
 		 * @note We use cflowbelow() to exclude the constructor execution, rather than 
 		 * withincode(), because the constructor may call other methods.
 		 * @note We prevent recursion into the aspect itself.
@@ -99,8 +103,7 @@ public aspect InvariantConditions extends Contract4J {
 			invarFieldCommon (invar, obj) && get (@Invar * ContractMarker+.*); 
 
 		void around (Invar invar, Object obj, Object arg) : invarSetField (invar, obj, arg) {
-			// Set up the context so we can retrieve any "old" values, if any. Note that we
-			// don't actually invoke any tests until after proceeding.
+			// Set up the context so we can retrieve any "old" values, before proceeding.
 			TestContext context = new TestContextImpl();
 			String testExpr = 
 				doBeforeTest (context, thisJoinPoint, 
@@ -111,10 +114,15 @@ public aspect InvariantConditions extends Contract4J {
 			getContractEnforcer().invokeTest(testExpr, "Invar", invar.message(), context);
 		}
 
+		/** 
+		 * Advice for field "gets". 
+		 * @note When we set up the context to retrieve "old" values, if any,
+		 * in the test expression, we can't get the actual field value until 
+		 * after executing the "proceed". This should be okay, as it doesn't
+		 * make much sense to write a test expression with "old" and new values
+		 * for this field, at least.
+		 */
 		Object around (Invar invar, Object obj) : invarGetField (invar, obj) {
-			// Set up the context so we can retrieve any "old" values, if any. 
-			// We can't get the actual field value until after executing the "proceed".
-			// Note that we don't actually invoke any tests until after proceeding.
 			TestContext context = new TestContextImpl();
 			String testExpr = 
 				doBeforeTest (context, thisJoinPoint, 
@@ -130,7 +138,7 @@ public aspect InvariantConditions extends Contract4J {
 		}
 
 		/**
-		 * REturns the test expression and sets values appropriately in the input
+		 * @rturns the test expression and sets values appropriately in the input
 		 * TestContext.
 		 */
 		protected String doBeforeTest (
@@ -166,16 +174,18 @@ public aspect InvariantConditions extends Contract4J {
 	}
 	
 	/** 
-	 * Test for field invariants in ctor contexts. There is no pointcut defined for 
-	 * the before case since the state should only be checked after the object is initialized.
-	 * After the c'tor completes, all field invariants are tested. The rationale is that
-	 * if a field invariant is defined, then it must hold after construction. 
-	 * However, this forces c'tors to always initialize all such fields, rather than 
-	 * allow lazy evaluation later. Nevertheless, that isn't a practical problem because a
-	 * lazy evaluation will be performed inside an accessor, so in this case the invariant 
+	 * Test for field invariants in a constructor context. There is no pointcut 
+	 * defined for the before case since the state should only be checked after 
+	 * the object is initialized. After the c'tor completes, all field invariants 
+	 * are tested. The rationale is that if a field invariant is defined, then 
+	 * it must hold after construction. However, this forces c'tors to always 
+	 * initialize all such fields, rather than allow lazy evaluation later. 
+	 * Nevertheless, that isn't a practical problem because a lazy evaluation 
+	 * will be performed inside an accessor, so in this case the invariant 
 	 * should be written as a test on the accessor.
-	 * @note The advice doesn't need to use a {@lnk ParentTestExpressionFinder} to locate
-	 * a parent's test expression because fields aren't overridden by derived classes!
+	 * @note The advice doesn't need to use a {@lnk ParentTestExpressionFinder}
+	 * to locate a parent's test expression because fields aren't overridden by
+	 * derived classes!
 	 * @note As before, we declare a separate nested aspect so we can define the precedence.
 	 */
 	public static aspect InvariantFieldCtorConditions extends Contract4J percflow(invarFieldCtorCall (ContractMarker)) {
@@ -224,9 +234,10 @@ public aspect InvariantConditions extends Contract4J {
 			execution (ContractMarker+.new(..)) && target (obj);
 				
 		/**
-		 * Field invariant pointcut within c'tor context. We match on the "cflowbelow" of the
-		 * constructor call and "within" even though it's less runtime efficient. Otherwise, set join points
-		 * nested in method calls within the c'tor will be ignored!
+		 * Field invariant pointcut within a constructor context. We match on 
+		 * the "cflowbelow" of the constructor call and not "within" even though
+		 * it's less runtime efficient. Otherwise, set join points nested in 
+		 * method calls within the c'tor will be ignored!
 		 * @note We prevent recursion into the aspect itself.
 		 */
 		pointcut invarFieldInCtor (Invar invar, ContractMarker obj, Object field) :
@@ -236,7 +247,8 @@ public aspect InvariantConditions extends Contract4J {
 			@annotation (invar) && target (obj) && args (field);
 			
 		/**
-		 * Observe any annotated field sets within the c'tor and record the invariant specification.
+		 * Observe any annotated field sets within the c'tor and record the 
+		 * invariant specification.
 		 */
 		after (Invar invar, ContractMarker obj, Object newFieldValue) returning : 
 			invarFieldInCtor (invar, obj, newFieldValue) {
@@ -253,7 +265,8 @@ public aspect InvariantConditions extends Contract4J {
 		}
 		
 		/**
-		 * After the c'tor completes, if there were any annotated fields set, then test them.
+		 * After the c'tor completes, if there were any annotated fields set, 
+		 * then test them.
 		 */
 		after(ContractMarker obj) returning : invarFieldCtorCall(obj) {
 			if (listOfAnnosFound == null) {
@@ -274,7 +287,7 @@ public aspect InvariantConditions extends Contract4J {
 	}
 	
 	/** 
-	 * Tests for methods, 
+	 * Invariant tests for methods. 
 	 * @note We declare a separate nested aspect so we can define the precedence.
 	 */
 	public static aspect InvariantMethodConditions extends Contract4J {
@@ -371,7 +384,7 @@ public aspect InvariantConditions extends Contract4J {
 	}
 	
 	/** 
-	 * Tests for constructors.
+	 * Invariant tests for constructors.
 	 * @note We declare a separate nested aspect so we can define the precedence.
 	 */
 	public static aspect InvariantCtorConditions extends Contract4J {
@@ -460,17 +473,6 @@ public aspect InvariantConditions extends Contract4J {
 	 * Invar annotation is explicitly declared on the type and one where it
 	 * inherits the declaration. We conveniently handle both with ITD of a
 	 * marker interface.
-	 * @note We call {@link Object#clone()} on the instance to snapshot the "before"
-	 * state. If this throws a {@link CloneNotSupportedException}, then any tests
-	 * that try to compare the before and after state will give potentially misleading
-	 * results!
-	 * @note The invariant type checking method looks identical to an invariant
-	 * test for a default c'tor, but in fact it isn't, because
-	 * these type tests are not static, while c'tor tests are static!
-	 * @note We considered using "pertypewithin(...Invarmarker+)", but the problem is
-	 * that the aspects inherited properties, e.g., the contract enforcer are not wired
-	 * for each instance (unless you use a container like Spring's IoC/DI container). 
-	 * Therefore, we use a singleton instantiation model and explicit "this()" JPs.
 	 * @note We declare a separate nested aspect so we can define the precedence.
 	 */
 	public static aspect InvariantTypeConditions extends Contract4J {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2005 Dean Wampler. All rights reserved.
+ * Copyright 2005, 2006 Dean Wampler. All rights reserved.
  * http://www.aspectprogramming.com
  *
  * Licensed under the Eclipse Public License - v 1.0; you may not use this
@@ -26,27 +26,42 @@ import org.contract4j5.Pre;
 import org.contract4j5.aspects.Contract4J;
 
 /**
- * Aspect to look for invalid usage of Contract4J.
- * @author Dean Wampler
+ * Aspect to look for invalid usage of Contract4J. The following generate
+ * warnings:
+ * <ol>
+ * <li>Warn when a precondition, postcondition, or invariant tests is defined 
+ * on a class or interface without the @Contract annotation.</li>
+ * <li>Warn when a test is defined on a static method.</li>
+ * </ol>
+ * @author Dean Wampler <mailto:dean@aspectprogramming.com>
+ * @note Static method tests are not supported because these methods are not
+ * involved with an object's state or behavior. However, it's possible that
+ * useful tests might be needed for class static "state", so this restriction
+ * may be removed in a subsequent release.
  */
 public aspect UsageEnforcement {
-	pointcut noPre() : 
+	pointcut preNotInContract() : 
 		! within (Contract4J.ContractMarker+) &&
 		(execution (@Pre * *.*(..)) || execution (@Pre *.new(..)));
 
-	pointcut noPost() : 
+	pointcut postNotInContract() : 
 		! within (Contract4J.ContractMarker+) &&
 		(execution (@Post * *.*(..)) || execution (@Post *.new(..)));
 	
-	pointcut noInvar() : 
+	pointcut invarNotInContract() : 
 		! within (Contract4J.ContractMarker+) &&
 		(execution (@Invar * *.*(..)) || execution (@Invar *.new(..)) ||
 		 get (@Invar * *) || set (@Invar * *));
 
-	declare warning: noPre(): 
+	pointcut staticTests() :
+		execution (@(Pre || Post || Invar) static * *.*(..));
+	
+	declare warning: preNotInContract(): 
 		"The @Pre Contract4J annotation requires the class annotation @Contract";
-	declare warning: noPost(): 
+	declare warning: postNotInContract(): 
 		"The @Post Contract4J annotation requires the class annotation @Contract";
-	declare warning: noInvar(): 
+	declare warning: invarNotInContract(): 
 		"The @Invar Contract4J annotation requires the class annotation @Contract";
+	declare warning: staticTests():
+		"Tests cannot be defined on static methods.";
 }

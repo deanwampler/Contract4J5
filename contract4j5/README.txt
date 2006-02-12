@@ -1103,6 +1103,9 @@ b) Remove "$target" if it won't be used for anything other than fields, for
 which it is redundant.
 c) Is "$args" really necessary? Can it be eliminated since the parameter names
 themselves can be used?
+8) Find a more elegant, aspectj-specific way to handle logging of information
+without embedding the ad hoc Reporter objects.
+9) Support tests on static methods.
 
 
 ** Notes for Each Release
@@ -1115,18 +1118,29 @@ evaluation using the Jakarta Commons JEXL expression parser.
 The package structure has been changed from com.aspectprogramming.* to
 	org.contract4j5.*.
 	
-Deprecated three features; they aren't supported in this milestone release.
+Deprecated several features; they aren't supported in this milestone release.
 
 1) The ad hoc configuration API and full support for configuration through 
 property files. Subsequent releases will "re-add" limited support for property 
 file configuration, for convenience, but the preferred way to configure
 Contract4J5 is through a standard dependency injection (DI) solution like 
-the Spring Framework.
+the Spring Framework. This release does all you to globally enable or disable 
+all tests or just all precondition, postcondition, or invariant tests. To use,
+define one or more of the following System properties (true or false):
+
+	"org.contract4j5.Contract"	Enable/disable all tests
+	"org.contract4j5.Pre"		Enable/disable all precondition tests
+	"org.contract4j5.Post"		Enable/disable all postcondition tests
+	"org.contract4j5.Invar"		Enable/disable all invariant tests
 
 2) The "alwaysActive" property of the V0.1 annotations, which kept a test 
 "active" even if all other annotations of the same kind were disabled globally.
 The complexity of implementing this feature in the new architecture outweighed 
 the benefits. Use an alternative implementation like embedded assert statements.
+
+3) Similarly, the "messagePrefix" and "messageSuffix" attributes of the 
+@Contract annotation are no longer supported. However, you can still define
+individual messages in the test annotations.
 
 3) Annotations on method parameters. This is a current AspectJ5 limitation; 
 it doesn't support annotations on method parameters, which were supported in

@@ -1,5 +1,5 @@
 /*
- * Copyright 2005 Dean Wampler. All rights reserved.
+ * Copyright 2005, 2006 Dean Wampler. All rights reserved.
  * http://www.aspectprogramming.com
  *
  * Licensed under the Eclipse Public License - v 1.0; you may not use this
@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @author Dean Wampler <dean@aspectprogramming.com>
+ * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 
 package org.contract4j5.testexpression;
@@ -23,37 +23,38 @@ package org.contract4j5.testexpression;
 import org.contract4j5.TestContext;
 
 /**
- * Interface for objects that know how to construct a "default" test expression when one is not specified
- * in the test annotation. An appropriate default will be context dependent (e.g., class-level vs. 
- * method-level invariants) and it would be nice to give the user the ability to configure his/her own
- * default behaviors.
+ * Interface for objects that know how to construct a "default" test expression 
+ * when one is not specified in the test annotation. An appropriate default will
+ * be context dependent (e.g., class-level vs. method-level invariants). The
+ * aspects that use these objects provide API hooks for users to install their
+ * own versions.
  */
 public interface DefaultTestExpressionMaker {
 	/**
 	 * @param context TestContext information
 	 * @return new test expression string or an empty string, if no default
-	 * is desired or feasible.
+	 * is desired or feasible. Should never return null.
 	 */
 	String makeDefaultTestExpression(TestContext context);
 
 	/**
 	 * Convenience method that examines the input "testExpression" and simply returns 
-	 * it, if it is not empty, or returns the default expression.
+	 * it, if it is not empty, or makes and returns the default expression.
 	 * @param testExpression that may or may not be empty.
 	 * @param context TestContext information
 	 * @return new test expression string or an empty string, if no default
-	 * is desired or feasible.
+	 * is desired or feasible. Should never return null.
 	 */
 	String makeDefaultTestExpressionIfEmpty(
 			String      testExpression,
 			TestContext context);
 	
 	/**
-	 * Iterate through the method arguments and compose a test expression
-	 * that requires each of them to be non-null. However, if any argument
-	 * is actually a primitive, it is ignored. For example, a method that
-	 * has the following argument list, <code>String, int, Foo, float</code>,
-	 * would result in a returned string equal to 
+	 * Helper method that iterates through the method arguments and composes a 
+	 * test expression that requires each of them to be non-null. However, if 
+	 * any argument is actually a primitive, it is ignored. For example, a 
+	 * method that has the following argument list, <code>String, int, Foo, 
+	 * float</code>, would result in a returned string equal to 
 	 * <code>args[0] != null && args[2] != null</code>. 
 	 * @note If the expression will be used within a larger test expression, 
 	 * it should probably be enclosed in parentheses by the caller, to avoid 

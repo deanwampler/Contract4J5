@@ -1,5 +1,5 @@
 /*
- * Copyright 2005 Dean Wampler. All rights reserved.
+ * Copyright 2005 2006 Dean Wampler. All rights reserved.
  * http://www.aspectprogramming.com
  *
  * Licensed under the Eclipse Public License - v 1.0; you may not use this
@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @author Dean Wampler <dean@aspectprogramming.com>
+ * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 
 package org.contract4j5.interpreter;
@@ -27,15 +27,15 @@ import org.contract4j5.util.reporter.Reporter;
 
 /**
  * The interface for the expression interpreter used to evaluate test expressions.
- * @author Dean Wampler
+ * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 public interface ExpressionInterpreter {
 	/**
 	 * Common invalid test expression errors that can be used by 
-	 * implementers of this interface. Note that space at end so more than one
-	 * can be concatenated together. Note that if implementers or clients of
-	 * interpreters define a default test expression when the expression is
-	 * empty, then the first message may never be used.
+	 * implementers of this interface. Note the space at end of each message so 
+	 * more than one can be concatenated together. Note that if implementers or 
+	 * clients of interpreters define a default test expression when the 
+	 * expression is empty, then the first message may never be used.
 	 * The messages that end in ":" are designed to support appending the 
 	 * offending substrings.
 	 */
@@ -59,19 +59,21 @@ public interface ExpressionInterpreter {
 	};
 
 	/**
-	 * Set whether or not an empty test expression should be treated as "no test", meaning it is
-	 * ignored and the test "passes" in all instances. By default, implementers should treat
-	 * empty tests as a failure, as they are likely to indicate incomplete test specifications,
-	 * thereby reducing the ability of Contract4J to detect errors.
+	 * Set whether or not an empty test expression should be treated as valid, 
+	 * meaning it is ignored and the test always "passes". By default, 
+	 * implementers should treat empty tests as a failure, as they are likely to
+	 * indicate incomplete contract specification, thereby reducing the ability 
+	 * of Contract4J to detect errors.
 	 * @param emptyOK
 	 */
 	void setTreatEmptyTestExpressionAsValidTest (boolean emptyOK);
 	
 	/**
-	 * Get whether or not an empty test expression should be treated as "no test", meaning it is
-	 * ignored and the test "passes" in all instances. By default, implementers should treat
-	 * empty tests as a failure, as they are likely to indicate incomplete test specifications,
-	 * thereby reducing the ability of Contract4J to detect errors.
+	 * Get whether or not an empty test expression should be treated as valid, 
+	 * meaning it is ignored and the test always "passes". By default, 
+	 * implementers should treat empty tests as a failure, as they are likely to
+	 * indicate incomplete contract specification, thereby reducing the ability 
+	 * of Contract4J to detect errors.
 	 * @return true if empty expressions are allowed
 	 */
 	boolean getTreatEmptyTestExpressionAsValidTest ();
@@ -90,11 +92,11 @@ public interface ExpressionInterpreter {
 	 *   added to the expansion.</td></tr>
 	 *   <tr><td><code>$target</code></td>
 	 *   <td>The <code>target</code> object. The corresponding value for this key should
-	 *   contain <code>$target</code>, like the <code>$this</code>.</td></tr>
-	 *   <tr><td><code>$old($this)</code>, <code>$old($target)</code>, 
-	 *   or </code>$old(</code><i>field</i><code>)</code></td>
-	 *   <td>The "old" value of <code>$this</code>, <code>$target</code>, or an instance field 
-	 *   value before a method invocation, <i>etc.</i></td></tr>
+	 *   contain <code>$target</code>, like the <code>$this</code>. Currently,
+	 *   only fields in a field invariant test map to <code>$target</code></td></tr>
+	 *   <tr><td><code>$old(..)</code></td>
+	 *   <td>The "old" value of enclosed expression. See {@link 
+	 *   #determineOldValues(String, TestContext) for valid contents.</td></tr>
 	 *   <tr><td><code>$return</code></td>
 	 *   <td>The object returned from a method. The corresponding value for this key should
 	 *   contain <code>$return</code>, like the <code>$this</code>.</td></tr>
@@ -114,49 +116,40 @@ public interface ExpressionInterpreter {
 	void setOptionalKeywordSubstitutions (Map<String, String> optionalKeywordSubstitutions);
 
 	/** 
-	 * Determine the "old" values required for a test expression and same them in a map so they 
-	 * can be compared with new values later. 
+	 * Determine the "old" values required for a test expression and save them 
+	 * in a map so they can be compared with new values later. 
 	 * The following <code>$old(..)</code> expressions are supported:
 	 * <table>
 	 * <tr><th>Expression</th><th>Maps To...</th><th>Comments</th></tr>
 	 * <tr>
 	 *   <td><code>$old($this)</code></td>
 	 *   <td>The instance in the <code>context</code></td>
-	 *   <td>Not recommended, because <code>this</code> may be changed by the test.</td>
+	 *   <td>Not recommended, because <code>this</code> is usually a reference
+	 *   to a mutable object, so it may be changed by the test.</td>
 	 * </tr>
 	 * <tr>
 	 *   <td><code>$old($this.foo)</code></td>
-	 *   <td>The <code>foo</code> field (if accessible...) in the instance in the <code>context</code></td>
-	 *   <td>Most useful if <code>foo</code> is a primitive or a reference to an immutable object, so that 
-	 *   its value won't be changed by the test.</td>
+	 *   <td>The <code>foo</code> field (if accessible...) in the instance in 
+	 *   the <code>context</code></td>
+	 *   <td>Most useful if <code>foo</code> is a primitive or a reference to an
+	 *   immutable object, so that its value won't be changed by the test.</td>
 	 * </tr>
 	 * <tr>
 	 *   <td><code>$old($this.doSomething(bar, baz))</code></td>
-	 *   <td>The result returned by the <code>doSomething()</code> method(if accessible...) in the instance 
-	 *   in the <code>context</code></td>
-	 *   <td>Most useful if <code>doSomething()</code> returns a primitive or a reference to an immutable 
-	 *   object, so that the returned value won't be changed by the test. To keep the implementation 
-	 *   reasonably simply (<i>e.g.</i>, parsing of "()"), the method call can take arguments, but can't embed
-	 *   calls to other methods of any kind.</td>
+	 *   <td>The result returned by the <code>doSomething()</code> method(if 
+	 *   accessible...) in the instance in the <code>context</code></td>
+	 *   <td>Most useful if <code>doSomething()</code> returns a primitive or a 
+	 *   reference to an immutable object, so that the returned value won't be 
+	 *   changed by the test. To keep the parser implementation reasonably simply 
+	 *   (<i>e.g.</i>, parsing of "()"), the method call can take arguments, but
+	 *   it can't embed calls to other methods of any kind.</td>
 	 * </tr>
 	 * <tr>
 	 *   <td><code>$old($target)</code></td>
 	 *   <td>The target in the <code>context</code></td>
-	 *   <td>Not recommended, because <code>target</code> may be changed by the test.</td>
-	 * </tr>
-	 * <tr>
-	 *   <td><code>$old($target.foo)</code></td>
-	 *   <td>The <code>foo</code> field (if accessible...) in the target in the <code>context</code></td>
-	 *   <td>Most useful if <code>foo</code> is a primitive or a reference to an immutable object, so that 
-	 *   its value won't be changed by the test.</td>
-	 * </tr>
-	 * <tr>
-	 *   <td><code>$old($target.doSomething(bar, baz))</code></td>
-	 *   <td>The result returned by the <code>doSomething()</code> method(if accessible...) in the target 
-	 *   in the <code>context</code></td>
-	 *   <td>Most useful if <code>doSomething()</code> returns a primitive or a reference to an immutable 
-	 *   object, so that the returned value won't be changed by the test. The same limitations on method
-	 *   arguments described for <code>$old($this.doSomething(bar, baz))</code> apply here.</td>
+	 *   <td>Not recommended, because <code>target</code> may be changed by the 
+	 *   test. All the options for members of <code>$this</code> just described
+	 *   also apply to <code>$target</code></td>
 	 * </tr>
 	 * <tr>
 	 *   <td><code>$old(foo)</code></td>
@@ -171,10 +164,12 @@ public interface ExpressionInterpreter {
 	 *   <code>$old($this.doSomething())</code></td>
 	 * </tr>
 	 * </table>
-	 * In summary, <code>$old()</code> may contain <code>$this</code>, <code>$target</code>, a field reference on 
-	 * either or a single method call on either, with <code>$this</code> assumed if neither keyword is present. 
-	 * No other expressions are supported. Using them in test expressions will result in unpredictable results 
-	 * (depending on the implementation). Note that whitespace is ignored, except that there can be no whitespace
+	 * In summary, <code>$old()</code> may contain <code>$this</code>, 
+	 * <code>$target</code>, a field reference on either or a single method call
+	 * on either, with <code>$this</code> assumed if neither keyword is present. 
+	 * No other expressions are supported. Using them in test expressions will 
+	 * result in unpredictable results (depending on the implementation). Note 
+	 * that whitespace is ignored, except that there can be no whitespace
 	 * between the "$" characters and their keywords.
 	 * @param testExpression that may contain references to "old" values.
 	 * @param context of the test.
@@ -184,7 +179,7 @@ public interface ExpressionInterpreter {
 	Map<String, Object> determineOldValues (String testExpression, TestContext context);
 
 	/**
-	 * Validate the input test expression by checking that if it contains any of the 
+	 * Validate the input test expression. Checks that if it contains any of the 
 	 * keywords, there are corresponding valid objects to insert for those keywords. 
 	 * "Error" and "warning" conditions are detected. The returned {@link TestResult#isPassed()}
 	 * will return false if any error conditions were detected. Otherwise it returns true.
@@ -192,15 +187,16 @@ public interface ExpressionInterpreter {
 	 * were detected.
 	 * For example, a warning is reported in the message string if <code>$this</code> is 
 	 * present, but "instance" is null. (This can't be treated as an error because, for 
-	 * example, the test might <code>$this == null</code> and the input object might 
-	 * intentionally be null!) Similarly for <code>$target</code>. However, if
+	 * example, the test might be <code>$this == null</code> and the input object might 
+	 * be null intentionally!) Similarly for <code>$target</code>. However, if
 	 * <code>$target</code> is present, then "itemName" can't be null or empty.  
 	 * A warning is issued if <code>$return</code> is present and "result" is null. 
-	 * A warning is issued iff <code>$args[..]</code> is present and "args" is null or 
+	 * A warning is issued if <code>$args[..]</code> is present and "args" is null or 
 	 * the array is empty. 
 	 * Errors include unrecognized "keywords", e.g., <code>$retrn</code> mispellings, 
 	 * invalid <code>$old</code> expressions, such as those missing parentheses or having
-	 * empty parentheses, and expressions with whitespace after the <code>$</code> signs.
+	 * empty parentheses, and expressions with whitespace between the <code>$</code> 
+	 * characters and the keywords.
 	 * If any validation fails, a non-empty string with an appropriate message is returned
 	 * as the message returned by {@link TestResult#getMessage()} called on the
 	 * returned object. If any of the validation failures are errors, then
@@ -223,12 +219,7 @@ public interface ExpressionInterpreter {
 	/**
 	 * Parse the test expression and invoke the test.
 	 * @param testExpression
-	 * @param context information including the itemName under test (class, method, or field),
-	 * the old and new instance pair of the class under test (may only be null for constructor 
-	 * tests or class-wide invariants, the old and new target pair (e.g., a field test), the
-	 * array of args passed to the method for method tests (otherwise null or empty), and the
-	 * result returned by the method (it will be null except for postcondition tests of methods
-	 * not returning void).
+	 * @param context information required by the test.
 	 * @return TestResult indicating whether or not the test passed and an associated message
 	 *   and or Throwable.
 	 * @throws ExpressionInterpreterError if the expression can't be parsed or the resulting

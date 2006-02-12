@@ -1,5 +1,5 @@
 /*
- * Copyright 2005 Dean Wampler. All rights reserved.
+ * Copyright 2005, 2006 Dean Wampler. All rights reserved.
  * http://www.aspectprogramming.com
  *
  * Licensed under the Eclipse Public License - v 1.0; you may not use this
@@ -26,9 +26,11 @@ import java.io.PrintWriter;
 import java.io.Writer;
 
 /** 
- * A Reporter implementation that uses a {@link Writer}, which can wrap {@link System#out} and 
- * {@link System#err}, the default case. It can also be used for {@link java.io.StringWriter} 
- * output.
+ * A Reporter implementation that uses a {@link Writer}, which can wrap 
+ * {@link System#out} and {@link System#err}, the default case. It can also be 
+ * used for {@link java.io.StringWriter} output, which is useful for testing.
+ * @note To imlement support for log4j or other 3rd-party logging toolkit, follow
+ * the example here.
  */
 public class WriterReporter extends ReporterHelper {
 	protected void reportSupport (Severity level, Class clazz, String message) {

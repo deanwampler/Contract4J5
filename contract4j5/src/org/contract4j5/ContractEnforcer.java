@@ -1,5 +1,5 @@
 /*
- * Copyright 2005 Dean Wampler. All rights reserved.
+ * Copyright 2005, 2006 Dean Wampler. All rights reserved.
  * http://www.aspectprogramming.com
  *
  * Licensed under the Eclipse Public License - v 1.0; you may not use this
@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @author Dean Wampler <dean@aspectprogramming.com>
+ * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 
 package org.contract4j5;
@@ -25,22 +25,14 @@ import org.contract4j5.interpreter.TestResult;
 import org.contract4j5.util.reporter.Reporter;
 
 /**
- * ContractEnforcer defines the interface called by Contract4J to test contract
- * conditions and report the failure appropriately.
- * 
+ * Interface for the component that invokes tests and handles failures.
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 public interface ContractEnforcer {
 	/**
-	 * Perform the test, given the test express. If the test fails,
-	 * {@link #handleFailure(String)} is called to log the error and 
-	 * throw a {@link ContractError}.
-	 * 
-	 * @param testExpression that implements the test, which must be valid based
-	 * on the constraints of the {@link ExpressionInterpreter}. If null or empty,
-	 * {@link #defaultTestExpression(String, String, Class, Object, Object, Object[], Object)}
-	 * is called to return a default expression or an empty expression, at the
-	 * implementers discretion.
+	 * Perform the test, given the test express and handle failure appropriately.
+	 * @param testExpression that implements the test, which must be valid, based
+	 * on the constraints of the {@link ExpressionInterpreter}. 
 	 * @param testPrefix for the corresponding test, <i>e.g.,</i> "pre"
 	 * @param extraMessage optional message printed with an error report
 	 * @param context containing context information about the method, etc.
@@ -70,11 +62,11 @@ public interface ContractEnforcer {
 	
 	/**
 	 * Handle a test failure by reporting a message and throwing a
-	 * {@link ContractError}, which is unchecked, with a user-specified message
-	 * and an optional input {@link Throwable} from which additional information is
-	 * reported. Use this method when an Throwable is caught that you believe
-	 * represents a contract failure. Note that the method assumes it will not
-	 * return. This is an important principle of &quot;Design by Contract&quot;. 
+	 * {@link ContractError}, which is unchecked, with an error message
+	 * and an optional input {@link Throwable} from which additional information
+	 * is reported. The normal requirement in DbC is that the program is stopped
+	 * when a test fails. Hence, assume that this method will not return.
+	 * This is an important principle of <i>Design by Contract</i>. 
 	 * It is a program correctness tool for catching logic errors during development; 
 	 * not a tool for checking runtime conditions. While clients of this class could 
 	 * catch the thrown ContractError and attempt recovery, doing so leads to quality
@@ -82,8 +74,7 @@ public interface ContractEnforcer {
 	 * urgent and will be deferred, thereby reducing quality. Hence, use alternative
 	 * means to test true runtime conditions <i>e.g.</i>, invalid user input,
 	 * memory exhaustion, <i>etc.</> and save contract tests for finding logic
-	 * errors during development.
-	 * 
+	 * errors during development
 	 * @param message describing the failure
 	 * @param throwable from which additional information is reported.
 	 * @throws ContractError
@@ -118,15 +109,15 @@ public interface ContractEnforcer {
 	boolean getIncludeStackTrace();
 	
 	/**
-	 * Set the ExpressionInterpreter that parses the test strings in the annotations and
-	 * executes the resulting test expressions.
+	 * Set the ExpressionInterpreter that parses and evaluates the test 
+	 * expressions in the annotations.
 	 * @param expressionInterpreter that if null results in no contract tests being executed.
 	 */
 	void setExpressionInterpreter(ExpressionInterpreter expressionInterpreter);
 
 	/**
-	 * Get the ExpressionInterpreter that parses the test strings in the annotations and
-	 * executes the resulting test expressions.
+	 * Get the ExpressionInterpreter that parses and evaluates the test 
+	 * expressions in the annotations.
 	 * @return ExpressionInterpreter that if null results in no contract tests being executed.
 	 */
 	ExpressionInterpreter getExpressionInterpreter();

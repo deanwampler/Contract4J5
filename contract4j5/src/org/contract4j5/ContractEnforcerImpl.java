@@ -1,5 +1,5 @@
 /*
- * Copyright 2005 Dean Wampler. All rights reserved.
+ * Copyright 2005, 2006 Dean Wampler. All rights reserved.
  * http://www.aspectprogramming.com
  *
  * Licensed under the Eclipse Public License - v 1.0; you may not use this
@@ -28,7 +28,7 @@ import org.contract4j5.util.reporter.WriterReporter;
 
 /**
  * Class that implements {@link ContractEnforcer}. Most of the interesting work is
- * done by the {@link ExpressionInterpreter} property used by this class.
+ * done by the {@link ExpressionInterpreter} used by this class.
  * 
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
@@ -55,26 +55,41 @@ public class ContractEnforcerImpl implements ContractEnforcer {
 
 	private ExpressionInterpreter expressionInterpreter = null;
 	
+	/* (non-Javadoc)
+	 * @see org.contract4j5.ContractEnforcer#getExpressionInterpreter()
+	 */
 	public ExpressionInterpreter getExpressionInterpreter() {
 		return expressionInterpreter;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.contract4j5.ContractEnforcer#setExpressionInterpreter(org.contract4j5.interpreter.ExpressionInterpreter)
+	 */
 	public void setExpressionInterpreter(ExpressionInterpreter expressionInterpreter) {
 		this.expressionInterpreter = expressionInterpreter;
 	}
 	
 	private boolean includeStackTrace;
 	
+	/* (non-Javadoc)
+	 * @see org.contract4j5.ContractEnforcer#setIncludeStackTrace(boolean)
+	 */
 	public void setIncludeStackTrace(boolean onOff) {
 		includeStackTrace = onOff;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.contract4j5.ContractEnforcer#getIncludeStackTrace()
+	 */
 	public boolean getIncludeStackTrace() {
 		return includeStackTrace;
 	}
 	
 	private boolean warnedOnce = false;
 	
+	/* (non-Javadoc)
+	 * @see org.contract4j5.ContractEnforcer#invokeTest(java.lang.String, java.lang.String, java.lang.String, org.contract4j5.TestContext)
+	 */
 	public void invokeTest (
 			String      testExpression, 
 			String      testPrefix, 
@@ -96,14 +111,8 @@ public class ContractEnforcerImpl implements ContractEnforcer {
 		}
 	}
 
-	/**
-	 * Format a standard error message used when a test fails.
-	 * @param testExpression
-	 * @param testPrefix
-	 * @param extraMessage
-	 * @param context
-	 * @param testResult
-	 * @return
+	/* (non-Javadoc)
+	 * @see org.contract4j5.ContractEnforcer#makeFailureMessage(java.lang.String, java.lang.String, java.lang.String, org.contract4j5.TestContext, org.contract4j5.interpreter.TestResult)
 	 */
 	public String makeFailureMessage(
 			String testExpression, 
@@ -201,7 +210,6 @@ public class ContractEnforcerImpl implements ContractEnforcer {
 
 	/**
 	 * Constructor.
-	 * 
 	 * @param expressionInterpreter
 	 * @param includeStackTrace
 	 */
@@ -214,7 +222,7 @@ public class ContractEnforcerImpl implements ContractEnforcer {
 
 	/**
 	 * Default Constructor. By default, don't include the stack trace in error
-	 * messages and set the interpreter attributes to null.
+	 * messages and set the expression interpreter to null (not recommended!).
 	 */
 	public ContractEnforcerImpl() {
 		setExpressionInterpreter(null);

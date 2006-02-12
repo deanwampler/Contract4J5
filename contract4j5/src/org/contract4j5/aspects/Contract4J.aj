@@ -1,5 +1,5 @@
 /*
- * Copyright 2005 Dean Wampler. All rights reserved.
+ * Copyright 2005, 2006 Dean Wampler. All rights reserved.
  * http://www.aspectprogramming.com
  *
  * Licensed under the Eclipse Public License - v 1.0; you may not use this
@@ -43,11 +43,14 @@ import org.contract4j5.util.reporter.WriterReporter;
  * subclass pointcuts, whereas using the @Contract annotation in PCDs only matches
  * on classes that explicitly use the annotation! Hence, the marker interface allows
  * us to change the typical behavior of annotations to fit the expected model for 
- * contracts!
+ * contracts, which should be inherited. Note, however, that for practical reasons,
+ * the @Contract annotation should always be used on subclasses anyway. One of those
+ * reasons is to silence warnings that it is missing if you use the test annotations
+ * in the subclasses!
  * Most PCDs must also include the "if (isEnabled(TestType...))" test, which determines
- * if a particular kind of annotation (or all of them) is disabled.
+ * if a particular kind of annotation is disabled.
  * @note Many of the properties are declared static, which is less flexible than 
- * per-instance, but makes it easier to for users to "wire" the property dependencies
+ * per-instance, but makes it easier for users to "wire" the property dependencies
  * using different means. Because the instantiation model of aspects is different from
  * objects, wiring is a little trickier. The preferred way is to use an IoC/DI
  * container like Spring, which makes it straightforward. However, since we don't want
@@ -64,7 +67,7 @@ abstract public aspect Contract4J {
 	declare parents: (@Contract *) implements ContractMarker;
 		
 	/**
-	 * Keys for property files. 
+	 * Keys for property files.
 	 */
 	public static final String[] enabledPropertyKeys = new String[] {
 			"org.contract4j5.Contract",
@@ -74,14 +77,14 @@ abstract public aspect Contract4J {
 	};
 	
 	/**
-	 * The types of contract tests, precondition, postcondition, and invariant tests.
+	 * The types of contract tests.
 	 */
 	public enum TestType { Pre, Post, Invar };
 	
 	static private boolean isEnabled[] = {true, true, true};
 	
 	/**
-	 * Is the test type enabled?
+	 * Is the test type enabled globally?
 	 * @param type  the type of test
 	 * @return true if enabled globally, false otherwise
 	 */
@@ -90,7 +93,7 @@ abstract public aspect Contract4J {
 	}
 	
 	/**
-	 * Set whether or not the test type is enabled
+	 * Set whether or not the test type is enabled globally.
 	 * @param type the type of test
 	 * @param b true if enabled globally, false otherwise
 	 */
@@ -103,7 +106,7 @@ abstract public aspect Contract4J {
 	 * bugs, we don't allow tests to be invoked implicitly within other tests, so we 
 	 * exclude the cflow of the {@link ContractEnforcer} object. Tests within tests can
 	 * happen if a test expression invokes a method call on the object and that method 
-	 * call has tests!
+	 * call has tests, for example.
 	 */
 	pointcut commonC4J() : 
 		within (ContractMarker+) &&
@@ -135,7 +138,7 @@ abstract public aspect Contract4J {
 	private static Reporter reporter;
 	
 	/**
-	 * @return Returns the reporter.
+	 * @return the reporter used for routine logging.
 	 */
 	public static Reporter getReporter() {
 		if (Contract4J.reporter == null) {
@@ -145,7 +148,7 @@ abstract public aspect Contract4J {
 	}
 
 	/**
-	 * @param reporter The reporter to set.
+	 * @param reporter used for routing logging.
 	 */
 	public static void setReporter(Reporter reporter) {
 		Contract4J.reporter = reporter;
@@ -154,15 +157,15 @@ abstract public aspect Contract4J {
 	private static ContractEnforcer contractEnforcer = null;
 
 	/**
-	 * Set the ContractEnforcer aspect to use.
-	 * @param contractEnforcer object that does the work of executing a test and
-	 * handling failures. If null, all tests are effectively disabled.
+	 * Set the ContractEnforcer object to use.
+	 * @param contractEnforcer object that does the work of executing all tests
+	 * and handling failures. If null, all tests are effectively disabled.
 	 */
 	public static void setContractEnforcer (ContractEnforcer contractEnforcer) { 
 		Contract4J.contractEnforcer = contractEnforcer;
 	}
 	/**
-	 * Get the ContractEnforcer that the aspect uses. Reports a warning if the 
+	 * Get the ContractEnforcer used to evaluate all tests. Reports a warning if the 
 	 * enforcer object isn't initialized and then creates a default 
 	 * {@link ContractEnforcerImpl} object with a {@link JexlExpressionEvaluator}.
 	 * @return the ContractEnforcer
@@ -183,7 +186,7 @@ abstract public aspect Contract4J {
 
 	/**
 	 * Find the "$old(..)" expressions in the test expression, determine the corresponding values
-	 * from the context and return those values a map.
+	 * from the context and return those values in a map.
 	 * @see ExpressionInterpreter#determineOldValues(String, TestContext)
 	 */
 	public Map<String, Object> determineOldValues (String testExpression, TestContext context) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2005 Dean Wampler. All rights reserved.
+ * Copyright 2005, 2006 Dean Wampler. All rights reserved.
  * http://www.aspectprogramming.com
  *
  * Licensed under the Eclipse Public License - v 1.0; you may not use this
@@ -145,8 +145,9 @@ public aspect ConstructorBoundaryConditions extends Contract4J {
 	}
 	
 	/**
-	 * Need to pass both the annotation and the fields extracted from our contract annotations, because
-	 * Java won't let us have our annotations implement an interface with these fields, nor any common
+	 * Need to pass both the annotation and the fields extracted from our 
+	 * contract annotations, because Java won't let us have our annotations 
+	 * implement an interface with these fields, nor any common
 	 * interface, so we have to pass everything in.
 	 */
 	protected void doTest (

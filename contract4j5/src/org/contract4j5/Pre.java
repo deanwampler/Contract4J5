@@ -1,5 +1,5 @@
 /*
- * Copyright 2005 Dean Wampler. All rights reserved.
+ * Copyright 2005, 2006 Dean Wampler. All rights reserved.
  * http://www.aspectprogramming.com
  *
  * Licensed under the Eclipse Public License - v 1.0; you may not use this
@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @author deanwampler <dean@aspectprogramming.com>
+ * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 package org.contract4j5;
 
@@ -27,40 +27,31 @@ import java.lang.annotation.Target;
 
 /**
  * An annotation that supports Design by Contract "precondition" tests.
- * The tests are generated in AspectJ. Classes that use these tests must be
- * declared with the {@link Contract} annotation. Then, precondition
- * tests can be specified using this annotation. 
- * <br/>A method with a precondition annotation will have the test performed
- * after the method executes.
+ * A method or constructor with a precondition annotation will have the test 
+ * performed before the method executes.
  * <br/>The {@link #value} String must be a valid Java or AspectJ expression
  * evaluating to true or false at runtime.
- * @see Contract for more information on value strings.
- *
  * @author Dean Wampler  <mailto:dean@aspectprogramming.com>
+ * @note The class must be annotated with @Contract
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PARAMETER, ElementType.METHOD, ElementType.CONSTRUCTOR})
 public @interface Pre {
     /**
-     * The "value" is the condition, the runtime test statement.
-     * It must evaluate to a legal Java or AspectJ expression at runtime.
-     * The default value is "" as there is no convenient default suitable
-     * for all cases. Instead subclasses of 
+     * The "value" is the test expression, which must be a legal Java or AspectJ
+     * expression that evaluates to true or false.
+     * The default value is "", although a suitable default would be to require
+     * that all none-primitive parameters be non-null. Instead subclasses of 
      * {@link org.contract4j5.testexpression.DefaultTestExpressionMaker}
-     * are used by the aspects to dynamically generate suitable defaults
-     * (if possible).
-     * You can override the global default by setting the property
-     * <code>org.contract4j5.pre.condition</code>
-     * Yes, that's "condition", not "value"!
+     * are used by the aspects to dynamically generate suitable defaults,
+     * when possible.
      */
     String value() default "";
 
     /**
      * An optional message to print with the standard message when the contract
      * fails.
-     * You can override the global default by setting the property
-     * <code>org.contract4j5.pre.message</code>
      */
     String message() default "";
 }

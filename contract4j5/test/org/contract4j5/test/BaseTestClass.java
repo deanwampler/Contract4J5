@@ -1,5 +1,5 @@
 /*
- * Copyright 2005 Dean Wampler. All rights reserved.
+ * Copyright 2005, 2006 Dean Wampler. All rights reserved.
  * http://www.contract4j.org
  *
  * Licensed under the Eclipse Public License - v 1.0; you may not use this
@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @author deanwampler <dean@aspectprogramming.com>
+ * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 package org.contract4j5.test;
 
@@ -23,6 +23,7 @@ import org.contract4j5.Contract;
 import org.contract4j5.Invar;
 import org.contract4j5.Post;
 import org.contract4j5.Pre;
+
 /**
  * A (contrived) example Java class that demonstrates how to define DbC tests.
  * The "@Contract" annotation is required. Then, we define a class-level

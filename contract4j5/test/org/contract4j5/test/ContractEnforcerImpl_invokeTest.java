@@ -1,5 +1,5 @@
 /*
- * Copyright 2005 Dean Wampler. All rights reserved.
+ * Copyright 2005, 2006 Dean Wampler. All rights reserved.
  * http://www.aspectprogramming.com
  *
  * Licensed under the Eclipse Public License - v 1.0; you may not use this
@@ -40,7 +40,6 @@ import org.contract4j5.util.reporter.WriterReporter;
 /**
  * Test ContractEnforcerImpl.invokeTest(). Other tests for this class are handled by
  * a separate TestCase.
- * @author Dean Wampler
  */
 public class ContractEnforcerImpl_invokeTest extends TestCase {
 	public static class Dummy {

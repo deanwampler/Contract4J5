@@ -1,3 +1,23 @@
+/*
+ * Copyright 2005 2006 Dean Wampler. All rights reserved.
+ * http://www.aspectprogramming.com
+ *
+ * Licensed under the Eclipse Public License - v 1.0; you may not use this
+ * software except in compliance with the License. You may obtain a copy of the 
+ * License at
+ *
+ *     http://www.eclipse.org/legal/epl-v10.html
+ *
+ * A copy is also included with this distribution. See the "LICENSE" file.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @author Dean Wampler <mailto:dean@aspectprogramming.com>
+ */
+
 package org.contract4j5.interpreter.jexl;
 
 import java.util.Map;
@@ -10,6 +30,10 @@ import org.contract4j5.TestContext;
 import org.contract4j5.interpreter.ExpressionInterpreterHelper;
 import org.contract4j5.interpreter.TestResult;
 
+/**
+ * Wrapper around the Jexl interpreter.
+ * @author Dean Wampler <mailto:dean@aspectprogramming.com>
+ */
 public class JexlExpressionInterpreter extends ExpressionInterpreterHelper {
 
 	private JexlContext jexlContext = null;
@@ -34,19 +58,8 @@ public class JexlExpressionInterpreter extends ExpressionInterpreterHelper {
 	}
 	
 	/**
-	 * Do the test. Begin by creating an expression object and substituting the special 
-	 * keywords, then evaluate.
-	 * Note that in "$old(..)" expressions, we replace anything other than "$old($this)" 
-	 * and "$old($target)" with "c4jOldThis.string", where "string" is the argument in
-	 * the "$old(..)". This assumes that the old instance was captured (e.g., thru cloning)
-	 * and the "string" is an accessible field in the instance.
-	 * The first substitution handles, e.g., "$old($this)", "$old($this.foo)", 
-	 * "$old($this.foo.bar)", but not "$old($this.foo.getBar())", etc., even though the
-	 * latter is legal. Instead, use "$old($this.foo).getBar().
-	 * @note If the item name isn't empty and the target is not null, both correspond to a field. 
-	 * We look for "bare" field references (without $this or $target) and replace them with
-	 * "c4jTarget".
-	 * TODO would it be better to use "c4jThis.field" instead?
+	 * Do the test. The input test expression already has all required subsitutions
+	 * made.
 	 * @see org.contract4j5.interpreter.ExpressionInterpreterHelper#doTest(java.lang.String, org.contract4j5.TestContext)
 	 */
 	@Override

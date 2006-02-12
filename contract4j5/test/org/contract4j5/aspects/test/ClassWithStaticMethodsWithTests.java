@@ -18,21 +18,24 @@
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 
-package org.contract4j5.test;
+package org.contract4j5.aspects.test;
 
+import org.contract4j5.Contract;
 import org.contract4j5.Invar;
 import org.contract4j5.Post;
 import org.contract4j5.Pre;
 
 /**
- * Interface that declares some contracts, but fails to include the required
- * "@Contract" annotation. Expect warnings to be generated.
+ * Class with static methods that declare tests. The compiler should warn that
+ * this isn't supported. You can ignore those warnings!
+ * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
-@Invar ("$this.getFlag() > 0")
-public interface NoContractInterface extends BaseInterface {
-	@Pre   void setName (String s);
-	@Post  String getName ();
-	@Invar("$this.getName().length() > 0") 
-	@Post("!$this.getName.equals(\"bad\")") 
-	void m (String s);
+@Contract
+public class ClassWithStaticMethodsWithTests {
+	@Pre
+	public static void staticMethodWithPre() {}
+	@Post
+	public static void staticMethodWithPost() {}
+	@Invar
+	public static void staticMethodWithInvar() {}
 }

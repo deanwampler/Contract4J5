@@ -1,3 +1,22 @@
+/*
+ * Copyright 2005 2006 Dean Wampler. All rights reserved.
+ * http://www.aspectprogramming.com
+ *
+ * Licensed under the Eclipse Public License - v 1.0; you may not use this
+ * software except in compliance with the License. You may obtain a copy of the 
+ * License at
+ *
+ *     http://www.eclipse.org/legal/epl-v10.html
+ *
+ * A copy is also included with this distribution. See the "LICENSE" file.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @author Dean Wampler <mailto:dean@aspectprogramming.com>
+ */
 package org.contract4j5.testexpression;
 
 import java.lang.annotation.Annotation;
@@ -11,18 +30,20 @@ import org.contract4j5.interpreter.TestResult;
  * Utility class for finding a corresponding annotation in a parent class,
  * interface, advice, or method. This utility supports the case where subclasses
  * use an annotation without a test expression and we want to use the
- * test expression in the corresponding annotation on a parent element,
+ * test expression in the annotation on the corresponding parent element,
  * if any, as the "default" expression. Note that methods subclassing a 
  * parent method or implementing an interface method are required to
  * add the same annotations found on the parent. This overcomes the 
  * limitation of Java method annotations that they are never inherited. Class
- * annotations are different; the subclass can optionally add the annotation.
- * @author Dean Wampler
+ * annotations are different; since they will be inherited, the subclass can 
+ * optionally add the annotation, which is useful for consistency and 
+ * explicit documentation purposes.
+ * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 public interface ParentTestExpressionFinder {
 	/**
 	 * Search for an annotation on the corresponding advice in the parent types,
-	 * if any, and return the first nonempty test expression found or return "".
+	 * if any, and return the first non-empty test expression found or return "".
 	 * @param whichAnnotationType
 	 * @param advice which of type Method
 	 * @param context

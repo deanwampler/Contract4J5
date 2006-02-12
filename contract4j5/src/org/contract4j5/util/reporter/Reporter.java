@@ -1,5 +1,5 @@
 /*
- * Copyright 2005 Dean Wampler. All rights reserved.
+ * Copyright 2005, 2006 Dean Wampler. All rights reserved.
  * http://www.aspectprogramming.com
  *
  * Licensed under the Eclipse Public License - v 1.0; you may not use this
@@ -21,10 +21,11 @@
 package org.contract4j5.util.reporter;
 
 /**
- * Reporter is a simple interface that abstracts calls to output streams,
- * loggers, etc. It is used so that Contract4J has minimal coupling to specific
- * toolkits while providing flexibility to handle output as users see fit.
- * 
+ * Reporter is a simple interface that abstracts logging-style calls to output 
+ * streams and loggers, etc. It is used so that Contract4J has minimal coupling 
+ * to specific toolkits while providing flexibility to handle output as end users 
+ * see fit. Specific implementations must direct the output appropriately, e.g.,
+ * to System.out, log4j, etc. 
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 public interface Reporter {

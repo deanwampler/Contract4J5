@@ -1,5 +1,5 @@
 /*
- * Copyright 2005 Dean Wampler. All rights reserved.
+ * Copyright 2005, 2006 Dean Wampler. All rights reserved.
  * http://www.aspectprogramming.com
  *
  * Licensed under the Eclipse Public License - v 1.0; you may not use this
@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @author Dean Wampler <dean@aspectprogramming.com>
+ * @author Dean Wampler <mailto: dean@aspectprogramming.com>
  */
 
 package org.contract4j5.interpreter;
@@ -35,8 +35,10 @@ import org.contract4j5.util.reporter.WriterReporter;
 
 
 /**
- * An abstract helper class that implements the common boiler plate for the expression interpreter.
- * It calls abstract methods to provide specific support for user-provided interpreters.
+ * An abstract helper class that implements the common boiler plate for the 
+ * expression interpreter. It uses a Template Method pattern and calls abstract 
+ * methods to provide specific support for user-provided interpreters.
+ * @author Dean Wampler <mailto: dean@aspectprogramming.com>
  */
 abstract public class ExpressionInterpreterHelper implements ExpressionInterpreter {
 
@@ -125,7 +127,7 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 	}
 	
 	/**
-	 * After making substitutions, calls the interpreter to evaluate the expression
+	 * After making substitutions, call the interpreter to evaluate the expression
 	 * to return an object to save for later comparison. 
 	 * @param exprStr that specifies at most one object. Should require no further processing.
 	 * @param context which is used to determine the object to return.
@@ -344,7 +346,7 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 	 * <tr>
 	 *   <td><code>$old(..)</code></td>
 	 *   <td><code>c4jExprVar</code>N, where "N" is an arbitrary number. A corresponding value
-	 *   must exist in the {@link TestContext#getOldValuesMap()}. If there is no corresonding
+	 *   must exist in the {@link TestContext#getOldValuesMap()}. If there is no corresponding
 	 *   value, <code>c4jThis...</code> or </code>c4jTarget...</code> is used, but this will
 	 *   be inaccurate, as these values reflect current, not past state!</td>
 	 * </tr>
