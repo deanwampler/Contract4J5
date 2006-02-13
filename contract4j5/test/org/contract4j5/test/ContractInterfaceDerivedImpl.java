@@ -31,8 +31,8 @@ import org.contract4j5.Pre;
  * This class does not change the annotations.
  * Note that the setName and getName methods below are commented out.
  * Jexl apparently can't resolve "$this.name" for objects of this class,
- * if name isn't an attribute. It doesn't seem to automatically convert to
- * getName(). However, this works for the parent class where the attribute exists.
+ * if name isn't a fields. It doesn't seem to automatically convert to
+ * getName(). However, this works for the parent class where the field exists.
  * Also, the two commented methods below cause an infinite recursion and stack 
  * overflow, even though the aspects explicitly try to prevent this!
  */

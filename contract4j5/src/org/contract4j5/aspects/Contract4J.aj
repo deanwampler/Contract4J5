@@ -33,7 +33,7 @@ import org.contract4j5.util.reporter.WriterReporter;
 
 /**
  * An abstract aspect that supports Design by Contract tests by advising classes,
- * aspects, methods, and attributes that have Contract4J annotations applied to
+ * aspects, methods, and fields that have Contract4J annotations applied to
  * them. This aspect provides some common features. Other aspects implement the
  * specific test types, etc.
  * Note that most PCDs will exclude static methods and look for
