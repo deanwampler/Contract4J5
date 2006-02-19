@@ -96,7 +96,7 @@ public interface ExpressionInterpreter {
 	 *   only fields in a field invariant test map to <code>$target</code></td></tr>
 	 *   <tr><td><code>$old(..)</code></td>
 	 *   <td>The "old" value of enclosed expression. See {@link 
-	 *   #determineOldValues(String, TestContext) for valid contents.</td></tr>
+	 *   #determineOldValues(String, TestContext)} for valid contents.</td></tr>
 	 *   <tr><td><code>$return</code></td>
 	 *   <td>The object returned from a method. The corresponding value for this key should
 	 *   contain <code>$return</code>, like the <code>$this</code>.</td></tr>

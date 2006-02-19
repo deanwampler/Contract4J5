@@ -213,7 +213,7 @@
 	<echo>  Test start time: ${start}</echo>
 	<junit printsummary="yes" haltonfailure="yes" showoutput="true" fork="yes">
 		<jvmarg value="-ea"/>
-		<formatter type="brief" usefile="false"/>
+		<formatter type="brief" usefile="true"/>
 		<classpath>
 			<pathelement location="${test.jar}"/>
 			<pathelement location="${project.jar}"/>
@@ -298,10 +298,12 @@
 <target name="clean" depends="init, clean-detritus">
 	<delete dir="${javadocs.reldir}" />
 	<delete dir="${gensrc.reldir}" />
+	<delete dir="${bin.reldir}" />  <!-- Eclipse output dir, not tools... -->
 	<delete dir="${classes.reldir}" />
 	<delete>
 		<fileset dir="." includes="${project.jar}" />
 		<fileset dir="." includes="${project.test.jar}" />
+		<fileset dir="." includes="TEST-*.txt" />
 	</delete>
 </target>
 

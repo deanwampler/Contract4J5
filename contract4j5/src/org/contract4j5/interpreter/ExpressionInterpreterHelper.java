@@ -363,7 +363,7 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 	 * expression returned by {@link TestResult#getMessage()} or, if an error occurred, 
 	 * an error message will be there and {@link TestResult#isPassed()} will return false.
 	 * @note For every <code>$old(..)</code> expressions, there should be a corresponding 
-	 * mapping in {@link TestContext.getOldValuesMap()}. If not, a warning is issued
+	 * mapping in {@link TestContext#getOldValuesMap()}. If not, a warning is issued
 	 * and an attempted substitution is made, but any expression evaluations will reflect the
 	 * current state, not the "old" state, thereby invalidating the test!
 	 */

@@ -49,7 +49,8 @@ esac
 : ${ASPECTJ_HOME:=$TOOL_HOME/aspectj1.5}
 : ${JAVA_HOME:=$TOOL_HOME/jdk$VERSION}
 : ${JUNIT_HOME:=$TOOL_HOME/junit3.8.1}
-: ${JEXL_HOME:=$TOOL_HOME/Apache/jakarta/commons}
+: ${JEXL_HOME:=$TOOL_HOME/Apache/jakarta/commons/commons-jexl-1.0}
+: ${COMMONS_LOGGING_HOME:=$TOOL_HOME/Apache/jakarta/commons/commons-logging-1.0.4}
 
 case "$osname" in
     cygwin*)
@@ -64,11 +65,12 @@ case "$osname" in
 	JAVA_HOME=`cygpath --windows --path "$JAVA_HOME"`
 	JUNIT_HOME=`cygpath --windows --path "$JUNIT_HOME"`
 	JEXL_HOME=`cygpath --windows --path "$JEXL_HOME"`
+	COMMONS_LOGGING_HOME=`cygpath --windows --path "$COMMONS_LOGGING_HOME"`
 	CLASSPATH=`cygpath --windows --path "$CLASSPATH"`
-	CLASSPATH="$ANT_HOME\\lib\\ant.jar;$ASPECTJ_HOME\\lib\\aspectjrt.jar;$ASPECTJ_HOME\\lib\\aspectjtools.jar;$JUNIT_HOME\\junit.jar;$JEXL_HOME\\commons-jexl-1.0.jar;$CLASSPATH"
+	CLASSPATH="$ANT_HOME\\lib\\ant.jar;$ASPECTJ_HOME\\lib\\aspectjrt.jar;$ASPECTJ_HOME\\lib\\aspectjtools.jar;$JUNIT_HOME\\junit.jar;$COMMONS_LOGGING_HOME\\commons-logging.jar;$JEXL_HOME\\commons-jexl-1.0.jar;$CLASSPATH"
 	;;
     *)
-	CLASSPATH=$ANT_HOME/lib/ant.jar:$ASPECTJ_HOME/lib/aspectjrt.jar:$ASPECTJ_HOME/lib/aspectjtools.jar:$JUNIT_HOME/junit.jar:$CLASSPATH
+	CLASSPATH=$ANT_HOME/lib/ant.jar:$ASPECTJ_HOME/lib/aspectjrt.jar:$ASPECTJ_HOME/lib/aspectjtools.jar:$JUNIT_HOME/junit.jar:$COMMONS_LOGGING_HOME/commons-logging.jar:$JEXL_HOME/commons-jexl-1.0.jar:$CLASSPATH
 	PATH=$JAVA_HOME/bin:$ASPECTJ_HOME/bin:$ANT_HOME/bin:$PATH
 	;;
 esac
@@ -79,6 +81,7 @@ export CONTRACT4J5_HOME
 export JAVA_HOME
 export JUNIT_HOME
 export JEXL_HOME
+export COMMONS_LOGGING_HOME
 export TOOL_HOME
 export CLASSPATH
 export PATH

@@ -18,7 +18,7 @@
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 
-package org.contract4j.aspects;
+package org.contract4j5.aspects;
 
 import org.contract4j5.Invar;
 import org.contract4j5.Post;

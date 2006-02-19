@@ -34,7 +34,7 @@ public class MiscUtils {
 	 * array of length equal to the longest input array and assign the values, in order, filling
 	 * in "" for the <code>itemName</code> when we run out of names, and null for the
 	 * <code>class</code> and <code>value</code> when we run out classes and values, respectively.
-	 * @param names
+	 * @param argNames
 	 * @param argTypes
 	 * @param argValues
 	 * @return null on error, other wise an Instance array of length equal to the input arrays

@@ -320,8 +320,9 @@ For Linux/Unix systems, sue these commands:
 
 On Windows systems, Unzip the zip file to an appropriate location.
 
-You will need Java 5, AspectJ 5, Jakarta Commons Jexl 1.0 to use Contract4J5.
-If you build it yourself, you will also need JUnit.
+You will need Java 5, AspectJ 5, Jakarta Commons Jexl 1.0, and Commons Logging
+(required by Jexl) to use Contract4J5. If you build Contract4J yourself, you 
+will also need JUnit.
 
 You can use the installed "contract4j5.jar" file as is. If you want to rebuild
 Contract4J, use the ant driver script "build.sh" or "build.bat", edit the file 
@@ -366,6 +367,18 @@ warnings which fall into two categories:
 1) Warnings in some unit tests when test annotations are used without the
 required @Contract annotation. This is deliberate for those tests.
 2) Unavoidable unchecked casts involving generics.
+3) The javadocs target also results in many warnings for references to aspects
+from Java files, which javadoc doesn't know how to resolve. To be clear, the
+following missing "classes" are actually aspects:
+  Contract4J
+  ConstructorBoundaryConditions
+  InvariantConditions
+  MethodBoundaryConditions
+You'll see lots of warnings about not being able to find
+"Contract4J#isEnabled(TestType)". 
+
+If the unit tests fail, look for output in "contract4j5/TEST-*.txt" files.
+Usually, the problem will be a classpath issue.
 
 Next, we'll look at code examples, then return to a discussion of invoking and
 configuring Contract4J5.
@@ -944,7 +957,8 @@ space is not allowed between the '$' and the word.
 *** Jexl can't parse literal floats and doubles with the 'f' and 'd' appended,
 respectively. Leave them off in both cases.
 
-*** Most other Java expressions, like comparisons and arithmetic expressions can be used. See the Jexl website for more information on allowed expressions,
+*** Most other Java expressions, like comparisons and arithmetic expressions can
+be used. See the Jexl website for more information on allowed expressions,
   http://jakarta.apache.org/commons/jexl/.
 
 *** Before passing the expressions to Jexl, substitutions are made. Normally,
@@ -1055,6 +1069,7 @@ scripts:
 3) AspectJ 1.5 (ASPECTJ_HOME) Make sure you have the "final" 1.5 release.
 3) Ant 1.6.X (ANT_HOME)
 4) Jexl 1.0 (JEXL_HOME)
+5) Commons Logging (COMMONS_LOGGING_HOME)
 
 Also define "CONTRACT4J5_HOME" to be the ".../contract4j5_050/contract4j5"
 directory where you installed it.

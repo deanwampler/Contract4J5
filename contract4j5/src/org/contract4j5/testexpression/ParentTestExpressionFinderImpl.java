@@ -169,7 +169,7 @@ public class ParentTestExpressionFinderImpl implements
 	 * @param whichAnnotationType which type of annotation
 	 * @param nameDeterminator the utility for determining the correct method name for the current "clazz".
 	 * It will be equal to "methodName", except for constructors, where it will be the clazz's "simpleName".
-	 * @return
+	 * @return a {@link TestResult} object with the the parent test's expression.
 	 */
 	protected TestResult findParentMethodTestExpressionSupport (
 			Class clazz,

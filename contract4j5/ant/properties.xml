@@ -38,6 +38,7 @@
 <property name="jexl.home"        value="${environ.JEXL_HOME}"/>
 
 <!-- Directories -->
+<property name="bin.reldir"      value="bin"/>
 <property name="classes.reldir"  value="classes"/>
 <property name="src.reldir"      value="src"/>
 <property name="test.reldir"     value="test"/>
