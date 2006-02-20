@@ -11,7 +11,7 @@
 #     don't think the conversion to/from windows path formats is correct
 #     (TBD). However, the build.bat script works fine.
 #
-#  Copyright 2005 Dean Wampler. All rights reserved.
+#  Copyright 2005, 2006 Dean Wampler. All rights reserved.
 #  http://www.aspectprogramming.com
 # 
 #  Licensed under the Eclipse Public License - v 1.0; you may not use this
@@ -58,7 +58,6 @@ case "$osname" in
 	#PATH="$JAVA_HOME\\bin;$ASPECTJ_HOME\\bin;$ANT_HOME\\bin;$PATH"
 	PATH="$JAVA_HOME/bin:$ASPECTJ_HOME/bin:$ANT_HOME/bin:$PATH"
 	HOME=`cygpath --windows --path "$HOME"`
-	TOOL_HOME=c:/tools/javatools
 	CONTRACT4J5_HOME=`cygpath --windows --path "$CONTRACT4J5_HOME"`
 	ANT_HOME=`cygpath --windows --path "$ANT_HOME"`
 	ASPECTJ_HOME=`cygpath --windows --path "$ASPECTJ_HOME"`
