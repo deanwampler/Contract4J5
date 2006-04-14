@@ -1,13 +1,14 @@
 Contract4J5 0.5.0 README  
 
 Contract4J5 (Annotation form)
-v0.5.0.0   February 7, 2006
+v0.5.0.0   February 20, 2006
 v0.1.1.0   October 4, 2005
 v0.1.0.2   April 24, 2005
 v0.1.0.1   February 6, 2005
 v0.1.0     January 31, 2005
 
 Contract4JBeans (Experimental "JavaBeans"-like form)
+v0.3.0.0   February 20, 2006
 v0.2.0.0   October 5, 2005
 v0.2.0M1   August 15, 2005
 
@@ -1125,7 +1126,7 @@ without embedding the ad hoc Reporter objects.
 
 ** Notes for Each Release
 
-*** v0.5.0 February 7, 2006
+*** v0.5.0 February 20, 2006
 
 Eliminated the precompilation step, replacing it with runtime teste expression
 evaluation using the Jakarta Commons JEXL expression parser.
