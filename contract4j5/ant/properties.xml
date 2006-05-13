@@ -2,9 +2,7 @@
 <!--
   properties.xml - Common ant properties for AspectProgramming/Contract4J5 software.
   See common.xml for usage details.
--->
 
-<!--  
   Copyright 2005 Dean Wampler. All rights reserved.
   http://www.aspectprogramming.com
  
@@ -29,18 +27,21 @@
 	You must define several "project.*" in the project build file.
 	See $CONTRACT4J5_HOME/build.xml for examples.
 -->
-<property environment="environ"/>
-<property name="ant.home"         value="${environ.ANT_HOME}"/>
-<property name="aspectj.home"     value="${environ.ASPECTJ_HOME}"/>
-<property name="contract4j5.home" value="${environ.CONTRACT4J5_HOME}"/>
-<property name="java.home"        value="${environ.JAVA_HOME}"/>
-<property name="junit.home"       value="${environ.JUNIT_HOME}"/>
-<property name="jexl.home"        value="${environ.JEXL_HOME}"/>
 
-<!-- Directories -->
-<property name="bin.reldir"      value="bin"/>
-<property name="classes.reldir"  value="classes"/>
-<property name="src.reldir"      value="src"/>
-<property name="test.reldir"     value="test"/>
-<property name="javadocs.reldir" value="doc/api"/>
-
+<project name="properties" default="common-init" basedir=".">
+	<dirname property="imported.basedir" file="${ant.file.imported}"/>
+	<property environment="environ"/>
+	<property name="ant.home"         value="${environ.ANT_HOME}"/>
+	<property name="aspectj.home"     value="${environ.ASPECTJ_HOME}"/>
+	<property name="contract4j5.home" value="${environ.CONTRACT4J5_HOME}"/>
+	<property name="java.home"        value="${environ.JAVA_HOME}"/>
+	<property name="junit.home"       value="${environ.JUNIT_HOME}"/>
+	<property name="jexl.home"        value="${environ.JEXL_HOME}"/>
+	
+	<!-- Directories -->
+	<property name="bin.reldir"      value="bin"/>
+	<property name="classes.reldir"  value="classes"/>
+	<property name="src.reldir"      value="src"/>
+	<property name="test.reldir"     value="test"/>
+	<property name="javadocs.reldir" value="doc/api"/>
+</project>

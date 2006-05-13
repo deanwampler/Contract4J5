@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-
 <!--
   build.xml - "Ant" build file for AspectProgramming's "Contract4J5" library.
 
@@ -21,21 +20,13 @@
   @author Dean Wampler  dean@aspectprogramming.com
 -->
 
-<!-- The conventional targets, "all", "build", etc. work only with the core Contract4J5 code
-	 rooted in the "src" and "test" directories. To build the optional "configurator" and
-	 "spring" packages, build the targets "all-configurator" or "all-spring", respectively.
+<!-- The conventional targets, "all", "build", etc. work only with the core 
+	 Contract4J5 code rooted in the "src" and "test" directories. To build the 
+	 optional "spring" example, build the "all-spring" target.
 -->
-<!-- Include some "common" files. Actually, since we only use them here, their contents
-     could be merged in... -->
-<!DOCTYPE project [
-	<!ENTITY common     SYSTEM "file:ant/common.xml">
-	<!ENTITY properties SYSTEM "file:ant/properties.xml">
-	<!ENTITY targets    SYSTEM "file:ant/targets.xml">
-]>
 
 <project name="Contract4J5" default="all" basedir=".">
-
-	&common;     <!-- Include the common stuff -->
+	<import file="ant/common.xml"/>
 
 	<!-- Pattern sets for compilation exclusions. -->
 	<patternset id="java.exclusions" />
@@ -48,23 +39,10 @@
         <property name="project.jar"      value="contract4j5.jar" />
 		<!-- "contract4J5-test.jar" contains the test/example aspects and classes -->
         <property name="project.test.jar" value="contract4j5-test.jar" />
-		<!-- "configurator.jar" contains the deprecated "configurator" code.
-		  Some support will be re-added in a subsequent pre-1.0 release. (See the README)
-        <property name="configurator.jar" value="configurator.jar" />
-        <property name="configurator.test.jar" value="configurator-test.jar" />
-		-->
 	</target>
 
 	<target name="all" depends="init, clean, build, test, docs" />
-	<target name="all-configurator" depends="init">
-		<antcall target="all">
-			<param name="src.reldir"       value="${configurator/src}" />
-			<param name="test.reldir"      value="${configurator/test}" />
-			<param name="classes.reldir"   value="${configurator/classes}" />
-			<param name="project.jar"      value="${configurator.jar}" />
-			<param name="project.test.jar" value="${configurator.test.jar}" />
-		</antcall>
-	</target>
+	<!-- Build an example using Spring configuration. -->
 	<target name="all-spring" depends="init">
 		<antcall target="all">
 			<param name="src.reldir"       value="${spring/src}" />

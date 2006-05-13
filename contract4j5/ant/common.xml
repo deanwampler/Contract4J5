@@ -1,23 +1,8 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!--
   common.xml - Ant "common" build file for AspectProgramming/Contract4J5 software.
+  Imported into "build.xml".
 
-  Include in your "build.xml" files as follows:
-	<!DOCTYPE project [
-		<!ENTITY common     SYSTEM "file:..../ant/common.xml">
-		<!ENTITY properties SYSTEM "file:..../ant/properties.xml">
-		<!ENTITY targets    SYSTEM "file:..../ant/targets.xml">
-	]>
-	...
-	<project ...>
-		&common;
-		...
-	</project>
-  Where the ENTITY definition should include the appropriate relative or absolute
-  path. For usage examples, see $CONTRACT4J5_HOME/build.xml.
--->
-
-<!--
   Copyright 2005 Dean Wampler. All rights reserved.
   http://www.aspectprogramming.com
 
@@ -36,11 +21,14 @@
   @author Dean Wampler  dean@aspectprogramming.com
 -->
 
-<!-- Your own "init" target should depend on "common-init" -->
+<!-- The "build.xml" "init" target depends on "common-init" -->
 
-<target name="common-init" depends="init-debugflag, init-debug, init-nondebug">
-	&properties;
-</target>
+<project name="common" default="common-init" basedir=".">
+	<dirname property="imported.basedir" file="${ant.file.imported}"/>
+	<import file="${imported.basedir}/ant/properties.xml"/>
+	<import file="${imported.basedir}/ant/targets.xml"/>
+	
+	<target name="common-init" depends="init-debugflag, init-debug, init-nondebug">
+	</target>
 
-<!-- Include standard targets. -->
-&targets;
+</project>
