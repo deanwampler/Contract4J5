@@ -326,9 +326,9 @@ public class JexlExpressionInterpreterTest extends TestCase {
 	
 	/** 
 	 * Test issue #TBD
-	 * Demonstrates that Jexl fails to parse "$this.attrib", where "attrib" is 
-	 * an attribute without an accessor method, independent of access declaration
-	 * (e.g., public, private, etc.)
+	 * Demonstrates that Jexl fails to parse "$this.field", where "field" is 
+	 * a field without a public getter method, independent of the access 
+	 * declaration of the field. (e.g., public, private, etc.)
 	 * @author Dean Wampler <mailto:dean@aspectprogramming.com>
 	 */
 	static public class AccessorTester {
@@ -337,14 +337,25 @@ public class JexlExpressionInterpreterTest extends TestCase {
 		protected int withNoAccessorProtected = 10;	
 		public    int withNoAccessorPublic    = 10;	
 		private   int withAccessor = 10;
-		public    int getWithAccessor() { return withAccessor; }
+		          int getWithAccessorDefault()   { return withAccessor; }
+		private   int getWithAccessorPrivate()   { return withAccessor; }
+		protected int getWithAccessorProtected() { return withAccessor; }
+		public    int getWithAccessorPublic()    { return withAccessor; }
+		public    int getWithAccessor()          { return withAccessor; }
 	}
 	
 	public void testSingleLetterAttributeInExpression() {
 		AccessorTester at = new AccessorTester();
 		Instance slaInstance = new Instance ("at", AccessorTester.class, at);
+
+		// Only a public getter method will work:
 		Instance withAccInstance = new Instance ("withAccessor", Integer.TYPE, at.withAccessor);
-		doTest2(true, "$this.withAccessor > 5", "withAccessor", slaInstance, withAccInstance, null, null);
+		doTest2(false, "$this.withAccessorDefault   > 5", "withAccessor", slaInstance, withAccInstance, null, null);
+		doTest2(false, "$this.withAccessorPrivate   > 5", "withAccessor", slaInstance, withAccInstance, null, null);
+		doTest2(false, "$this.withAccessorProtected > 5", "withAccessor", slaInstance, withAccInstance, null, null);
+		doTest2(true,  "$this.withAccessorPublic    > 5", "withAccessor", slaInstance, withAccInstance, null, null);
+		doTest2(true,  "$this.withAccessor          > 5", "withAccessor", slaInstance, withAccInstance, null, null);
+
 		Instance noAccInstanceDefault = new Instance ("withNoAccessorDefault", Integer.TYPE, at.withNoAccessorDefault);
 		doTest2(false, "$this.withNoAccessorDefault > 5", "withNoAccessorDefault", slaInstance, noAccInstanceDefault, null, null);
 		Instance noAccInstancePrivate = new Instance ("withNoAccessorPrivate", Integer.TYPE, at.withNoAccessorPrivate);

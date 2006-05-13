@@ -1,6 +1,7 @@
 Contract4J5 0.5.0 README  
 
 Contract4J5 (Annotation form)
+v0.5.1.0   May 19, 2006
 v0.5.0.0   February 20, 2006
 v0.1.1.0   October 4, 2005
 v0.1.0.2   April 24, 2005
@@ -232,7 +233,10 @@ cannot be null.
 
 Contract4J5 v0.5 embeds the Jakarta "Jexl" interpreter, an expression evaluator,
 which it uses to evaluate the test expressions in the annotations. (See  
-http://jakarta.apache.org/commons/jexl/ for more information on Jexl.)
+http://jakarta.apache.org/commons/Jexl/ for more information on Jexl. Note,
+there are quirks and limitations of Jexl that are discussed throughout this
+README. It might be worthing searching for "Jexl" to find and read those
+details.)
 
 The v0.1 version of Contract4J5 used a preprocessing approach. Using a plugin
 for Sun's Annotation Processor Tool (APT), it generated AspectJ code that
@@ -415,7 +419,9 @@ import org.contract4j5.Pre;
  * resolve the variable name. While not required in all cases, as a rule it is
  * best to always refer to fields this way for consistent. The one case where
  * you don't need the "$this." is when you define an invariant for a field 
- * itself (See the test for "name" below).
+ * itself (See the test for "name" below). Note also that in order for Jexl to 
+ * resolve the field reference, a JavaBeans "getter" method must exist for the 
+ * field, even if the field is public!
  */
 @Contract
 @Invar("$this.lazyPi==3.14159")	// see comments for "lazyPi" below.
@@ -427,6 +433,7 @@ public class BaseTestClass {
 	 * FUNCTION, or the invariant test will fail!
 	 * NOTE: the Jexl parser chokes if the invariant test appends "f" to the 
 	 * constant!
+   * NOTE: Jexl can't resolve "lazyPi" unless "getLazyPi()" exists!
 	 */
 	private float lazyPi = -1f;
 
@@ -460,7 +467,8 @@ public class BaseTestClass {
      * test expression. (In the future, "$target" may have other uses in the 
      * more general AspectJ-sense of the poincut "target()" expression.)
      * NOTE: You can specify an optional error message that will be reported
-     * with any failure message.
+     * with any failure message. Also, as stated before, "name" must have a 
+     * "getName()" accessor or Jexl can't resolve it!
      */
     @Invar(value="name != null && name.length() > 0",
 		   message="this.name must never be null!")
@@ -681,6 +689,7 @@ Examples:
 public class Bar {
   @Invar("name != null && name.length() > 0")
   private String name;
+  public  String getName() { return name; }
   ...
 }
 
@@ -690,7 +699,9 @@ accessor methods in the interfaces (see below).
 
 Note that for the field "name", we are able to use the "bare" field name when
 defining an invariant test for it. You can also use "$this.name" or the
-"$target" keyword.
+"$target" keyword. *However*, as discussed previously, the Jexl interpreter can 
+only resolve the field if a JavaBeans "getter" method is defined for it, as 
+shown in the example!
 
 In the future, "$target" may be used more generally for objects that correspond
 to AspectJ's "target()" pointcut expression, but currently "$target" is only 
@@ -698,7 +709,9 @@ used in field invariant tests to refer to the field.)
 
 4) Define Method and Constructor Preconditions, Postconditions, and Invariants.
 NOTE: we have to use "$this.name" in the following interface example, not just
-"name" by itself, because we are no longer defining a field invariant test!
+"name" by itself, because we are no longer defining a field invariant test! 
+Repeating for emphasis, don't forget that a field getter method is required for 
+Jexl to resolve the field reference.
 
 Examples:
 @Contract
@@ -725,6 +738,8 @@ public class FooImpl implements Foo {
 
   @Pre @Post
   void incrementI (int amount) {...}
+
+  int getI() { ... }   // getter method required by Jexl!
   ...
 }
   
@@ -741,6 +756,8 @@ public class Bar {
   public Bar (float factor) {
     this.factor = factor;
   }
+
+	float getFactor() { ... }   // getter method required by Jexl!
 }
 
 The "Foo" interface simulates a field invariant test on an implied name field by
@@ -780,7 +797,8 @@ correct values before invoking Jexl to evaluate the expressions. Here is a
 description of the keywords and their proper use.
 
 $this    The "this" object under test
-$target  A field in an invariant test
+$target  A field in an invariant test. There *must* be a corresponding JavaBeans
+         "getter" method or Jexl won't be able to resolve the field.
 $result  The return result of a method; only valid in postconditions
 $args[n] The "nth" argument in a parameter list
 $old(..) The "old" value (before a method is actually executed) of the 
@@ -849,7 +867,8 @@ Support Design by Contract?".
 ** $this refers to the object being tested. You can call any public method on 
 the object in the test expression; Jexl will resolve the type. Additionally,
 if you refer to a bare field that is not public, Jexl will convert the 
-expression to the corresponding "getter" call.
+expression to the corresponding "getter" call. In fact, the getter method is
+*required* in order for Jexl to resolve the field!
 
 ** $target currently is used only to refer to the field in a field invariant
 test. Future use may include any context associated with the "target()" 
@@ -906,8 +925,7 @@ accessor, even if the field is private. Hence, an expression like
   $this.foo.bar.baz.doIt(1)
 is allowed and will be translated to
   $this.getFoo().getBar().getBaz().doIt(1)
-assuming fields "foo", "bar", and "baz" are not public, but they have getter 
-methods.
+In fact, the getter method is *required* in order for Jexl to resolve the field!
 
 Normally, you should prepend "$this." before a "bare" field reference as the
 parser does not always correctly resolve the reference to an instance field.
@@ -917,7 +935,7 @@ tests, "$target" can be used to refer to the field.
 
 Note the example previously where a field invariant test was written with the 
 bare field called "name", but when a set of "conceptually similar" @Pre and 
-@Post tests were written in an interface on "setNae()" and "getName()" methods,
+@Post tests were written in an interface on "setName()" and "getName()" methods,
 it was necessary to use "$this.name". Contract4J may not resolve the field
 correctly in those cases.  
 
@@ -936,13 +954,21 @@ define field invariant tests, either on declared accessor methods or as
 invariants on the class itself. You can refer to the (implied) bare field in
 the test, as long as you declare an appropriate accessor method for it.
 
-** Miscellaneous Notes
+** Miscellaneous Notes and Debugging Tips
 
 *** All test expressions must evaluate to a boolean value. 
 
 *** Test expressions that fail to be evaluated by Jexl will be treated as test
 failures, on the grounds that they expression is buggy in this case! (This
-behavior is configurable with an API call.)
+behavior is configurable with an API call.) However, this can also be 
+confusing when it is the test itself that is buggy. In particular, see
+the next bullet item.
+
+*** Remember that if any test accesses an instance field, the field 
+*must* have a corresponding JavaBeans getter method. Otherwise, Jexl will
+fail to resolve the field and the test will fail. This can be confusing since
+currently Contract4J does not distinguish between test "bugs" and actual
+test failures.
 
 *** Avoid expressions with side effects. Since tests will usually be turned 
 off in production, test expressions with side effects, e.g., assignments, will
@@ -960,7 +986,7 @@ respectively. Leave them off in both cases.
 
 *** Most other Java expressions, like comparisons and arithmetic expressions can
 be used. See the Jexl website for more information on allowed expressions,
-  http://jakarta.apache.org/commons/jexl/.
+  http://jakarta.apache.org/commons/Jexl/.
 
 *** Before passing the expressions to Jexl, substitutions are made. Normally,
 you shouldn't case, but when debugging, you may see strings with these 
@@ -980,7 +1006,7 @@ Most of the heavy lifting of expression evaluation BEFORE sending it to Jexl
 is done in
   org.contract4j5.interpreter.ExpressionInterpreterHelper.java
 The wrapper for Jexl itself is 
-  org.contract4j5.interpreter.jexl.JexlExpressionInterpreter.java
+  org.contract4j5.interpreter.Jexl.JexlExpressionInterpreter.java
 
 ----- Configuring the Behavior
 
@@ -1038,7 +1064,7 @@ classes:
     The expression interpreter interface
   org.contract4j5.interpreter.ExpressionInterpreterHelper	-
     An abstract helper class that provides a partial implementation.
-  org.contract4j5.interpreter.jexl.JexlExpressionInterpreter	-
+  org.contract4j5.interpreter.Jexl.JexlExpressionInterpreter	-
     The Jexl implementation of the interpreter. A different interpreter,
     e.g., Groovy or Jython could be supported by subclassing the helper class.
   org.contract4j5.util.reporter.Reporter;
@@ -1069,7 +1095,7 @@ scripts:
 2) Java 5 (JAVA_HOME)
 3) AspectJ 1.5 (ASPECTJ_HOME) Make sure you have the "final" 1.5 release.
 3) Ant 1.6.X (ANT_HOME)
-4) Jexl 1.0 (JEXL_HOME)
+4) Jexl 1.0 (Jexl_HOME)
 5) Commons Logging (COMMONS_LOGGING_HOME)
 
 Also define "CONTRACT4J5_HOME" to be the ".../contract4j5_050/contract4j5"
@@ -1126,10 +1152,35 @@ without embedding the ad hoc Reporter objects.
 
 ** Notes for Each Release
 
+*** v0.5.1 May 19, 2006
+
+Added examples to the build process of doing binary and load-time weaving, in 
+addition to the compile time weaving in the 0.5.0 examples. "Binary" weaving is
+weaving done after compiling all code, using a post-compilation weaving step.
+It is useful for organizations that prefer to use javac for all java files.
+Load-time weaving is done as the application loads class files, using a special
+"java agent" for this purpose. See the section "Invocation and Configuration of 
+Contract4J5" for more details.
+
+Added an example using the Spring framework to configure Contract4J. It requires
+that you have Spring v1.2+ installed (see http://www.springframework.org).
+
+At the same time, improved the options for using properties to "wire" 
+Contract4J, as an alternative to using Spring.
+
+Replaced the entity definitions in the build-related XML files with the ant
+<import> task. Apparently, NetBeans doesn't like the entity definitions. (Thanks
+to Matthew Harrison for bringing this to my attention and for providing 
+refactored build files.)
+
+Added more tests that explicitly demonstrate that contract expressions that
+access instance properties only work if the properties have JavaBeans getter
+methods (Jexl limitation).
+
 *** v0.5.0 February 20, 2006
 
 Eliminated the precompilation step, replacing it with runtime teste expression
-evaluation using the Jakarta Commons JEXL expression parser.
+evaluation using the Jakarta Commons Jexl expression parser.
 
 The package structure has been changed from com.aspectprogramming.* to
 	org.contract4j5.*.
@@ -1193,16 +1244,21 @@ manages the Aspect Programming web site, http://www.aspectprogramming.com/.
 There you will find more information and whitepapers on Contract4J and 
 Aspect-Oriented Software Development (AOSD), in general. 
 
-The forthcoming AOSD.06 Conference in Bonn, Germany (March 19-24) will feature
+The AOP@Work series
+(http://www.ibm.com/developerworks/views/java/libraryview.jsp?search_by=aop@work)
+developerWorks.com (http://www.developerWorks.com) contains an article about 
+Contract4J, http://www-128.ibm.com/developerworks/java/library/j-aopwork17.html.
+It introduces "Design by Contract" and how Contract4J supports it in Java. The 
+article concludes with a discussion of emerging trends in Aspect-Oriented 
+Design.
+
+The recent AOSD.06 Conference in Bonn, Germany (March 19-24, 2006) featured
 a talk in the Industry Track on Contract4J, specifically on the lessoned about
 writing generic, reusable aspects in AspectJ while implementing Contract4J. 
-There will also be a brief presentation on aspect-oriented design patterns in
+There was also a brief paper on aspect-oriented design patterns in
 Contract4J in the ACP4IS workshop. See http://www.aosd.net/2006/ for more
-information and also check contract4j.org after the conference for information 
-about the corresponding papers. 
-
-An article about Contract4J is in preparation for the AOP@Work series on 
-developerWorks.com. Publication is tentatively planned for April, 2006. 
+information and also check aspectprogramming.com/papers for information 
+about getting these papers. 
 
 The definitive site on AOSD is http://www.aosd.net.
 
