@@ -81,6 +81,42 @@ public class PrimitiveFieldInvarTest extends TestCase {
 		}
 	}
 
+	@Contract
+	public static class DefaultFieldWithoutAccessor {
+		@Invar ("defaultField == 0") int defaultField = 0;	
+		public DefaultFieldWithoutAccessor(int i) {
+			defaultField = i;
+			System.err.format("defaultField = %d", defaultField);
+		}
+	}
+	
+	@Contract
+	public static class PrivateFieldWithoutAccessor {
+		@Invar ("privateField == 0") private int privateField = 0;	
+		public PrivateFieldWithoutAccessor(int i) {
+			privateField = i;
+			System.err.format("privateField = %d", privateField);
+		}
+	}
+	
+	@Contract
+	public static class ProtectedFieldWithoutAccessor {
+		@Invar ("protectedField == 0") protected int protectedField = 0;	
+		public ProtectedFieldWithoutAccessor(int i) {
+			protectedField = i;
+			System.err.format("protectedField = %d", protectedField);
+		}
+	}
+	
+	@Contract
+	public static class PublicFieldWithoutAccessor {
+		@Invar ("publicField == 0") public int publicField = 0;	
+		public PublicFieldWithoutAccessor(int i) {
+			publicField = i;
+			System.err.format("publicField = %d", publicField);
+		}
+	}
+	
 	FieldInvarWithDefaultExpr[] fdefault = null;
 
 	@Override
@@ -252,4 +288,47 @@ public class PrimitiveFieldInvarTest extends TestCase {
 		}
 	}
 
+	// For next four tests, all tests will fail, even when a valid value is 
+	// used (0), because JEXL requires a getter method to find the attribute!
+	
+	public void testDefaultFieldsWithoutAccessors () {
+		for (int i=0; i<2; i++) {
+			try {
+				new DefaultFieldWithoutAccessor(i); 
+				fail("i="+i);
+			} catch (ContractError ce) {
+				// Expected
+			}
+		}
+	}
+	public void testPrivateFieldsWithoutAccessors () {
+		for (int i=0; i<2; i++) {
+			try {
+				new PrivateFieldWithoutAccessor(i); 
+				fail("i="+i);
+			} catch (ContractError ce) {
+				// Expected
+			}
+		}
+	}
+	public void testProtectedFieldsWithoutAccessors () {
+		for (int i=0; i<2; i++) {
+			try {
+				new ProtectedFieldWithoutAccessor(i); 
+				fail("i="+i);
+			} catch (ContractError ce) {
+				// Expected
+			}
+		}
+	}
+	public void testPublicFieldsWithoutAccessors () {
+		for (int i=0; i<2; i++) {
+			try {
+				new PublicFieldWithoutAccessor(i); 
+				fail("i="+i);
+			} catch (ContractError ce) {
+				// Expected
+			}
+		}
+	}
 }
