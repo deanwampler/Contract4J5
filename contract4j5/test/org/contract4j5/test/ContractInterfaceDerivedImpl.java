@@ -22,8 +22,6 @@ package org.contract4j5.test;
 
 import org.contract4j5.Contract;
 import org.contract4j5.Invar;
-import org.contract4j5.Post;
-import org.contract4j5.Pre;
 
 /**
  * Class subclassing {@link ContractInterfaceImpl}, which 
