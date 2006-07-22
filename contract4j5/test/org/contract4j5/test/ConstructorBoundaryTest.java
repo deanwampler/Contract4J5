@@ -27,6 +27,8 @@ import org.contract4j5.ContractError;
 import org.contract4j5.Post;
 import org.contract4j5.Pre;
 import org.contract4j5.aspects.Contract4J;
+import org.contract4j5.configurator.Configurator;
+import org.contract4j5.configurator.test.ConfiguratorForTesting;
 
 public class ConstructorBoundaryTest extends TestCase {
 	@Contract
@@ -61,7 +63,8 @@ public class ConstructorBoundaryTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		ManualSetup.wireC4J();
+		Configurator c = new ConfiguratorForTesting();
+		c.configure();
 		Contract4J.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(false);
 	}
 	

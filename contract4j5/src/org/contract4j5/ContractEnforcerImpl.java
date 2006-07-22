@@ -24,7 +24,6 @@ import org.contract4j5.interpreter.ExpressionInterpreter;
 import org.contract4j5.interpreter.TestResult;
 import org.contract4j5.util.reporter.Reporter;
 import org.contract4j5.util.reporter.Severity;
-import org.contract4j5.util.reporter.WriterReporter;
 
 /**
  * Class that implements {@link ContractEnforcer}. Most of the interesting work is
@@ -40,9 +39,6 @@ public class ContractEnforcerImpl implements ContractEnforcer {
 	 * @see org.contract4j5.ContractEnforcer#getReporter()
 	 */
 	public Reporter getReporter() {
-		if (this.reporter == null) {
-			this.reporter = new WriterReporter();
-		}
 		return reporter;
 	}
 

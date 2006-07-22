@@ -27,6 +27,8 @@ import org.contract4j5.ContractError;
 import org.contract4j5.Invar;
 import org.contract4j5.aspects.Contract4J;
 import org.contract4j5.aspects.InvariantConditions;
+import org.contract4j5.configurator.Configurator;
+import org.contract4j5.configurator.test.ConfiguratorForTesting;
 import org.contract4j5.testexpression.DefaultFieldInvarTestExpressionMaker;
 import org.contract4j5.testexpression.DefaultTestExpressionMaker;
 import org.contract4j5.testexpression.SimpleStringDefaultTestExpressionMaker;
@@ -86,7 +88,8 @@ public class ObjectFieldInvarTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		ManualSetup.wireC4J();
+		Configurator c = new ConfiguratorForTesting();
+		c.configure();
 		initEnv (true, true);
 		// Construct the array of "default" objects.
 		fdefault = new FieldInvarWithDefaultExpr[] {

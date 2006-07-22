@@ -27,6 +27,9 @@ import junit.framework.TestCase;
 import org.contract4j5.ContractEnforcer;
 import org.contract4j5.ContractEnforcerImpl;
 import org.contract4j5.ContractError;
+import org.contract4j5.aspects.Contract4J;
+import org.contract4j5.configurator.Configurator;
+import org.contract4j5.configurator.test.ConfiguratorForTesting;
 import org.contract4j5.interpreter.ExpressionInterpreter;
 import org.contract4j5.interpreter.jexl.JexlExpressionInterpreter;
 import org.contract4j5.util.reporter.Reporter;
@@ -44,24 +47,27 @@ public class ContractEnforcerImplTest extends TestCase {
 	Reporter              reporter;
 	protected void setUp() throws Exception {
 		super.setUp();
-		interpreter = new JexlExpressionInterpreter();
-		contractEnforcer = new ContractEnforcerImpl(interpreter, true);
 		reporter = new WriterReporter(Severity.WARN, new StringWriter(1024));
-		ManualSetup.wireC4J(interpreter, contractEnforcer, reporter);
+		Configurator c = new ConfiguratorForTesting();
+		c.configure();
+		c.setReporter(reporter);
+		contractEnforcer = Contract4J.getContractEnforcer();
+		contractEnforcer.setIncludeStackTrace(true);
+		interpreter = contractEnforcer.getExpressionInterpreter();
 	}
 
 	public void testConstructor1() {
-		assertTrue(contractEnforcer.getIncludeStackTrace());
-		assertSame(interpreter, contractEnforcer.getExpressionInterpreter());
-		ContractEnforcer contractEnforcer2 = 
-			new ContractEnforcerImpl(interpreter, false);
-		assertFalse(contractEnforcer2.getIncludeStackTrace());
+		ContractEnforcer ce1 = new ContractEnforcerImpl(interpreter, true);
+		assertTrue(ce1.getIncludeStackTrace());
+		assertSame(interpreter, ce1.getExpressionInterpreter());
+		ContractEnforcer ce2 = new ContractEnforcerImpl(interpreter, false);
+		assertFalse(ce2.getIncludeStackTrace());
 	}
 
 	public void testConstructor2() {
-		ContractEnforcer contractEnforcer2 = new ContractEnforcerImpl();
-		assertFalse(contractEnforcer2.getIncludeStackTrace());
-		assertNull(contractEnforcer2.getExpressionInterpreter());
+		ContractEnforcer ce = new ContractEnforcerImpl();
+		assertFalse(ce.getIncludeStackTrace());
+		assertNull(ce.getExpressionInterpreter());
 	}
 
 	public void testSetGetExpressionInterpreter() {

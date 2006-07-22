@@ -27,6 +27,8 @@ import org.contract4j5.ContractError;
 import org.contract4j5.Invar;
 import org.contract4j5.Post;
 import org.contract4j5.Pre;
+import org.contract4j5.configurator.Configurator;
+import org.contract4j5.configurator.test.ConfiguratorForTesting;
 
 /**
  * Test that user defined error messages are picked up from the test annotations.
@@ -94,7 +96,8 @@ public class AnnotationMessageTest extends TestCase {
 	protected void setUp() throws Exception {
 		// TODO Auto-generated method stub
 		super.setUp();
-		ManualSetup.wireC4J();
+		Configurator c = new ConfiguratorForTesting();
+		c.configure();
 	}
 	
 	public void testTypeInvar() {

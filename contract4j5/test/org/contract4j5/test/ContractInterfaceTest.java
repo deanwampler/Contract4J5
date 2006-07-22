@@ -2,10 +2,13 @@ package org.contract4j5.test;
 
 import junit.framework.TestCase;
 
+import org.contract4j5.Contract;
 import org.contract4j5.ContractError;
 import org.contract4j5.Invar;
 import org.contract4j5.Post;
 import org.contract4j5.Pre;
+import org.contract4j5.configurator.Configurator;
+import org.contract4j5.configurator.test.ConfiguratorForTesting;
 
 /** 
  * Tests and demonstrates behavior of a class that implements a contract-defining
@@ -30,6 +33,7 @@ public class ContractInterfaceTest extends TestCase {
 		
 	private ContractInterfaceImplWithNoAnnos implWithNoAnnos = null;
 	
+	@Contract
 	public static class ContractInterfaceImplWithAnnos implements ContractInterface {
 		private String name = null;
 		@Pre   public void setName (String s) { name = s; }
@@ -43,6 +47,8 @@ public class ContractInterfaceTest extends TestCase {
 	
 	protected void setUp() throws Exception {
 		super.setUp();
+		Configurator c = new ConfiguratorForTesting();
+		c.configure();
 		implWithNoAnnos = new ContractInterfaceImplWithNoAnnos();
 		implWithAnnos   = new ContractInterfaceImplWithAnnos();
 	}

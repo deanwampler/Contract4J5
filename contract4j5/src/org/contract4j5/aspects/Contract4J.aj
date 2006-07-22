@@ -21,12 +21,15 @@
 package org.contract4j5.aspects;
 
 import java.util.Map;
+
 import org.contract4j5.Contract;
 import org.contract4j5.ContractEnforcer;
 import org.contract4j5.ContractEnforcerImpl;
+import org.contract4j5.TestContext;
+import org.contract4j5.configurator.Configurator;
+import org.contract4j5.configurator.PropertiesConfigurator;
 import org.contract4j5.interpreter.ExpressionInterpreter;
 import org.contract4j5.interpreter.jexl.JexlExpressionInterpreter;
-import org.contract4j5.TestContext;
 import org.contract4j5.util.reporter.Reporter;
 import org.contract4j5.util.reporter.Severity;
 import org.contract4j5.util.reporter.WriterReporter;
@@ -67,16 +70,6 @@ abstract public aspect Contract4J {
 	declare parents: (@Contract *) implements ContractMarker;
 		
 	/**
-	 * Keys for property files.
-	 */
-	public static final String[] enabledPropertyKeys = new String[] {
-			"org.contract4j5.Contract",
-			"org.contract4j5.Pre",
-			"org.contract4j5.Post",
-			"org.contract4j5.Invar",
-	};
-	
-	/**
 	 * The types of contract tests.
 	 */
 	public enum TestType { Pre, Post, Invar };
@@ -100,6 +93,23 @@ abstract public aspect Contract4J {
 	static public void setEnabled (TestType type, boolean b) { 
 		isEnabled[type.ordinal()] = b; 
 	}	
+	
+	static private Configurator systemConfigurator = null;
+	
+	/**
+	 * Return the system configurator used by Contract4J. If null, no 
+	 * configuration will be done, which is appropriate if using an "external"
+	 * configurator, such as the Spring IoC container.
+	 * @return the system configurator. May be null.
+	 */
+	static public Configurator getSystemConfigurator() {
+		return systemConfigurator;
+	}
+	
+	static public void setSystemConfigurator (Configurator configurator) {
+		systemConfigurator = configurator;
+		configured = false;
+	}
 	
 	/**
 	 * Common exclusions, etc. for all PCDs. For simplicity, and to prevent some subtle 
@@ -141,9 +151,6 @@ abstract public aspect Contract4J {
 	 * @return the reporter used for routine logging.
 	 */
 	public static Reporter getReporter() {
-		if (Contract4J.reporter == null) {
-			Contract4J.reporter = new WriterReporter();
-		}
 		return Contract4J.reporter;
 	}
 
@@ -164,23 +171,12 @@ abstract public aspect Contract4J {
 	public static void setContractEnforcer (ContractEnforcer contractEnforcer) { 
 		Contract4J.contractEnforcer = contractEnforcer;
 	}
+
 	/**
-	 * Get the ContractEnforcer used to evaluate all tests. Reports a warning if the 
-	 * enforcer object isn't initialized and then creates a default 
-	 * {@link ContractEnforcerImpl} object with a {@link JexlExpressionEvaluator}.
-	 * @return the ContractEnforcer
+	 * Get the ContractEnforcer used to evaluate all tests. 
+	 * @return the ContractEnforcer, which might be null
 	 */
 	public static ContractEnforcer getContractEnforcer () { 
-		if (contractEnforcer == null) {
-			ExpressionInterpreter ei = new JexlExpressionInterpreter();
-			contractEnforcer = new ContractEnforcerImpl(ei, false);
-			contractEnforcer.setReporter(getReporter());
-			ei.setReporter(getReporter());
-
-			getReporter().report (Severity.WARN, Contract4J.class, 
-					"Contract4J.aj has no ContractEnforcer defined. Using a ContractEnforcerImpl"+
-					"with a JexlExpressionInterpreter()");
-		}
 		return contractEnforcer;
 	}
 
@@ -195,67 +191,62 @@ abstract public aspect Contract4J {
 	}
 	
 
-	public Contract4J() {
-		initSystemProps();
+	public Contract4J() {}
+
+	// "Last resort" initialization; User's of C4J should do this explicitly as
+	// described elsewhere.
+	private static aspect MakeSureWeAreConfigured {
+		pointcut thisAspect(): adviceexecution() && within(MakeSureWeAreConfigured);
+		pointcut getContract4JState(): 
+			!get(static boolean Contract4J.configured) && get(static * Contract4J+.*); 
+		pointcut makeSureConfiguredFirst(): 
+			if(Contract4J.isConfigured() == false) && getContract4JState() && !cflow(thisAspect());
+		before(): makeSureConfiguredFirst() {
+			lazyConfigure();
+		}
+	}
+	
+	protected static boolean configured = false;
+	public static boolean isConfigured() {
+		return configured;
+	}
+
+	public static void setConfigured(boolean configured) {
+		Contract4J.configured = configured;
+	}
+
+	protected static void lazyConfigure() { 
+		if (configured == false) {
+			doDefaultConfiguration();
+			configured = true;
+		}
 	}
 	
 	/**
-	 * Allow system properties to override other configuration settings.
+	 * Last resort configuration; use a {@link PropertiesConfigurator}, then
+	 * if not initialized, use a {@link ContractEnforcerImpl}, with a {@link
+	 * JexlExpressionInterpreter} and a {@link WriterReporter}.
+	 * @todo Move this logic elsewhere.
 	 */
-	protected void initSystemProps() {
-		for (int i = 0; i < enabledPropertyKeys.length; i++) {
-			String propStr = System.getProperty(enabledPropertyKeys[i]);
-			if (propStr != null && propStr.length() > 0) {
-				try {
-					boolean value = convertToBoolean(propStr);
-					if (i == 0) {	// The overall "contract" key?
-						setEnabled(TestType.Pre,   value);
-						setEnabled(TestType.Post,  value);
-						setEnabled(TestType.Invar, value);
-						if (value == false) {
-							return;	// Don't read the props for any other keys
-						}
-					} else {
-						setEnabled(TestType.values()[i], value);
-					}
-				} catch (IllegalArgumentException iae) {
-					getReporter().report (Severity.ERROR, Contract4J.class, 
-						"Invalid value \""+propStr+"\" for property \""+enabledPropertyKeys[i]+"\" ignored.");
-				}	
-			}
+	protected static void doDefaultConfiguration() {
+		Configurator configurator = getSystemConfigurator();
+		if (configurator == null) {
+			configurator = new PropertiesConfigurator();
+			setSystemConfigurator(configurator);
 		}
+		configurator.configure();
+		if (getContractEnforcer() == null) {
+			setContractEnforcer(new ContractEnforcerImpl(new JexlExpressionInterpreter(), true));
+		}
+		Reporter r = getReporter();
+		if (r == null) {
+			r = new WriterReporter();
+			setReporter(r);
+		}
+		r.report (Severity.WARN, Contract4J.class, 
+			"Contract4J was not configured explicitly, so the default process " +
+			"was used. See the unit tests for configuration examples.");
 	}
-	
-	/**
-	 * @param s string that should start with "t", "f", "y", "n", or equals
-	 * "on", or "off", case ignored. We assume the string is not null or empty.
-	 * @return true or false corresponding to input string
-	 * @throws IllegalArgumentException if the input string doesn't match an expected value.
-	 */
-	protected static boolean convertToBoolean (String s) throws IllegalArgumentException {
-		s = s.trim();
-		char c = s.charAt(0);
-		switch (c) {
-		case 't':
-		case 'T':
-		case 'y':
-		case 'Y':
-			return true;
-		case 'f':
-		case 'F':
-		case 'n':
-		case 'N':
-			return false;
-			default:
-		}
-		if (s.equalsIgnoreCase("on")) {
-			return true;
-		}
-		if (s.equalsIgnoreCase("off")) {
-			return false;
-		}
-		throw new IllegalArgumentException();
-	}
-	
+
 }
 

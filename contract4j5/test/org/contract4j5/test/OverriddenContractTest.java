@@ -23,6 +23,8 @@ package org.contract4j5.test;
 import junit.framework.TestCase;
 
 import org.contract4j5.ContractError;
+import org.contract4j5.configurator.Configurator;
+import org.contract4j5.configurator.test.ConfiguratorForTesting;
 
 /**
  * Tests behavior when a base class' contract is overridden by a 
@@ -42,7 +44,8 @@ public class OverriddenContractTest extends TestCase {
 	
 	protected void setUp() throws Exception {
 		super.setUp();
-		ManualSetup.wireC4J();
+		Configurator c = new ConfiguratorForTesting();
+		c.configure();
 		bases = new OverriddenContractBase[2];
 		try {
 			bases[0] = new OverriddenContractBase    ("b1", "b2", "b3");

@@ -1,0 +1,66 @@
+# This is an example property file for Contract4J. After creating a 
+# "Contract4J.properties" configured for your needs, add the following to
+# your application's startup code:
+#
+#   import java.io.FileInputStream;
+#   import java.util.Properties;
+#   import org.contract4j5.configurator.PropertiesConfigurator;
+#   ...
+#     Properties props = new Properties();
+#     props.load (new FileInputStream(".../Contract4J.properties"));
+#     PropertiesConfigurator configurator = 
+#         new PropertiesConfigurator(props);
+#     configurator.configure();
+#
+# Note that the PropertiesConfigurator will read any System properties first, 
+# then read the specified properties, which are optional.
+#
+# As an alternative, see the related Spring configuration example.
+
+# Global enable/disable all tests, or all pre, post, and invariant tests
+org.contract4j5.Contract=true
+org.contract4j5.Pre=true
+org.contract4j5.Post=true
+org.contract4j5.Invar=true
+
+# "Wire" system objects and properties:
+# The "Reporter" object used for output, logging, whatever.
+org.contract4j5.GlobalReporter=org.contract4j5.util.reporter.WriterReporter
+org.contract4j5.GlobalReporterThreshold=warn
+
+# If you're using "WriterReporters" or subclasses, you can specify an output
+# java.io.Writer or java.io.OutputStream used for all the severity levels
+# (there are more programmatic configuration options...).
+org.contract4j5.GlobalWriterReporterWriter=com.mycompany.MyJavaIOWriterSubclass
+org.contract4j5.GlobalWriterReporterOutputStream=System.err
+
+# The object that tests and enforces the contracts.
+org.contract4j5.ContractEnforcer=org.contract4j5.ContractEnforcerImpl
+org.contract4j5.ContractEnforcerIncludeStackTrace=false
+
+# The expression interpreter, e.g., the one based on JEXL.
+org.contract4j5.ExpressionInterpreter=org.contract4j5.interpreter.jexl.JexlExpressionInterpreter
+org.contract4j5.ExpressionInterpreterEmptyTestExpressionsValid=false
+# Optional keyword substitutions: "name1=value1, name2=value2, ..."
+org.contract4j5.ExpressionInterpreterOptionalKeywordSubstitutions=FOO=foo, BAR=bar
+
+# Objects that make default test expressions when an annotation doesn't define 
+# one explicitly.
+org.contract4j5.DefaultFieldInvarTestExpressionMaker=org.contract4j5.testexpression.DefaultFieldInvarTestExpressionMaker
+org.contract4j5.DefaultFieldCtorInvarTestExpressionMaker=org.contract4j5.testexpression.DefaultFieldInvarTestExpressionMaker
+org.contract4j5.DefaultMethodInvarTestExpressionMaker=org.contract4j5.testexpression.SimpleStringDefaultTestExpressionMaker
+org.contract4j5.DefaultCtorInvarTestExpressionMaker=org.contract4j5.testexpression.SimpleStringDefaultTestExpressionMaker
+org.contract4j5.DefaultTypeInvarTestExpressionMaker=org.contract4j5.testexpression.SimpleStringDefaultTestExpressionMaker
+org.contract4j5.DefaultCtorPreTestExpressionMaker=org.contract4j5.testexpression.DefaultPreTestExpressionMaker
+org.contract4j5.DefaultCtorPostReturningVoidTestExpressionMaker=org.contract4j5.testexpression.SimpleStringDefaultTestExpressionMaker
+org.contract4j5.DefaultMethodPreTestExpressionMaker=org.contract4j5.testexpression.DefaultPreTestExpressionMaker
+org.contract4j5.DefaultMethodPostTestExpressionMaker=org.contract4j5.testexpression.DefaultPostTestExpressionMaker
+org.contract4j5.DefaultMethodPostReturningVoidTestExpressionMaker=org.contract4j5.testexpression.SimpleStringDefaultTestExpressionMaker
+
+# Objects that search up the parent class hierarchy for corresponding tests.
+org.contract4j5.CtorParentTestExpressionFinder=org.contract4j5.testexpression.ParentTestExpressionFinderImpl
+org.contract4j5.MethodParentTestExpressionFinder=org.contract4j5.testexpression.ParentTestExpressionFinderImpl
+org.contract4j5.MethodInvarParentTestExpressionFinder=org.contract4j5.testexpression.ParentTestExpressionFinderImpl
+org.contract4j5.CtorInvarParentTestExpressionFinder=org.contract4j5.testexpression.ParentTestExpressionFinderImpl
+org.contract4j5.TypeInvarParentTestExpressionFinder=org.contract4j5.testexpression.ParentTestExpressionFinderImpl
+ 

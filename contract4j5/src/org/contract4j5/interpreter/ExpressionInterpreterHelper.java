@@ -31,7 +31,6 @@ import org.contract4j5.TestContext;
 import org.contract4j5.util.MiscUtils;
 import org.contract4j5.util.reporter.Reporter;
 import org.contract4j5.util.reporter.Severity;
-import org.contract4j5.util.reporter.WriterReporter;
 
 
 /**
@@ -44,9 +43,6 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 
 	private Reporter reporter;
 	public Reporter getReporter() {
-		if (reporter == null) {
-			reporter = new WriterReporter();
-		}
 		return reporter;
 	}
 	public void setReporter(Reporter reporter) {

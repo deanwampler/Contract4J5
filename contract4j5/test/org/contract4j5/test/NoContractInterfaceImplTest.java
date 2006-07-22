@@ -23,6 +23,8 @@ package org.contract4j5.test;
 import junit.framework.TestCase;
 
 import org.contract4j5.ContractError;
+import org.contract4j5.configurator.Configurator;
+import org.contract4j5.configurator.test.ConfiguratorForTesting;
 
 public class NoContractInterfaceImplTest extends TestCase {
 	private NoContractInterfaceImpl obj = null;
@@ -35,7 +37,8 @@ public class NoContractInterfaceImplTest extends TestCase {
 
 	protected void setUp() throws Exception {
 		super.setUp();
-		ManualSetup.wireC4J();
+		Configurator c = new ConfiguratorForTesting();
+		c.configure();
 		obj = new NoContractInterfaceImpl(1);
 	}
 

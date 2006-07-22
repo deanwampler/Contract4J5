@@ -28,16 +28,22 @@ import junit.framework.TestCase;
 import org.contract4j5.Instance;
 import org.contract4j5.TestContext;
 import org.contract4j5.TestContextImpl;
+import org.contract4j5.configurator.Configurator;
+import org.contract4j5.configurator.test.ConfiguratorForTesting;
 import org.contract4j5.interpreter.ExpressionInterpreter;
 import org.contract4j5.interpreter.ExpressionInterpreterHelper;
 import org.contract4j5.interpreter.TestResult;
+import org.contract4j5.util.reporter.WriterReporter;
 
 public class ExpressionInterpreterHelperTest extends TestCase {
 	ExpressionInterpreterHelper interpreter = null;
 	
 	protected void setUp() throws Exception {
 		super.setUp();
+		Configurator c = new ConfiguratorForTesting();
+		c.configure();
 		interpreter = new ExpressionInterpreterStub();
+		interpreter.setReporter(new WriterReporter());
 	}
 
 	/*

@@ -101,9 +101,13 @@ public class WriterReporter extends ReporterHelper {
 	 * @param stream the OutputStream to use. Can be null. If not null, it will be wrapped in 
 	 * a {@link Writer}.
 	 */
-	public void setStream (Severity level, OutputStream stream) {
+	public void setStreams (Severity level, OutputStream stream) {
 		int l = level.ordinal();
 		setWriterSupport (l, stream != null ? new PrintWriter(stream) : null);
+	}
+	
+	public void setStreams (OutputStream stream) {
+		setWriters (stream != null ? new PrintWriter(stream) : null);		
 	}
 	
 	private void setWriterSupport (int l, Writer writer) {

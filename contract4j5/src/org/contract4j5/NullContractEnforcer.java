@@ -46,21 +46,24 @@ public class NullContractEnforcer implements ContractEnforcer {
 	public void handleFailure(String message) throws ContractError {}
 	public void handleFailure() throws ContractError {}
 
-	public void setIncludeStackTrace(boolean onOff) {}
-	public boolean getIncludeStackTrace() { return false; }
+	boolean includeStackTrace = false;
+	public void setIncludeStackTrace(boolean onOff) { includeStackTrace = onOff; }
+	public boolean getIncludeStackTrace() { return includeStackTrace; }
 
-	private NullExpressionInterpreter nullExpressionInterpreter = 
+	private ExpressionInterpreter expressionInterpreter = 
 		new NullExpressionInterpreter();
 	public void setExpressionInterpreter(
-			ExpressionInterpreter expressionInterpreter) {}
+			ExpressionInterpreter expressionInterpreter) {
+		this.expressionInterpreter = expressionInterpreter;
+	}
 	public ExpressionInterpreter getExpressionInterpreter() {
-		return nullExpressionInterpreter;
+		return expressionInterpreter;
 	}
 
-	Reporter nullReporter = new NullReporter();
+	Reporter reporter = new NullReporter();
 	public void setReporter(Reporter reporter) {}
 	public Reporter getReporter() {
-		return nullReporter;
+		return reporter;
 	}
 	
 

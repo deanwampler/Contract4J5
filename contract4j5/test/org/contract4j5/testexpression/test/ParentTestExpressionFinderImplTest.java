@@ -32,17 +32,20 @@ import org.contract4j5.Post;
 import org.contract4j5.Pre;
 import org.contract4j5.TestContext;
 import org.contract4j5.TestContextImpl;
+import org.contract4j5.configurator.Configurator;
+import org.contract4j5.configurator.test.ConfiguratorForTesting;
 import org.contract4j5.interpreter.TestResult;
 import org.contract4j5.test.OverriddenContractBase;
 import org.contract4j5.test.OverriddenContractDerived;
 import org.contract4j5.testexpression.ParentTestExpressionFinderImpl;
+import org.contract4j5.util.reporter.WriterReporter;
 
 public class ParentTestExpressionFinderImplTest extends TestCase {
 	ParentTestExpressionFinderImpl finder = null;
 	TestResult defaultResult = new TestResult (true, "default");
 	TestContext context = null;
-	OverriddenContractBase    base    = new OverriddenContractBase("f1", "f2", "f3");
-	OverriddenContractDerived derived = new OverriddenContractDerived("f1", "f2", "f3");
+	OverriddenContractBase    base    = null;
+	OverriddenContractDerived derived = null;
 	Constructor constructor = null;
 	Method     method   = null;
 	String     itemName = null;
@@ -54,9 +57,15 @@ public class ParentTestExpressionFinderImplTest extends TestCase {
 	Instance   object   = null;
 	Instance   target   = null;
 	Instance   result   = null;
+	
 	protected void setUp() throws Exception {
 		super.setUp();
+		Configurator c = new ConfiguratorForTesting();
+		c.configure();
 		finder   = new ParentTestExpressionFinderImpl();
+		finder.setReporter(new WriterReporter());
+		base     = new OverriddenContractBase("f1", "f2", "f3");
+		derived  = new OverriddenContractDerived("f1", "f2", "f3");
 		itemName = "";
 		method   = null;
 		pre      = null;

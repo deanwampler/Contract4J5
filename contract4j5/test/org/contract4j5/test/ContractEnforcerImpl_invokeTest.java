@@ -26,12 +26,13 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.contract4j5.ContractEnforcer;
-import org.contract4j5.ContractEnforcerImpl;
 import org.contract4j5.ContractError;
 import org.contract4j5.Instance;
 import org.contract4j5.TestContextImpl;
+import org.contract4j5.aspects.Contract4J;
+import org.contract4j5.configurator.Configurator;
+import org.contract4j5.configurator.test.ConfiguratorForTesting;
 import org.contract4j5.interpreter.ExpressionInterpreter;
-import org.contract4j5.interpreter.jexl.JexlExpressionInterpreter;
 import org.contract4j5.util.reporter.CompositeReporter;
 import org.contract4j5.util.reporter.Reporter;
 import org.contract4j5.util.reporter.Severity;
@@ -56,15 +57,17 @@ public class ContractEnforcerImpl_invokeTest extends TestCase {
 	
 	protected void setUp() throws Exception {
 		super.setUp();
-		interpreter = new JexlExpressionInterpreter();
-		contractEnforcer = new ContractEnforcerImpl(interpreter, false);
 		Reporter reporter1 = new WriterReporter(Severity.DEBUG, new StringWriter(1024));
 		Reporter reporter2 = new WriterReporter(Severity.DEBUG);  // stdout, stderr
 		reporter           = new CompositeReporter(Severity.DEBUG);
 		List<Reporter> rlist = reporter.getReporters();
 		rlist.add(0, reporter1);
 		rlist.add(1, reporter2);
-		ManualSetup.wireC4J(interpreter, contractEnforcer, reporter);
+		Configurator c = new ConfiguratorForTesting();
+		c.configure();
+		c.setReporter(reporter);
+		contractEnforcer = Contract4J.getContractEnforcer();
+		interpreter = contractEnforcer.getExpressionInterpreter();
 		dummy = new Dummy("Dummy");
 	}
 

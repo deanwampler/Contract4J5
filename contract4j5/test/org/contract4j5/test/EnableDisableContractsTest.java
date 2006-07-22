@@ -24,18 +24,21 @@ import junit.framework.TestCase;
 
 import org.contract4j5.ContractError;
 import org.contract4j5.aspects.Contract4J;
+import org.contract4j5.configurator.Configurator;
+import org.contract4j5.configurator.test.ConfiguratorForTesting;
 
 /**
  * Test API programmatic manipulation of properties, as opposed to configuration
  * through property files.
  */
-public class ProgrammaticPropertiesTest extends TestCase {
+public class EnableDisableContractsTest extends TestCase {
 	
 	BaseTestClass baseTestClass = null;
 
 	protected void setUp() throws Exception {
 		super.setUp();
-		ManualSetup.wireC4J();
+		Configurator c = new ConfiguratorForTesting();
+		c.configure();
 		Contract4J.setEnabled(Contract4J.TestType.Pre, false);
 		Contract4J.setEnabled(Contract4J.TestType.Post, false);
 		Contract4J.setEnabled(Contract4J.TestType.Invar, false);

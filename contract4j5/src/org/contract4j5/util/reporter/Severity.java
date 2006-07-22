@@ -27,5 +27,15 @@ package org.contract4j5.util.reporter;
  */
 public enum Severity {
 	DEBUG, INFO, WARN, ERROR, FATAL, OFF;
+
+	public static Severity parse(String str) {
+		if (str == null || str.length() == 0)
+			return null;
+		for (Severity s: Severity.values()) {
+			if (str.toUpperCase().equals(s.name()))
+				return s;
+		}
+		return null;
+	}
 }
 	

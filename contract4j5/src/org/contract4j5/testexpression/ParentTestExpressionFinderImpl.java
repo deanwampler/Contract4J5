@@ -32,7 +32,6 @@ import org.contract4j5.interpreter.ExpressionInterpreter;
 import org.contract4j5.interpreter.TestResult;
 import org.contract4j5.util.reporter.Reporter;
 import org.contract4j5.util.reporter.Severity;
-import org.contract4j5.util.reporter.WriterReporter;
 
 /**
  * Default implementation.
@@ -71,9 +70,6 @@ public class ParentTestExpressionFinderImpl implements
 	
 	private Reporter reporter;
 	public Reporter getReporter() {
-		if (reporter == null) {
-			reporter = new WriterReporter();
-		}
 		return reporter;
 	}
 	public void setReporter(Reporter reporter) {
