@@ -22,6 +22,7 @@ package org.contract4j5.testexpression;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 import org.contract4j5.Invar;
@@ -189,8 +190,12 @@ public class ParentTestExpressionFinderImpl implements
 			// Note that for ctor annotations, nothing will be found on interfaces!
 			Type[] interfaces = clazz.getGenericInterfaces();
 			for (Type t: interfaces) {
+                Class tClass = (t instanceof ParameterizedType)
+                ? (Class) ((ParameterizedType) t).getRawType()
+                : (Class) t;
+
 				result = findParentMethodAnnoTestExpression (
-					(Class) t,
+					tClass,
 					methodName,
 					methodArgsTypes,
 					isConstructor,
@@ -209,7 +214,7 @@ public class ParentTestExpressionFinderImpl implements
 	protected TestResult findParentMethodAnnoTestExpression(
 			Class      clazz,
 			String     methodName,
-			Class<?>[] methodArgsTypes,
+			Class[]    methodArgsTypes,
 			boolean    isConstructor,
 			Annotation whichAnnotationType) {
 		try {

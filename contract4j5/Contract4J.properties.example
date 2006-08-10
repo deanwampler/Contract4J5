@@ -17,7 +17,7 @@
 #
 # As an alternative, see the related Spring configuration example.
 
-# Global enable/disable all tests, or all pre, post, and invariant tests
+# Globally enable/disable all tests, or all pre, post, and invariant tests
 org.contract4j5.Contract=true
 org.contract4j5.Pre=true
 org.contract4j5.Post=true

@@ -69,6 +69,14 @@ abstract public aspect Contract4J {
 	
 	declare parents: (@Contract *) implements ContractMarker;
 		
+	static public boolean isPreTestsEnabled()   { return isEnabled[TestType.Pre.ordinal()]; }
+	static public boolean isPostTestsEnabled()  { return isEnabled[TestType.Post.ordinal()]; }
+	static public boolean isInvarTestsEnabled() { return isEnabled[TestType.Invar.ordinal()];	}
+
+	static public void setPreTestsEnabled(boolean b)   { isEnabled[TestType.Pre.ordinal()] = b; }
+	static public void setPostTestsEnabled(boolean b)  { isEnabled[TestType.Post.ordinal()] = b; }
+	static public void setInvarTestsEnabled(boolean b) { isEnabled[TestType.Invar.ordinal()] = b; }
+	
 	/**
 	 * The types of contract tests.
 	 */
@@ -99,7 +107,7 @@ abstract public aspect Contract4J {
 	/**
 	 * Return the system configurator used by Contract4J. If null, no 
 	 * configuration will be done, which is appropriate if using an "external"
-	 * configurator, such as the Spring IoC container.
+	 * configurator, such as Spring dependency injection.
 	 * @return the system configurator. May be null.
 	 */
 	static public Configurator getSystemConfigurator() {
@@ -225,7 +233,8 @@ abstract public aspect Contract4J {
 	/**
 	 * Last resort configuration; use a {@link PropertiesConfigurator}, then
 	 * if not initialized, use a {@link ContractEnforcerImpl}, with a {@link
-	 * JexlExpressionInterpreter} and a {@link WriterReporter}.
+	 * JexlExpressionInterpreter} and a {@link WriterReporter}. Lots of ugly
+	 * violations of the Law of Demeter here!
 	 * @todo Move this logic elsewhere.
 	 */
 	protected static void doDefaultConfiguration() {
@@ -242,6 +251,8 @@ abstract public aspect Contract4J {
 		if (r == null) {
 			r = new WriterReporter();
 			setReporter(r);
+			getContractEnforcer().setReporter(r);
+			getContractEnforcer().getExpressionInterpreter().setReporter(r);
 		}
 		r.report (Severity.WARN, Contract4J.class, 
 			"Contract4J was not configured explicitly, so the default process " +

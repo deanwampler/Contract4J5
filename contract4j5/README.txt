@@ -1154,9 +1154,9 @@ without embedding the ad hoc Reporter objects.
 
 *** v0.5.1 May 19, 2006
 
-Added examples to the build process of doing binary and load-time weaving, in 
-addition to the compile time weaving in the 0.5.0 examples. "Binary" weaving is
-weaving done after compiling all code, using a post-compilation weaving step.
+Added examples to the build process of doing binary (jar) and load-time weaving,
+in addition to the compile time weaving in the 0.5.0 examples. "Binary" weaving
+is weaving done after compiling all code, using a post-compilation weaving step.
 It is useful for organizations that prefer to use javac for all java files.
 Load-time weaving is done as the application loads class files, using a special
 "java agent" for this purpose. See the section "Invocation and Configuration of 
@@ -1165,8 +1165,9 @@ Contract4J5" for more details.
 Added an example using the Spring framework to configure Contract4J. It requires
 that you have Spring v1.2+ installed (see http://www.springframework.org).
 
-At the same time, improved the options for using properties to "wire" 
-Contract4J, as an alternative to using Spring.
+At the same time, greatly improved the options for using system properties or 
+properties files to "wire" Contract4J, as an alternative to using Spring. See 
+the tests in "org.contract4j5.configurator.test" for examples.
 
 Replaced the entity definitions in the build-related XML files with the ant
 <import> task. Apparently, NetBeans doesn't like the entity definitions. (Thanks
@@ -1176,6 +1177,10 @@ refactored build files.)
 Added more tests that explicitly demonstrate that contract expressions that
 access instance properties only work if the properties have JavaBeans getter
 methods (Jexl limitation).
+
+Fixed some bugs, including a few warnings related to generics. (Thanks to Falk 
+Bruegmann for a generics warning fix.)
+
 
 *** v0.5.0 February 20, 2006
 
