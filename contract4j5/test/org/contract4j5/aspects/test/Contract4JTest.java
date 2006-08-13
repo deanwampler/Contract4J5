@@ -4,6 +4,15 @@ import junit.framework.TestCase;
 import org.contract4j5.aspects.*;
 
 public class Contract4JTest extends TestCase {
+	@Override
+	protected void tearDown() throws Exception {
+		super.tearDown();
+		// Leave test with all enabled statically.
+		Contract4J.setEnabled(Contract4J.TestType.Pre,   true);
+		Contract4J.setEnabled(Contract4J.TestType.Post,  true);
+		Contract4J.setEnabled(Contract4J.TestType.Invar, true);
+	}
+	
 	public void testEnableAll() {
 		doSetCheckOldStyle(true, true, true);
 		doSetCheckNewStyle(true, true, true);
