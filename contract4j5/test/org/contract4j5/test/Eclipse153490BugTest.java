@@ -1,6 +1,7 @@
 package org.contract4j5.test;
 
 import org.contract4j5.Contract;
+import org.contract4j5.ContractError;
 import org.contract4j5.Post;
 import org.contract4j5.Pre;
 import org.contract4j5.aspects.Contract4J;
@@ -10,7 +11,7 @@ import junit.framework.TestCase;
 public class Eclipse153490BugTest extends TestCase {
 	
 	@Contract
-	public class Foo {
+	public static class Foo {
 	
 	  private String fooField = null;
 	
@@ -36,7 +37,17 @@ public class Eclipse153490BugTest extends TestCase {
 	  Contract4J.setEnabled(Contract4J.TestType.Invar, true); //3
 	
 	  Foo foo = new Foo();
-	  foo.setFooField(null);
-	  System.out.println(foo.getFooField());
+	  try {
+		  foo.setFooField(null);
+		  fail();
+	  } catch (ContractError ce) {
+		  // expected
+	  }
+	  try {
+		  System.out.println(foo.getFooField());
+		  fail();
+	  } catch (ContractError ce) {
+		  // expected
+	  }
 	}	
 }

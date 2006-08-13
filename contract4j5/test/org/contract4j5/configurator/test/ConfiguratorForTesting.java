@@ -34,8 +34,16 @@ public class ConfiguratorForTesting extends AbstractConfigurator {
 		ptef.setReporter(reporter);
 		ConstructorBoundaryConditions.setParentTestExpressionFinder(ptef);
 		MethodBoundaryConditions.setParentTestExpressionFinder(ptef);
+		
 		InvariantConditions.InvariantTypeConditions.setParentTestExpressionFinder(ptef);
 		InvariantConditions.InvariantMethodConditions.setParentTestExpressionFinder(ptef);
 		InvariantConditions.InvariantCtorConditions.setParentTestExpressionFinder(ptef);
+
+		// Using null will cause the aspects to use their default values.
+		InvariantConditions.InvariantFieldConditions.setDefaultFieldInvarTestExpressionMaker(null);
+		InvariantConditions.InvariantFieldCtorConditions.setDefaultFieldInvarTestExpressionMaker(null);
+		InvariantConditions.InvariantTypeConditions.setDefaultTypeInvarTestExpressionMaker(null);
+		InvariantConditions.InvariantMethodConditions.setDefaultMethodInvarTestExpressionMaker(null);
+		InvariantConditions.InvariantCtorConditions.setDefaultCtorInvarTestExpressionMaker(null);
 	}
 }
