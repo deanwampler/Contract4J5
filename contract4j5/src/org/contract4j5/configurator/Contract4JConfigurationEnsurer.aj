@@ -23,22 +23,15 @@ public aspect Contract4JConfigurationEnsurer {
 		get(* Contract4J+.*) &&
 		this(c4j); 
 	pointcut configureC4JFirstIfNotConfigured(Contract4J c4j): 
-		if(c4j.isConfigured() == false) && getContract4JState(c4j) && !cflow(thisAspect());
+		if(c4j.getSystemConfigurator() == null) 
+			&& getContract4JState(c4j) && !cflow(thisAspect());
 
 	before(Contract4J c4j): configureC4JFirstIfNotConfigured(c4j) {
 		doLazyConfiguration(c4j);
 	}
 	
-	/**
-	 * Assume it's already configured if there is a system-wide configurator
-	 * defined.
-	 */
-	public boolean Contract4J.isConfigured() {
-		return getSystemConfigurator() != null;
-	}
-
 	protected void doLazyConfiguration(Contract4J c4j) { 
-		if (c4j.isConfigured() == false) {
+		if (c4j.getSystemConfigurator() == null) {
 			doDefaultConfiguration(c4j);
 		}
 	}

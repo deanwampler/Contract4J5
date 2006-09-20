@@ -1,10 +1,8 @@
 #!/bin/bash
 #------------------------------------------
-# build.sh - Simple build driver script
+# build.sh - Simple build driver *nix shell script
 #
-# Edit to suit your environment or define these variables other ways.
-# Note that they are used by the ant build (except for TOOL_HOME, which
-# is used for convenience).
+# See "env.sh" for environment variable definitions.
 #
 # Notes:
 #  1) This currently has problems on Windows, running under cygwin. I
@@ -29,60 +27,6 @@
 # 
 #  @author deanwampler <dean@aspectprogramming.com>
 
-VERSION=1.5.0
-#set -x
-
-osname=`uname -s 2> /dev/null | /usr/bin/tr "[:upper:]" "[:lower:]" 2> /dev/null`
-echo "Building on $osname"
-
-case "$osname" in
-    cygwin*)
-		: ${TOOL_HOME:=/cygdrive/c/tools/javatools}
-		;;
-	*)
-		: ${TOOL_HOME:=$HOME/tools}
-		;;
-esac
-
-: ${CONTRACT4J5_HOME:=$HOME/src/java/contract4j5_050/contract4j5}
-: ${ANT_HOME:=$TOOL_HOME/Apache/apache-ant-1.6.2}
-: ${ASPECTJ_HOME:=$TOOL_HOME/aspectj1.5}
-: ${JAVA_HOME:=$TOOL_HOME/jdk$VERSION}
-: ${JUNIT_HOME:=$TOOL_HOME/junit3.8.1}
-: ${JEXL_HOME:=$TOOL_HOME/Apache/jakarta/commons/commons-jexl-1.0}
-: ${COMMONS_LOGGING_HOME:=$TOOL_HOME/Apache/jakarta/commons/commons-logging-1.0.4}
-
-case "$osname" in
-    cygwin*)
-	#PATH=`cygpath --windows --path "$PATH"`
-	#PATH="$JAVA_HOME\\bin;$ASPECTJ_HOME\\bin;$ANT_HOME\\bin;$PATH"
-	PATH="$JAVA_HOME/bin:$ASPECTJ_HOME/bin:$ANT_HOME/bin:$PATH"
-	HOME=`cygpath --windows --path "$HOME"`
-	CONTRACT4J5_HOME=`cygpath --windows --path "$CONTRACT4J5_HOME"`
-	ANT_HOME=`cygpath --windows --path "$ANT_HOME"`
-	ASPECTJ_HOME=`cygpath --windows --path "$ASPECTJ_HOME"`
-	JAVA_HOME=`cygpath --windows --path "$JAVA_HOME"`
-	JUNIT_HOME=`cygpath --windows --path "$JUNIT_HOME"`
-	JEXL_HOME=`cygpath --windows --path "$JEXL_HOME"`
-	COMMONS_LOGGING_HOME=`cygpath --windows --path "$COMMONS_LOGGING_HOME"`
-	CLASSPATH=`cygpath --windows --path "$CLASSPATH"`
-	CLASSPATH="$ANT_HOME\\lib\\ant.jar;$ASPECTJ_HOME\\lib\\aspectjrt.jar;$ASPECTJ_HOME\\lib\\aspectjtools.jar;$JUNIT_HOME\\junit.jar;$COMMONS_LOGGING_HOME\\commons-logging.jar;$JEXL_HOME\\commons-jexl-1.0.jar;$CLASSPATH"
-	;;
-    *)
-	CLASSPATH=$ANT_HOME/lib/ant.jar:$ASPECTJ_HOME/lib/aspectjrt.jar:$ASPECTJ_HOME/lib/aspectjtools.jar:$JUNIT_HOME/junit.jar:$COMMONS_LOGGING_HOME/commons-logging.jar:$JEXL_HOME/commons-jexl-1.0.jar:$CLASSPATH
-	PATH=$JAVA_HOME/bin:$ASPECTJ_HOME/bin:$ANT_HOME/bin:$PATH
-	;;
-esac
-
-export ANT_HOME
-export ASPECTJ_HOME
-export CONTRACT4J5_HOME
-export JAVA_HOME
-export JUNIT_HOME
-export JEXL_HOME
-export COMMONS_LOGGING_HOME
-export TOOL_HOME
-export CLASSPATH
-export PATH
+. ./env.sh
 
 ant "$@"

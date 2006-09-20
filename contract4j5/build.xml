@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!--
-  build.xml - "Ant" build file for AspectProgramming's "Contract4J5" library.
+  build.xml - "Ant" build file for Aspect Programming's "Contract4J5" library.
 
-  Copyright 2005 Dean Wampler. All rights reserved.
+  Copyright 2005-2006 Dean Wampler. All rights reserved.
   http://www.aspectprogramming.com
  
   Licensed under the Eclipse Public License - v 1.0; you may not use this
@@ -36,22 +36,32 @@
 		<!-- This release version -->
 		<property name="version"          value="050" />
 		<!-- "contract4J5.jar" contains the runtime deployment aspects and classes -->
-        <property name="project.jar"      value="contract4j5.jar" />
+		<property name="project.jar"      value="contract4j5.jar" />
 		<!-- "contract4J5-test.jar" contains the test/example aspects and classes -->
-        <property name="project.test.jar" value="contract4j5-test.jar" />
+		<property name="project.test.jar" value="contract4j5-test.jar" />
+		<path id="extra-classpath" />  <!-- empty by default -->
 	</target>
 
 	<target name="all" depends="init, clean, build, test, docs" />
+	
 	<!-- Build an example using Spring configuration. -->
-	<target name="all-spring" depends="init">
-		<antcall target="all">
-			<param name="src.reldir"       value="${spring/src}" />
-			<param name="test.reldir"      value="${spring/test}" />
-			<param name="classes.reldir"   value="${spring/classes}" />
-			<param name="project.jar"      value="${spring.jar}" />
-			<param name="project.test.jar" value="${spring.test.jar}" />
+	<target name="all.spring" depends="init">
+		<path id="extra.classpath">
+			<path refid="spring.classpath" />
+			<fileset file="${project.jar}" />
+		</path>
+		<antcall target="_all.spring">
+			<param name="src.reldir"       value="${spring.example.reldir}/src" />
+			<param name="test.reldir"      value="${spring.example.reldir}/test" />
+			<param name="src.classes.reldir"  value="${spring.example.reldir}/src-classes" />
+			<param name="test.classes.reldir" value="${spring.example.reldir}/test-classes" />
+			<param name="bin.reldir"       value="${spring.example.reldir}/bin"/>
+			<param name="javadocs.reldir"  value="${spring.example.reldir}/doc/api"/>
+			<param name="project.test.jar" value="${spring.example.reldir}/spring_example.test.jar" />
 		</antcall>
 	</target>
+	<!-- No "project.jar" to build, so we skip the build target and just build the test jar. -->
+	<target name="_all.spring" depends="clean.spring, project-test.jar, test" />
 
 	<target name="build" depends="init, jar" />
 
@@ -59,7 +69,7 @@
 	
 	<target name="project.jar" depends="compile">
 		<jar destfile="${project.jar}">  
-			<fileset dir="${classes.reldir}"
+			<fileset dir="${src.classes.reldir}"
 			    excludes="**/test/**" />
 			<fileset dir="${src.reldir}"
 				includes="**/*.properties" />
@@ -67,16 +77,19 @@
 	</target>
 	<target name="project-test.jar" depends="compile-test">
 		<jar destfile="${project.test.jar}">  
-			<fileset dir="${classes.reldir}"
+			<fileset dir="${test.classes.reldir}"
 			    includes="**/test/**" />
 			<fileset dir="${test.reldir}"
 				includes="**/*.properties" />
+			<fileset dir="${test.reldir}"
+				includes="**/*.xml" />
 		</jar>
 	</target>
 	
 	<!-- Compile the library's java and aj files with ajc -->
 	<target name="compile" depends="init">
 		<antcall target="compileAspectJTemplate">
+			<param name="classes.reldir" value="${src.classes.reldir}" />
 			<param name="aspectpath" value="" />
 		</antcall>
 	</target>
@@ -85,6 +98,7 @@
 	<target name="compile-test" depends="init">
 		<antcall target="compileAspectJTemplate">
 			<param name="src.reldir"  value="${test.reldir}" />
+			<param name="classes.reldir" value="${test.classes.reldir}" />
 			<param name="aspectpath"  value="${project.jar}" />
 		</antcall>
 	</target>

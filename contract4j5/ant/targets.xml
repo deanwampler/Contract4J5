@@ -83,13 +83,20 @@
 		</fileset>
 	</path>
 	
+	<path id="spring.classpath">
+		<fileset dir="${spring.home}/dist">
+			<include name="**/*.jar"/>
+		</fileset>
+	</path>
+	
 	<path id="project.classpath">
 		<path refid="aspectj.classpath" />
 		<path refid="junit.classpath" />
 		<path refid="jexl.classpath" />
+		<path refid="extra.classpath" />
 	</path>
 	
-	
+
 	<!-- "init-debug" and "init-nondebug" set miscellaneous build properties.
 	   "init-debugflag" is a bit of a hack. It gets the environment variable
 	   and sets a property. It's a dependent of "init", before "init-debug" and
@@ -186,9 +193,10 @@
 			debug="${build.compiler.debug}"
 			debuglevel="${build.compiler.debuglevel}"
 			deprecation="true"
-			verbose="${build.compiler.verbose}"
+			verbose="true"
 			argfiles="${contract4j5.home}/ant/ajc.args.lst">
-			<srcdir>
+			<!-- verbose="${build.compiler.verbose}" -->
+			<srcdir> 
 				<pathelement location="${src.reldir}" />
 			</srcdir>
 			<classpath>
@@ -296,19 +304,28 @@
 		<mkdir dir="${javadocs.reldir}" />
 	</target>
 		
-	<target name="clean" depends="init, clean-detritus">
+	<target name="clean"        depends="clean.common, clean.project.jar" />
+	<target name="clean.spring" depends="clean.common" />
+
+	<target name="clean.common" depends="init, clean.detritus">
 		<delete dir="${javadocs.reldir}" />
 		<delete dir="${gensrc.reldir}" />
 		<delete dir="${bin.reldir}" />  <!-- Eclipse output dir, not tools... -->
-		<delete dir="${classes.reldir}" />
+		<delete dir="${src.classes.reldir}" />
+		<delete dir="${test.classes.reldir}" />
 		<delete>
-			<fileset dir="." includes="${project.jar}" />
-			<fileset dir="." includes="${project.test.jar}" />
+			<fileset file="${project.test.jar}" />
 			<fileset dir="." includes="TEST-*.txt" />
 		</delete>
 	</target>
 	
-	<target name="clean-detritus" depends="init"
+	<target name="clean.project.jar">
+		<delete>
+			<fileset file="${project.jar}" />
+		</delete>
+	</target>
+		
+	<target name="clean.detritus" depends="init"
 		  description="Clean up the editor backup files, etc.">
 		<delete>
 			<fileset dir="." defaultexcludes="no">

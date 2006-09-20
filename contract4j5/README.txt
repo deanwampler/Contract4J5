@@ -231,10 +231,24 @@ cannot be null.
 3) The "getName" method has a postcondition that it can never return null.
 4) The "doIt" method has both a pre- and a postcondition test.
 
+If a test fails, Contract4J throws an unchecked exception, ContractError, after
+printing some diagnostic information (see the unit tests for examples). A 
+special subclass of ContractError is thrown if the test itself can't be 
+evaluated for some reason (discussed in more detail below). That error is 
+TestSpecificationError. So, clients who want to catch contract errors and also
+distinguish between these two types should follow this idiom:
+  try {
+    ...
+  } catch (TestSpecificationError tse) {
+    ...
+  } catch (ContractError ce) {
+    ...
+  }
+
 Contract4J5 v0.5 embeds the Jakarta "Jexl" interpreter, an expression evaluator,
-which it uses to evaluate the test expressions in the annotations. (See  
+to evaluate the test expressions in the annotations. (See  
 http://jakarta.apache.org/commons/Jexl/ for more information on Jexl. Note,
-there are quirks and limitations of Jexl that are discussed throughout this
+that there are quirks and limitations of Jexl that are discussed throughout this
 README. It might be worthing searching for "Jexl" to find and read those
 details.)
 
@@ -243,10 +257,12 @@ for Sun's Annotation Processor Tool (APT), it generated AspectJ code that
 hard-coded the test expressions. The generated code and the original code were
 then compiled. 
 
-V0.5 eliminates this preprocessor step, thereby simplifying adoption. All you
+V0.5 eliminated this preprocessor step, thereby simplifying adoption. All you
 have to do is add a final AspectJ weaving step to your build, write your tests
 in familiar annotations, and you are done. No custom AspectJ code is required.
 
+V0.6 refined the internal structure of Contract4J to provide better 
+configuration options.
 
 ---- Inheritance Behavior of Contracts
 
@@ -317,17 +333,19 @@ expressions correctly.
 
 ---- Installation:
 
-For Linux/Unix systems, sue these commands: 
+For Linux/Unix systems, use these commands: 
 
 	1) cd ~/work		# or wherever...
-	3) cp .../contract4j5_050.tar.gz .
-	4) tar xvzf contract4j5_050.tar.gz 
+	3) cp .../contract4j5_060.tar.gz .
+	4) tar xvzf contract4j5_060.tar.gz 
 
 On Windows systems, Unzip the zip file to an appropriate location.
 
 You will need Java 5, AspectJ 5, Jakarta Commons Jexl 1.0, and Commons Logging
 (required by Jexl) to use Contract4J5. If you build Contract4J yourself, you 
-will also need JUnit.
+will also need JUnit. If you build the Spring Framework example, which shows
+how to configure Contract4J using Spring, you will need v1.2.5 or later of 
+Spring.
 
 You can use the installed "contract4j5.jar" file as is. If you want to rebuild
 Contract4J, use the ant driver script "build.sh" or "build.bat", edit the file 
@@ -335,7 +353,8 @@ and change the environment variable definitions to point to appropriate
 locations for your environment. Or, you can define the appropriate environment
 variables in your environment and use the build.xml ant script directly.
 
-The distribution has the following structure:
+The distribution has the following structure. In the "contract4j5" directory,
+you will find the following:
 
 README.txt - This file
 LICENSE.txt - The Apache 2 license file for Contract4J
@@ -355,32 +374,52 @@ classes - where build artifacts (except the jars) are stored
 doc - Where Javadocs are written
 contract4j5.jar - The runtime deployment jar. It contains the build products 
 from "src".
-contract4j5-test.jar - The jar containing the build products from "test". 
-Not part of the normal runtime deployment.
+contract4j5-test.jar - The jar containing the build products from "test", which
+is not part of the normal runtime deployment.
+
+In the separate "Contract4JWithSpring" directory, you will find the following:
+
+README.txt - Description of the Spring example and build instructions
+test - The only "source" directory with a single JUnit test class that runs the
+example.
+
 
 If you want to build Contract4J:
 
-	6a) ./build.sh all    (*nix)
-	6b) build.bat all     (windows)
+	1a) ./build.sh all    (*nix)
+	1b) build.bat all     (windows)
 or
-	6c) ant all
+	1c) ant all
 
-The jar files "contract4j5.jar" and "contract4j-test.jar" in the current
-directory will be built and the unit/acceptance tests will be executed. The
-tests generate a LOT of output, but they should all pass. Also, there will some
-warnings which fall into two categories:
+To build the corresponding Spring example:
+
+	2a) ./build.sh all.spring (*nix)
+	2b) build.bat all.spring  (windows)
+or
+	2c) ant all.spring
+
+(See ../Contract4J5WithSpring/README.txt for more information on this example.)
+
+Building "all" creates the jar files "contract4j5.jar" and "contract4j-test.jar"
+in the current directory and runs the unit and acceptance tests in the "test"
+directory tree. 
+
+The tests generate a LOT of output, but they should all pass. There will some
+warnings that fall into two categories:
 1) Warnings in some unit tests when test annotations are used without the
 required @Contract annotation. This is deliberate for those tests.
-2) Unavoidable unchecked casts involving generics.
-3) The javadocs target also results in many warnings for references to aspects
-from Java files, which javadoc doesn't know how to resolve. To be clear, the
-following missing "classes" are actually aspects:
-  Contract4J
+2) Some unchecked casts involving generics.
+3) The javadocs target also generates warnings for references to aspects
+from Java files, which javadoc doesn't know how to resolve. The following 
+missing "classes" are actually aspects:
+  AbstractConditions
   ConstructorBoundaryConditions
-  InvariantConditions
+  Invariant*Conditions (several)
   MethodBoundaryConditions
-You'll see lots of warnings about not being able to find
-"Contract4J#isEnabled(TestType)". 
+  UsageEnforcement
+  Contract4JConfigurationEnsurer
+You'll see lots of warnings about not being able to find members of these 
+aspects.
 
 If the unit tests fail, look for output in "contract4j5/TEST-*.txt" files.
 Usually, the problem will be a classpath issue.
@@ -959,10 +998,18 @@ the test, as long as you declare an appropriate accessor method for it.
 *** All test expressions must evaluate to a boolean value. 
 
 *** Test expressions that fail to be evaluated by Jexl will be treated as test
-failures, on the grounds that they expression is buggy in this case! (This
-behavior is configurable with an API call.) However, this can also be 
-confusing when it is the test itself that is buggy. In particular, see
-the next bullet item.
+failures, on the grounds that they expression is buggy in this case! Note that
+if an annotation is empty, that is it doesn't define a test expression, then it
+it considered an error if a default expression can't be inferred and no 
+corresponding test exists on a parent class. However, there is an API call to
+allow empty tests (see 
+ExpressionInterpreter.setTreatEmptyTestExpressionAsValidTest(boolean) in the
+org.contract4j5.interpreter package).
+
+When a test fails due to a test error, a subclass of ContractErrror is thrown,
+TestSpecificationError (new in v0.6.0) Nonetheless, it can be confusing when a
+test that looks valid fails for this reason; in particular, see the next bullet
+item.
 
 *** Remember that if any test accesses an instance field, the field 
 *must* have a corresponding JavaBeans getter method. Otherwise, Jexl will
@@ -1001,39 +1048,40 @@ etc.
 some of the substitutions that are made.
 
 *** Some common expression errors have "canned" strings defined for them in
-  org.contract4j5.interpreter.ExpressionInterpreter.java
+  org.contract4j5.interpreter.ExpressionInterpreter
 Most of the heavy lifting of expression evaluation BEFORE sending it to Jexl 
 is done in
-  org.contract4j5.interpreter.ExpressionInterpreterHelper.java
+  org.contract4j5.interpreter.ExpressionInterpreterHelper
 The wrapper for Jexl itself is 
-  org.contract4j5.interpreter.Jexl.JexlExpressionInterpreter.java
+  org.contract4j5.interpreter.Jexl.JexlExpressionInterpreter
 
 ----- Configuring the Behavior
 
-For this v0.5.0 release, the behavior of Contract4J5 can only be configured 
-through API calls. Some limited support for configuration using property files
-is planned for subsequent release. Most of the previous support for property
-file configuration and the ad hoc "configurator" used previously have been
-deprecated and won't be supported further (unless interest is high enough...).
-We believe you should use a standard mechanism like Spring's Dependency 
-Injection (DI) rather than have to manage yet another proprietary "wiring" 
-approach.
+The v0.6.0 release greatly expanded the options for configuring Contract4J5.
+In addition to the previous support for configuration through API calls, you
+can now customize most behavior using property files and also using Spring 
+dependency injection. Besides setting properties such as which types of tests
+to enable, whether or not to print the stack trace when contracts fail, etc.,
+you can also specify your own classes to satisfy particular dependencies (e.g.,
+the expression interpreter). 
 
-However, Contract4J5 will use reasonable defaults if you don't do any wiring.
+We recommend using a standard mechanism like Spring's Dependency 
+Injection (DI) for nontrivial configuration. (See the Spring example that is
+part of this release.) However, for simple property configuration, property 
+files are fine; see the unit test PropertiesConfiguratorTest.java in the
+org.contract4j5.configurator.test package for examples.
 
-An example of using Spring DI for configuration is planned for a subsequent 
-release before v1.0 final. This release demonstrates using API calls to 
-configure Contract4J5 through a test support class, ManualSetup in 
-test/org/contract4j5/test/ManualSetup.java. It is in most of the test cases.  
+Note that Contract4J5 will use reasonable defaults if you don't do any 
+configuration.
 
-ManualSetup.enableContracts() shows how to enable or disable
-contract tests application-wide using the API:
+Here are some API examples. Note that the wiring API changed significantly for
+the v0.6.0 release. 
 
   import org.contract4j5.aspects.Contract4J;
   ...
-  Contract4J.setEnabled(Contract4J.TestType.Pre,   true);
-  Contract4J.setEnabled(Contract4J.TestType.Post,  true);
-  Contract4J.setEnabled(Contract4J.TestType.Invar, true);
+  Contract4J.getInstance().setEnabled(Contract4J.TestType.Pre,   true);
+  Contract4J.getInstance().setEnabled(Contract4J.TestType.Post,  true);
+  Contract4J.getInstance().setEnabled(Contract4J.TestType.Invar, true);
 
 This example turns on all three test types. 
 
@@ -1041,12 +1089,11 @@ NOTE: To completely disable contract checking, build the application without
 "contract4j5.jar" in your path. This is recommended for "production" builds 
 when you don't want any test overhead.
 
-The ManualSetup.wireC4J() methods demonstrate that there are several components
-in Contract4J5 and how they are wired together:
+There are several components in Contract4J5. The main ones are:
 
   ExpressionInterpreter	- wraps Jexl; could wrap alternatives!
   ContractEnforcer     	- handles test invocation and failure handling
-  Reporter				- simple output/logging wrapper.
+  Reporter              - simple output/logging wrapper.
 
 Note that a runtime warning are issued if the ExpressionInterpreter or 
 ContractEnforcer are not defined, as tests can't be run otherwise. The Reporter
@@ -1055,9 +1102,9 @@ objects will default to stdout/stderr if undefined.
 Here are more details about these component interfaces and implementing
 classes:
 
-  org.contract4j5.ContractEnforcer	-
+  org.contract4j5.enforcer.ContractEnforcer	-
   	The enforcer interface
-  org.contract4j5.ContractEnforcerImpl	-
+  org.contract4j5.enforcer.ContractEnforcerImpl	-
   	The one implementation used here. It runs the tests and on failure, logs
   	a detailed error message and terminates program execution.
   org.contract4j5.interpreter.ExpressionInterpreter	-
@@ -1080,11 +1127,18 @@ Notes:
 
 1) For all properties currently defined, if a value is empty, it is ignored!
 
-2) Some of the fields in the aspects are actually static (e.g. default test
-expression makers and locators of test expressions in parent classes). Making
-them static was a compromise to permit easy access by pure Java code, such as
-unit tests!
-   
+2) In pre-v0.6.0 releases, the fields in the aspects were static, e.g.,
+  ConstructorBoundaryConditions.getDefaultPreTestExpressionMaker()
+Now, you get the "aspectOf()" instance first:
+  ConstructorBoundaryConditions.aspectOf().getDefaultPreTestExpressionMaker()
+
+3) The type "Contract4J" was an aspect in pre-v0.6.0 releases. It is now a class
+and a singleton instance is used. Hence,
+   Contract4J.setEnabled(Contract4J.TestType.Pre, true);
+is now
+   Contract4J.getInstance().setEnabled(Contract4J.TestType.Pre, true);
+
+
 --- Invocation and Configuration of Contract4J5
 
 To build Contract4J5 the following third-party tools are required, along with 
@@ -1097,12 +1151,14 @@ scripts:
 3) Ant 1.6.X (ANT_HOME)
 4) Jexl 1.0 (Jexl_HOME)
 5) Commons Logging (COMMONS_LOGGING_HOME)
+6) Spring (SPRING_HOME) - optional
 
 Also define "CONTRACT4J5_HOME" to be the ".../contract4j5_050/contract4j5"
 directory where you installed it.
 
-For your convenience, you can use the build driver script "build.sh". Edit the 
-values of the environment variables in that script for your environment.
+For your convenience, you can use the build driver script "build.sh" or
+"build.bat". Edit the values of the environment variables in the corresponding
+scripts "env.sh" or "env.bat" for your environment.
 
 Only Java, AspectJ, and Jexl are required if you simply use the binary 
 "contract4j5.jar" in the distribution. Make sure your build process either 
@@ -1118,36 +1174,24 @@ to incorporate the Contract4J5 jars into your build.
 Here is a brief list of some of the more important "todo" items, roughly in 
 order of importance. 
 
-1) Provide an example of using Spring DI to configure Contract4J5.
-2) Support basic configuration through property files for users who aren't
-using Spring.
-3) Automatically enforce proper usage of method/constructor annotations in
+1) Automatically enforce proper usage of method/constructor annotations in
 subclasses when the corresponding methods are annotated in the parent classes
 or interfaces. Or, automatically evaluate the tests for method overrides even
 they aren't annotated.
-4) Implement more exhaustive tests. While v0.5.0 comes with a significant
+2) Implement more exhaustive tests. While Contract4J comes with a significant
 JUnit-based test suite, it requires more test cases to ensure expected behavior
 in a wide variety of possible usage scenarios.
-3) Integrate into the AspectJ5 library project. Contract4J5, or parts of it,
-may become part of standard AspectJ5 library under development. This step will 
-require changing the package structure and probably naming conventions, etc. 
-to conform to the emerging conventions for that library. However, this process 
-*should* have only a small impact on users.
-4) Exploit aspects to manage the "Reporter" objects, which are hard-coded in
-classes that use them.
-5) Refine test handling. For example, field invariants are evaluated for reads,
+3) Find a more elegant, aspectj-specific way to handle logging of information
+without embedding the ad hoc Reporter objects.
+4) Refine test handling. For example, field invariants are evaluated for reads,
 but this probably only makes sense for the very first read, in case it is 
 uninitialized. The rest of the time, evaluating just field writes makes sense.
-6) Eliminate the requirement to annotate the class with @Contract.
-7) For the keywords:
+5) Eliminate the requirement to annotate the class with @Contract.
+6) For the keywords:
 a) Allow "this" without the '$'? 
 b) Remove "$target" if it won't be used for anything other than fields, for 
 which it is redundant.
-c) Is "$args" really necessary? Can it be eliminated since the parameter names
-themselves can be used?
-8) Find a more elegant, aspectj-specific way to handle logging of information
-without embedding the ad hoc Reporter objects.
-9) Support tests on static methods.
+7) Allow contract tests on static methods.
 
 
 ** Notes for Each Release
@@ -1155,9 +1199,9 @@ without embedding the ad hoc Reporter objects.
 *** v0.6.0 October 1, 2006
 
 Major refactoring to improve the internal structure, e.g., to reduce the 
-over-reliance on singletons. Defining contracts is unchanged (except for some 
-bug fixes), but the configuration API has changed (this is still pre-1.0 
-software); see below.
+over-reliance on singletons and to improve the "wiring" options. Defining 
+contracts is unchanged (except for some bug fixes), but the configuration API 
+has changed (this is still pre-1.0 software).
 
 Added an example using the Spring Framework v1.2.5 to configure Contract4J (see
 http://www.springframework.org). See the separate "src" folder called
@@ -1165,14 +1209,32 @@ http://www.springframework.org). See the separate "src" folder called
 compatable, if not easier with new 2.0 features. However, using Contract4J with
 Spring v2.0 was not tested.
 
-Greatly improved the options for using system properties or properties files to
-"wire" Contract4J, as an alternative to using Spring. See the tests in 
+Greatly improved the options for using properties files to "wire" Contract4J, 
+as an alternative to using Spring. See the tests in 
 "org.contract4j5.configurator.test" for examples.
 
+If a test fails because the expression is empty or can't be evaluated by Jexl,
+a subclass of ContractError, TestSpecificationError, is now thrown. This makes 
+it easier to determine when a test failed because the test itself was bad, as
+opposed to the class under test failing to meet the contract. Using a subclass
+of ContractError means that any existing "catch (ContractError ce)" code will
+continue to catch both kinds of failures. However, users who want to distinguish
+between the two types of errors should use this idiom:
+  try {
+    ...
+  } catch (TestSpecificationError tse) {
+    ...
+  } catch (ContractError ce) {
+    ...
+  }
+  
 Added examples to the build process of doing binary (jar) and load-time weaving,
-in addition to the compile time weaving in the 0.5.0 examples. "Binary" weaving
-is weaving done after compiling all code, using a post-compilation weaving step.
-It is useful for organizations that prefer to use javac for all java files.
+in addition to the compile time weaving in the previous releases. 
+
+"Binary" weaving is weaving done after compiling all code, using a 
+post-compilation weaving step. It is useful for organizations that prefer to use
+javac for all java files. 
+
 Load-time weaving is done as the application loads class files, using a special
 "java agent" for this purpose. See the section "Invocation and Configuration of 
 Contract4J5" for more details.

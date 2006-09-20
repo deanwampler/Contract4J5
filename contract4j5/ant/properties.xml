@@ -37,11 +37,14 @@
 	<property name="java.home"        value="${environ.JAVA_HOME}"/>
 	<property name="junit.home"       value="${environ.JUNIT_HOME}"/>
 	<property name="jexl.home"        value="${environ.JEXL_HOME}"/>
+	<property name="spring.home"      value="${environ.SPRING_HOME}"/>
 	
 	<!-- Directories -->
-	<property name="bin.reldir"      value="bin"/>
-	<property name="classes.reldir"  value="classes"/>
 	<property name="src.reldir"      value="src"/>
 	<property name="test.reldir"     value="test"/>
+	<property name="src.classes.reldir"  value="src-classes"/>
+	<property name="test.classes.reldir" value="test-classes"/>
+	<property name="bin.reldir"      value="bin"/>
 	<property name="javadocs.reldir" value="doc/api"/>
+	<property name="spring.example.reldir" value="../Contract4J5WithSpring"/>
 </project>
