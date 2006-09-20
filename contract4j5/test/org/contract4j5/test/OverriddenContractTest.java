@@ -23,6 +23,7 @@ package org.contract4j5.test;
 import junit.framework.TestCase;
 
 import org.contract4j5.ContractError;
+import org.contract4j5.TestSpecificationError;
 import org.contract4j5.configurator.Configurator;
 import org.contract4j5.configurator.test.ConfiguratorForTesting;
 
@@ -64,6 +65,8 @@ public class OverriddenContractTest extends TestCase {
 			try {
 				bases[i].setField1(null);
 				fail("i="+i);
+			} catch (TestSpecificationError tse) {
+				fail();
 			} catch (ContractError ce) {
 			}
 		}
@@ -83,6 +86,8 @@ public class OverriddenContractTest extends TestCase {
 			try {
 				bases[i].setField2(null);
 				fail("i="+i);
+			} catch (TestSpecificationError tse) {
+				fail();
 			} catch (ContractError ce) {
 			}
 			try {
@@ -98,6 +103,8 @@ public class OverriddenContractTest extends TestCase {
 			try {
 				bases[i].setField3(null); // fail pre
 				fail("i="+i);
+			} catch (TestSpecificationError tse) {
+				fail();
 			} catch (ContractError ce) {
 			}
 			try {
@@ -109,6 +116,8 @@ public class OverriddenContractTest extends TestCase {
 				bases[i].setField3("foobar"); // fail post
 				bases[i].getField3();
 				fail("i="+i);
+			} catch (TestSpecificationError tse) {
+				fail();
 			} catch (ContractError ce) {
 			}
 			try {

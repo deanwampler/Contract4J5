@@ -26,20 +26,18 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.aspectj.lang.reflect.SourceLocation;
-import org.contract4j5.ContractEnforcer;
 import org.contract4j5.Instance;
 import org.contract4j5.Post;
 import org.contract4j5.Pre;
 import org.contract4j5.TestContext;
 import org.contract4j5.TestContextImpl;
+import org.contract4j5.TestSpecificationError;
 import org.contract4j5.interpreter.TestResult;
 import org.contract4j5.testexpression.DefaultPostTestExpressionMaker;
 import org.contract4j5.testexpression.DefaultPreTestExpressionMaker;
 import org.contract4j5.testexpression.DefaultTestExpressionMaker;
-import org.contract4j5.testexpression.ParentTestExpressionFinder;
-import org.contract4j5.testexpression.ParentTestExpressionFinderImpl;
 import org.contract4j5.testexpression.SimpleStringDefaultTestExpressionMaker;
-import org.contract4j5.util.MiscUtils;
+import org.contract4j5.util.InstanceUtils;
 
 /**
  * Test the method preconditions and postconditions. Note that static methods 
@@ -48,87 +46,42 @@ import org.contract4j5.util.MiscUtils;
  * static behavior, so a possible extension is to allow aspects on static methods.
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
-public aspect MethodBoundaryConditions extends Contract4J {
-	private static DefaultTestExpressionMaker defaultPreTestExpressionMaker = null;
+public aspect MethodBoundaryConditions extends AbstractConditions {
+	private  DefaultTestExpressionMaker defaultPreTestExpressionMaker;
 	
-	/**
-	 * @return the DefaultTestExpressionMaker for preconditions tests for methods
-	 */
-	public static DefaultTestExpressionMaker getDefaultPreTestExpressionMaker() { 
-		if (defaultPreTestExpressionMaker == null) {
+	public DefaultTestExpressionMaker getDefaultPreTestExpressionMaker() { 
+		if (defaultPreTestExpressionMaker == null)
 			defaultPreTestExpressionMaker = new DefaultPreTestExpressionMaker();
-		}
 		return defaultPreTestExpressionMaker; 
 	}
 	
-	/**
-	 * @param maker DefaultTestExpressionMaker for preconditions tests for methods
-	 */
-	public static void setDefaultPreTestExpressionMaker (DefaultTestExpressionMaker maker) { 
+	public void setDefaultPreTestExpressionMaker (DefaultTestExpressionMaker maker) { 
 		defaultPreTestExpressionMaker = maker; 
 	}
 
-	private static DefaultTestExpressionMaker defaultPostTestExpressionMaker = null;
+	private DefaultTestExpressionMaker defaultPostTestExpressionMaker;
 	
-	/**
-	 * @return the DefaultTestExpressionMaker for postcondition tests for
-	 * methods not returning void
-	 */
-	public static DefaultTestExpressionMaker getDefaultPostTestExpressionMaker() { 
-		if (defaultPostTestExpressionMaker == null) {
+	public DefaultTestExpressionMaker getDefaultPostTestExpressionMaker() { 
+		if (defaultPostTestExpressionMaker == null)
 			defaultPostTestExpressionMaker = new DefaultPostTestExpressionMaker();
-		}
 		return defaultPostTestExpressionMaker; 
 	}
 	
-	/**
-	 * @param maker DefaultTestExpressionMaker for postcondition tests for
-	 * methods not returning void
-	 */
-	public static void setDefaultPostTestExpressionMaker (DefaultTestExpressionMaker maker) { 
+	public void setDefaultPostTestExpressionMaker (DefaultTestExpressionMaker maker) { 
 		defaultPostTestExpressionMaker = maker; 
 	}
 
-	private static DefaultTestExpressionMaker defaultPostReturningVoidTestExpressionMaker = null;
+	private DefaultTestExpressionMaker defaultPostReturningVoidTestExpressionMaker;
 	
-	/**
-	 * @return the DefaultTestExpressionMaker for postcondition tests for
-	 * methods returning void. (By default, the test expression itself will be "".)
-	 */
-	public static DefaultTestExpressionMaker getDefaultPostReturningVoidTestExpressionMaker() { 
-		if (defaultPostReturningVoidTestExpressionMaker == null) {
-			defaultPostReturningVoidTestExpressionMaker = new SimpleStringDefaultTestExpressionMaker();
-		}
+	public DefaultTestExpressionMaker getDefaultPostReturningVoidTestExpressionMaker() { 
+		if (defaultPostReturningVoidTestExpressionMaker == null)
+			defaultPostReturningVoidTestExpressionMaker = 
+				new SimpleStringDefaultTestExpressionMaker();
 		return defaultPostReturningVoidTestExpressionMaker; 
 	}
 	
-	/**
-	 * @param maker DefaultTestExpressionMaker for postcondition tests for
-	 * methods returning void
-	 */
-	public static void setDefaultPostReturningVoidTestExpressionMaker (DefaultTestExpressionMaker maker) { 
+	public void setDefaultPostReturningVoidTestExpressionMaker (DefaultTestExpressionMaker maker) { 
 		defaultPostReturningVoidTestExpressionMaker = maker; 
-	}
-
-	private static ParentTestExpressionFinder parentTestExpressionFinder = null;
-	
-	/**
-	 * @return the parentTestExpressionFinder used to determine the text expression
-	 * used by the corresponding annotation on the corresponding parent method, if any.
-	 */
-	public static ParentTestExpressionFinder getParentTestExpressionFinder() {
-		if (parentTestExpressionFinder == null) {
-			parentTestExpressionFinder = new ParentTestExpressionFinderImpl();
-		}
-		return parentTestExpressionFinder;
-	}
-
-	/**
-	 * @param parentTestExpressionFinder to use.
-	 */
-	public static void setParentTestExpressionFinder(
-			ParentTestExpressionFinder finder) {
-		parentTestExpressionFinder = finder;
 	}
 
 	/**
@@ -220,7 +173,7 @@ public aspect MethodBoundaryConditions extends Contract4J {
 		String[]    argNames   = ms.getParameterNames();
 		Class[]     argTypes   = ms.getParameterTypes();
 		Object[]    argValues  = thisJoinPoint.getArgs();
-		Instance[]  args       = MiscUtils.makeInstanceArray(argNames, argTypes, argValues);
+		Instance[]  args       = InstanceUtils.makeInstanceArray(argNames, argTypes, argValues);
 		SourceLocation loc     = thisJoinPoint.getSourceLocation(); 
 		Instance    instance   = new Instance (methodName, clazz, obj);
 		// The returned value is set in the advice for post tests for 
@@ -236,9 +189,8 @@ public aspect MethodBoundaryConditions extends Contract4J {
 			getParentTestExpressionFinder().findParentMethodTestExpressionIfEmpty(
 				annoTestExpr, anno, ms.getMethod(), context);
 		if (result.isPassed() == false) {
-			ContractEnforcer enf = getContractEnforcer();
-			String msg = enf.makeFailureMessage (annoTestExpr, testTypeName, result.getMessage(), context, result);
-			enf.handleFailure(msg);
+			getContractEnforcer().fail(annoTestExpr, testTypeName, result.getMessage(),  
+					context, new TestSpecificationError());
 		}
 		String testExpr = result.getMessage(); 
 		testExpr = maker.makeDefaultTestExpressionIfEmpty(testExpr, context);

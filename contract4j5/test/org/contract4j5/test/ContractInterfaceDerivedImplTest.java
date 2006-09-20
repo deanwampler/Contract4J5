@@ -21,6 +21,7 @@
 package org.contract4j5.test;
 
 import org.contract4j5.ContractError;
+import org.contract4j5.TestSpecificationError;
 
 public class ContractInterfaceDerivedImplTest extends ContractInterfaceImplTest {
 	private ContractInterfaceImpl obj2 = null;
@@ -39,6 +40,8 @@ public class ContractInterfaceDerivedImplTest extends ContractInterfaceImplTest 
 		try {
 			obj2 = new ContractInterfaceDerivedImpl(0);  // Fail class invariant
 			fail();
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError ce) {
 			// Expected
 		}
@@ -48,6 +51,8 @@ public class ContractInterfaceDerivedImplTest extends ContractInterfaceImplTest 
 		try {
 			obj2 = new ContractInterfaceDerivedImpl(100);  // Fail the c'tor precondition.
 			fail();
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError ce) {
 			// Expected
 		}
@@ -56,6 +61,8 @@ public class ContractInterfaceDerivedImplTest extends ContractInterfaceImplTest 
 	public void testClassImplContractInterface3() {
 		try {
 			obj2 = new ContractInterfaceDerivedImpl(1, 2); // Fail the c'tor postcondition
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 			// Expected
@@ -71,6 +78,8 @@ public class ContractInterfaceDerivedImplTest extends ContractInterfaceImplTest 
 		try {
 			obj2.getName();
 			fail();
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError ce) {
 			// Expected	to now fail!
 		}
@@ -79,6 +88,8 @@ public class ContractInterfaceDerivedImplTest extends ContractInterfaceImplTest 
 	public void testClassImplContractInterface5() {
 		try {
 			obj2 = new ContractInterfaceDerivedImpl(1, 5);  // Fail the "b" field invariant
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 			// Expected

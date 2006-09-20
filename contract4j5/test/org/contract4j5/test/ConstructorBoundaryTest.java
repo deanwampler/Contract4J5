@@ -23,10 +23,11 @@ package org.contract4j5.test;
 import junit.framework.TestCase;
 
 import org.contract4j5.Contract;
+import org.contract4j5.Contract4J;
 import org.contract4j5.ContractError;
 import org.contract4j5.Post;
 import org.contract4j5.Pre;
-import org.contract4j5.aspects.Contract4J;
+import org.contract4j5.TestSpecificationError;
 import org.contract4j5.configurator.Configurator;
 import org.contract4j5.configurator.test.ConfiguratorForTesting;
 
@@ -60,23 +61,28 @@ public class ConstructorBoundaryTest extends TestCase {
 		}
 	}
 
+	Contract4J c4j;
+	
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		Configurator c = new ConfiguratorForTesting();
 		c.configure();
-		Contract4J.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(false);
+		c4j = c.getContract4J();
+		c4j.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(false);
 	}
 	
 	public void testCtorWithDefaultPrePostFail() {
 		try {
 			new ConstructorBoundaryWithDefaultExpr("foo", 0);
 			fail("testCtorWithDefaultPrePostPass");  // should fail because the default @Post test is "", which is disallowed.
+		} catch (TestSpecificationError tse) {
 		} catch (ContractError ce) {
+			fail();
 		}
 	}
 	public void testCtorWithDefaultPostPass() {
-		Contract4J.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(true);
+		c4j.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(true);
 		try {
 			ConstructorBoundaryWithDefaultExpr t = 
 				new ConstructorBoundaryWithDefaultExpr("foo", 0);
@@ -88,21 +94,21 @@ public class ConstructorBoundaryTest extends TestCase {
 	}
 	
 	public void testCtorWithDefaultPreFail1() {
+		doTestCtorWithDefaultPreFailsWithTestSpecError(null);
+		doTestCtorWithDefaultPreFailsWithTestSpecError("foo");
+	}
+	private void doTestCtorWithDefaultPreFailsWithTestSpecError(String ctorArg) {
 		try {
-			new ConstructorBoundaryWithDefaultExpr(null, 1);
-			fail();  
+			new ConstructorBoundaryWithDefaultExpr(ctorArg, 0);
+			fail(ctorArg);  
+		} catch (TestSpecificationError tse) {
 		} catch (ContractError ce) {
+			fail(ctorArg);
 		}
 	}
-	public void testCtorWithDefaultPreFail2() {
-		try {
-			new ConstructorBoundaryWithDefaultExpr("foo", 0);
-			fail();  
-		} catch (ContractError ce) {
-		}
-	}
+
 	public void testCtorWithDefaultPrePass() {
-		Contract4J.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(true);
+		c4j.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(true);
 		try {
 			new ConstructorBoundaryWithDefaultExpr("foo", 2);
 		} catch (ContractError ce) {
@@ -114,6 +120,8 @@ public class ConstructorBoundaryTest extends TestCase {
 		try {
 			new ConstructorBoundaryWithDefinedExpr(null, 2);
 			fail();  
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError ce) {
 		}
 	}
@@ -121,6 +129,8 @@ public class ConstructorBoundaryTest extends TestCase {
 		try {
 			new ConstructorBoundaryWithDefinedExpr("foo", 0);
 			fail();  
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError ce) {
 		}
 	}
@@ -128,6 +138,8 @@ public class ConstructorBoundaryTest extends TestCase {
 		try {
 			new ConstructorBoundaryWithDefinedExpr("", 2);
 			fail();  
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError ce) {
 		}
 	}
@@ -135,6 +147,8 @@ public class ConstructorBoundaryTest extends TestCase {
 		try {
 			new ConstructorBoundaryWithDefinedExpr("foo", 1);
 			fail();  
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError ce) {
 		}
 	}

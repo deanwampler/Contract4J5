@@ -23,9 +23,10 @@ package org.contract4j5.test;
 import junit.framework.TestCase;
 
 import org.contract4j5.Contract;
+import org.contract4j5.Contract4J;
 import org.contract4j5.ContractError;
 import org.contract4j5.Invar;
-import org.contract4j5.aspects.Contract4J;
+import org.contract4j5.TestSpecificationError;
 import org.contract4j5.configurator.Configurator;
 import org.contract4j5.configurator.test.ConfiguratorForTesting;
 
@@ -64,13 +65,22 @@ public class TypeInvarTest extends TestCase {
 		}
 	}
 
+	Contract4J c4j;
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		Configurator c = new ConfiguratorForTesting();
 		c.configure();
+		c4j = c.getContract4J();
 	}
-	
+
+	@Override
+	protected void tearDown() throws Exception {
+		super.tearDown();
+		c4j.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(false);
+	}
+
 	public void testWithDefaultFalse() {
 		TypeInvarWithDefaultExpr t = 
 			doTestCtorWithDefault(false, "foo", 1);  // Won't pass if empty test strings, but args irrelevant
@@ -79,14 +89,14 @@ public class TypeInvarTest extends TestCase {
 		t = doTestCtorWithDefault(false, null,  0); 
 		// Now temporarily disable the test failure when the test is empty so we can
 		// successfully create an object for subsequent tests.
-		Contract4J.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(true);
+		c4j.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(true);
 		t = new TypeInvarWithDefaultExpr("foo", 1);  // Will pass if empty test strings.
-		Contract4J.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(false);
+		c4j.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(false);
 		doTestSetIWithDefault(t, false);
 		doTestSetNameWithDefault(t, false);
 	}
 	public void testCtorWithDefaultTrue() {
-		Contract4J.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(true);
+		c4j.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(true);
 		TypeInvarWithDefaultExpr t = 
 			doTestCtorWithDefault(true, "foo", 1);  // Will pass if empty test strings.
 		t = doTestCtorWithDefault(true, null,  1); 
@@ -102,10 +112,12 @@ public class TypeInvarTest extends TestCase {
 				fail();
 			}
 			return t;
-		} catch (ContractError ce) {
+		} catch (TestSpecificationError tse) {
 			if (shouldPass) {
 				fail();
 			}
+		} catch (ContractError ce) {
+			fail();
 		}
 		return null;
 	}
@@ -115,10 +127,12 @@ public class TypeInvarTest extends TestCase {
 			if (!shouldPass) {
 				fail();
 			}
-		} catch (ContractError ce) {
+		} catch (TestSpecificationError tse) {
 			if (shouldPass) {
 				fail();
 			}
+		} catch (ContractError ce) {
+			fail();
 		}
 	}
 	protected void doTestSetNameWithDefault (TypeInvarWithDefaultExpr t, boolean shouldPass) {
@@ -127,10 +141,12 @@ public class TypeInvarTest extends TestCase {
 			if (!shouldPass) {
 				fail();
 			}
-		} catch (ContractError ce) {
+		} catch (TestSpecificationError tse) {
 			if (shouldPass) {
 				fail();
 			}
+		} catch (ContractError ce) {
+			fail();
 		}
 	}
 	
@@ -139,15 +155,21 @@ public class TypeInvarTest extends TestCase {
 		try {
 			t = new TypeInvarWithDefinedExpr(null, 1);
 			fail();
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError ce) {
 		}
 		try {
 			t = new TypeInvarWithDefinedExpr("foo", 0);
 			fail();
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError ce) {
 		}
 		try {
 			t = new TypeInvarWithDefinedExpr(null, 0);
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 		}
@@ -155,10 +177,14 @@ public class TypeInvarTest extends TestCase {
 		try {
 			t.setI(0);
 			fail();
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError ce) {
 		}
 		try {
 			t.setName(null);
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 		}

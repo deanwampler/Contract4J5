@@ -33,7 +33,6 @@ import org.contract4j5.configurator.test.ConfiguratorForTesting;
 import org.contract4j5.interpreter.ExpressionInterpreter;
 import org.contract4j5.interpreter.ExpressionInterpreterHelper;
 import org.contract4j5.interpreter.TestResult;
-import org.contract4j5.util.reporter.WriterReporter;
 
 public class ExpressionInterpreterHelperTest extends TestCase {
 	ExpressionInterpreterHelper interpreter = null;
@@ -43,7 +42,6 @@ public class ExpressionInterpreterHelperTest extends TestCase {
 		Configurator c = new ConfiguratorForTesting();
 		c.configure();
 		interpreter = new ExpressionInterpreterStub();
-		interpreter.setReporter(new WriterReporter());
 	}
 
 	/*
@@ -68,7 +66,7 @@ public class ExpressionInterpreterHelperTest extends TestCase {
 	 * Test method for 'org.contract4j5.interpreter.ExpressionInterpreterHelper.validateTestExpression(String testExpression, TestContext context)'
 	 */
 	public void testValidateTestExpression() {
-		doTestValidateTestExpression (false, " ", ExpressionInterpreter.InvalidTestExpression.EMPTY_EXPRESSION); 
+		doTestValidateTestExpression (false, " ", ExpressionInterpreter.InvalidTestExpression.EMPTY_EXPRESSION_ERROR); 
 		doTestValidateTestExpression (true,  " $this ", ExpressionInterpreter.InvalidTestExpression.THIS_KEYWORD_WITH_NO_INSTANCE);
 		doTestValidateTestExpression (true,  " $target ", ExpressionInterpreter.InvalidTestExpression.TARGET_KEYWORD_WITH_NO_TARGET);
 		doTestValidateTestExpression (true,  " $return ", ExpressionInterpreter.InvalidTestExpression.RETURN_KEYWORD_WITH_NO_RETURN);

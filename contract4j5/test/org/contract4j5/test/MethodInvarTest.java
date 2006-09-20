@@ -23,9 +23,10 @@ package org.contract4j5.test;
 import junit.framework.TestCase;
 
 import org.contract4j5.Contract;
+import org.contract4j5.Contract4J;
 import org.contract4j5.ContractError;
 import org.contract4j5.Invar;
-import org.contract4j5.aspects.Contract4J;
+import org.contract4j5.TestSpecificationError;
 import org.contract4j5.configurator.Configurator;
 import org.contract4j5.configurator.test.ConfiguratorForTesting;
 
@@ -70,11 +71,14 @@ public class MethodInvarTest extends TestCase {
 		}
 	}
 
+	Contract4J c4j;
+	
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		Configurator c = new ConfiguratorForTesting();
 		c.configure();
+		c4j = c.getContract4J();
 	}
 	
 	public void testSetIWithDefaultOnBefore1 () {
@@ -83,8 +87,10 @@ public class MethodInvarTest extends TestCase {
 		try {
 			t.setI(1);
 			fail();  // fails because test is empty
-		} catch (ContractError ce) {
+		} catch (TestSpecificationError tse) {
 			assertEquals(0, t.i);  // fails before value is set
+		} catch (ContractError ce) {
+			fail();
 		}
 	}
 	public void testSetIWithDefaultOnBefore2 () {
@@ -93,8 +99,10 @@ public class MethodInvarTest extends TestCase {
 		try {
 			t.setI(0);
 			fail();  // fails because test is empty
-		} catch (ContractError ce) {
+		} catch (TestSpecificationError tse) {
 			assertEquals(1, t.i);  // fails before value is set
+		} catch (ContractError ce) {
+			fail();
 		}
 	}
 	public void testSetIWithDefaultOnBefore3 () {
@@ -103,13 +111,15 @@ public class MethodInvarTest extends TestCase {
 		try {
 			t.setI(2);
 			fail();  // fails because test is empty
-		} catch (ContractError ce) {
+		} catch (TestSpecificationError tse) {
 			assertEquals(1, t.i);  // fails before value is set
+		} catch (ContractError ce) {
+			fail();
 		}
 	}
 	public void testSetIWithDefaultOff1 () {
 		// Turn off failures for empty tests 
-		Contract4J.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(true);
+		c4j.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(true);
 		MethodInvarWithDefaultExpr t = 
 			new MethodInvarWithDefaultExpr("foo", 1);
 		try {
@@ -120,7 +130,7 @@ public class MethodInvarTest extends TestCase {
 	}
 	public void testSetIWithDefaultOff2 () {
 		// Turn off failures for empty tests 
-		Contract4J.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(true);
+		c4j.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(true);
 		MethodInvarWithDefaultExpr t = 
 			new MethodInvarWithDefaultExpr("foo", 1);
 		try {
@@ -136,6 +146,8 @@ public class MethodInvarTest extends TestCase {
 		try {
 			t.setI(1);
 			fail();
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError ce) {
 			assertEquals (0, t.i);  // it will have been set to 0; test failed afterwards.
 		}
@@ -145,6 +157,8 @@ public class MethodInvarTest extends TestCase {
 			new MethodInvarWithDefinedExpr("foo", 1);
 		try {
 			t.setI(0);
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 			assertEquals (0, t.i);  // it will still be 0; test failed beforehand.
@@ -166,13 +180,15 @@ public class MethodInvarTest extends TestCase {
 		try {
 			t.getI();
 			fail();  // fails because test is empty
-		} catch (ContractError ce) {
+		} catch (TestSpecificationError tse) {
 			assertEquals (0, t.i);
+		} catch (ContractError ce) {
+			fail();
 		}
 	}
 	public void testGetIWithDefaultPass () {
 		// Turn off failures for empty tests 
-		Contract4J.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(true);
+		c4j.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(true);
 		MethodInvarWithDefaultExpr t = 
 			new MethodInvarWithDefaultExpr(null, 0);
 		try {
@@ -188,6 +204,8 @@ public class MethodInvarTest extends TestCase {
 			new MethodInvarWithDefinedExpr(null, 0);
 		try {
 			t.getI();
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 			assertEquals (0, t.i);
@@ -210,8 +228,10 @@ public class MethodInvarTest extends TestCase {
 		try {
 			t.setName(null);
 			fail();  // fails because test is empty
-		} catch (ContractError ce) {
+		} catch (TestSpecificationError tse) {
 			assertEquals ("foo", t.name);  // test fails before setting to null
+		} catch (ContractError ce) {
+			fail();
 		}
 	}
 	public void testSetNameWithDefaultOnBefore2 () {
@@ -220,8 +240,10 @@ public class MethodInvarTest extends TestCase {
 		try {
 			t.setName("foo");
 			fail();  // fails because test is empty
-		} catch (ContractError ce) {
+		} catch (TestSpecificationError tse) {
 			assertNull (t.name);  // test fails before setting value to "foo"
+		} catch (ContractError ce) {
+			fail();
 		}
 	}
 	public void testSetNameWithDefaultOnBefore3 () {
@@ -230,14 +252,16 @@ public class MethodInvarTest extends TestCase {
 		try {
 			t.setName("bar");
 			fail();  // fails because test is empty
-		} catch (ContractError ce) {
+		} catch (TestSpecificationError tse) {
 			assertEquals ("foo", t.name);  // test fails before setting to null
+		} catch (ContractError ce) {
+			fail();
 		}
 	}
 	
 	public void testSetNameWithDefaultOff1 () {
 		// Turn off failures for empty tests 
-		Contract4J.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(true);
+		c4j.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(true);
 		MethodInvarWithDefaultExpr t = 
 			new MethodInvarWithDefaultExpr("foo", 1);
 		try {
@@ -249,7 +273,7 @@ public class MethodInvarTest extends TestCase {
 	}
 	public void testSetNameWithDefaultOff2 () {
 		// Turn off failures for empty tests 
-		Contract4J.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(true);
+		c4j.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(true);
 		MethodInvarWithDefaultExpr t = 
 			new MethodInvarWithDefaultExpr("foo", 1);
 		try {
@@ -266,6 +290,8 @@ public class MethodInvarTest extends TestCase {
 		try {
 			t.setName("foo");
 			fail();
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError ce) {
 			assertNull (t.name);  // fails before setting value
 		}
@@ -275,6 +301,8 @@ public class MethodInvarTest extends TestCase {
 			new MethodInvarWithDefinedExpr("foo", 1);
 		try {
 			t.setName(null);
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 			assertNull (t.name);  // fails after setting value
@@ -297,12 +325,14 @@ public class MethodInvarTest extends TestCase {
 		try {
 			t.getName();
 			fail();  // fails because test is empty
+		} catch (TestSpecificationError tse) {
 		} catch (ContractError ce) {
+			fail();
 		}
 	}
 	public void testGetNameWithDefaultPass () {
 		// Turn off failures for empty tests 
-		Contract4J.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(true);
+		c4j.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(true);
 		MethodInvarWithDefaultExpr t = 
 			new MethodInvarWithDefaultExpr(null, 0);
 		try {
@@ -318,6 +348,8 @@ public class MethodInvarTest extends TestCase {
 			new MethodInvarWithDefinedExpr(null, 0);
 		try {
 			t.getName();
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 			assertNull(t.name);

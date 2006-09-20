@@ -23,7 +23,6 @@ package org.contract4j5.interpreter;
 import java.util.Map;
 
 import org.contract4j5.TestContext;
-import org.contract4j5.util.reporter.Reporter;
 
 /**
  * The interface for the expression interpreter used to evaluate test expressions.
@@ -32,15 +31,18 @@ import org.contract4j5.util.reporter.Reporter;
 public interface ExpressionInterpreter {
 	/**
 	 * Common invalid test expression errors that can be used by 
-	 * implementers of this interface. Note the space at end of each message so 
-	 * more than one can be concatenated together. Note that if implementers or 
-	 * clients of interpreters define a default test expression when the 
+	 * implementers of this interface. Note the space at the end of each message 
+	 * so that more than one can be concatenated together. Note that if implementers
+	 * or clients of interpreters define a default test expression when the 
 	 * expression is empty, then the first message may never be used.
 	 * The messages that end in ":" are designed to support appending the 
 	 * offending substrings.
+	 * Finally, some of the errors may be considered "test expression errors" 
+	 * terminating execution, while others may be considered just warnings.
 	 */
 	static enum InvalidTestExpression {
-		EMPTY_EXPRESSION               ("The test expression is empty! "),
+		EMPTY_EXPRESSION_ERROR         ("It is an error for the test expression to be empty! "),
+		EMPTY_EXPRESSION_WARNING       ("Warning: the test expression is empty! "),
 		THIS_KEYWORD_WITH_NO_INSTANCE  ("\"$this\" present, but the \"instance\" is null. "),
 		TARGET_KEYWORD_WITH_NO_TARGET  ("\"$target\" present, but the \"target\" is null. "),
 		OLD_KEYWORD_NO_ARGS            ("The \"$old(..)\" keyword 'function' requires a field, method call, \"$this\", or \"$target\" argument, in parentheses. "),
@@ -227,7 +229,4 @@ public interface ExpressionInterpreter {
 	 */
 	TestResult invokeTest (String testExpression, TestContext context);
 	
-	Reporter getReporter();
-
-	void setReporter (Reporter reporter);
 }

@@ -20,9 +20,9 @@
 
 package org.contract4j5.util.debug;
 
+import org.contract4j5.Contract4J;
 import org.contract4j5.util.reporter.Reporter;
 import org.contract4j5.util.reporter.Severity;
-import org.contract4j5.util.reporter.WriterReporter;
 
 /**
  * Report when an exception is thrown. This is most useful for debugging Contract4J
@@ -36,18 +36,14 @@ public aspect ReportThrows {
 		!within (ReportThrows) &&
 		this(o) {
 		Class clazz = o != null ? o.getClass() : null;
-		getReporter().report(Severity.ERROR, clazz, th.toString());
-		th.printStackTrace();
+		Reporter r = getReporter();
+		if (r != null) {
+			r.report(Severity.ERROR, clazz, th.toString());
+			th.printStackTrace();
+		}
 	}
 	
-	private Reporter reporter;
-	public Reporter getReporter() {
-		if (this.reporter == null) {
-			this.reporter = new WriterReporter();
-		}
-		return reporter;
-	}
-	public void setReporter(Reporter reporter) {
-		this.reporter = reporter;
+	protected Reporter getReporter() {
+		return Contract4J.getInstance().getReporter();
 	}
 }

@@ -22,8 +22,9 @@ package org.contract4j5.test;
 
 import junit.framework.TestCase;
 
+import org.contract4j5.Contract4J;
 import org.contract4j5.ContractError;
-import org.contract4j5.aspects.Contract4J;
+import org.contract4j5.TestSpecificationError;
 import org.contract4j5.configurator.Configurator;
 import org.contract4j5.configurator.test.ConfiguratorForTesting;
 
@@ -33,15 +34,16 @@ import org.contract4j5.configurator.test.ConfiguratorForTesting;
  */
 public class EnableDisableContractsTest extends TestCase {
 	
-	BaseTestClass baseTestClass = null;
-
+	BaseTestClass baseTestClass;
+	Contract4J c4j;
 	protected void setUp() throws Exception {
 		super.setUp();
 		Configurator c = new ConfiguratorForTesting();
 		c.configure();
-		Contract4J.setEnabled(Contract4J.TestType.Pre, false);
-		Contract4J.setEnabled(Contract4J.TestType.Post, false);
-		Contract4J.setEnabled(Contract4J.TestType.Invar, false);
+		c4j = c.getContract4J();
+		c4j.setEnabled(Contract4J.TestType.Pre, false);
+		c4j.setEnabled(Contract4J.TestType.Post, false);
+		c4j.setEnabled(Contract4J.TestType.Invar, false);
 		baseTestClass = new BaseTestClass("baseTestClass");
 	}
 
@@ -54,14 +56,18 @@ public class EnableDisableContractsTest extends TestCase {
 	}
 
 	public void testPreMethodOn() {
-		Contract4J.setEnabled(Contract4J.TestType.Pre, true);
+		c4j.setEnabled(Contract4J.TestType.Pre, true);
 		try {
 			baseTestClass.doThat(0, "foo");
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 		}
 		try {
 			baseTestClass.doThat(1, "bar");
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 		}
@@ -86,10 +92,12 @@ public class EnableDisableContractsTest extends TestCase {
 	}
 
 	public void testPostMethodOn() {
-		Contract4J.setEnabled(Contract4J.TestType.Post, true);
+		c4j.setEnabled(Contract4J.TestType.Post, true);
 		try {
 			baseTestClass.setName("bad name");
 			baseTestClass.doIt();
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 		}
@@ -104,14 +112,18 @@ public class EnableDisableContractsTest extends TestCase {
 	}
 
 	public void testInvarMethodOn() {
-		Contract4J.setEnabled(Contract4J.TestType.Invar, true);
+		c4j.setEnabled(Contract4J.TestType.Invar, true);
 		try {
 			baseTestClass.setLazyPi(0f);
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 		}
 		try {
 			baseTestClass.setName(null);
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 		}
@@ -126,12 +138,13 @@ public class EnableDisableContractsTest extends TestCase {
 	}
 
 	public void testInvarFieldOn() {
-		Contract4J.setEnabled(Contract4J.TestType.Invar, true);
+		c4j.setEnabled(Contract4J.TestType.Invar, true);
 		try {
 			baseTestClass.setName(null);
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 		}
 	}
-
 }

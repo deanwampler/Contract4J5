@@ -22,15 +22,15 @@ package org.contract4j5.aspects;
 
 /** 
  * Declare precedence of advice: See documentation for why we use this order.
+ * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 public aspect DeclareContractPrecedence {
 	declare precedence :
 		ConstructorBoundaryConditions, 
 		MethodBoundaryConditions, 
-		InvariantConditions,
-		InvariantConditions.InvariantCtorConditions,
-		InvariantConditions.InvariantMethodConditions,
-		InvariantConditions.InvariantFieldCtorConditions,
-		InvariantConditions.InvariantFieldConditions,
-		InvariantConditions.InvariantTypeConditions;
+		InvariantCtorConditions,
+		InvariantMethodConditions,
+		InvariantFieldCtorConditions,
+		InvariantFieldConditions,
+		InvariantTypeConditions;
 }

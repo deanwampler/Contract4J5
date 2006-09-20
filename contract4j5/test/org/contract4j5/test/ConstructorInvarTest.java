@@ -23,9 +23,10 @@ package org.contract4j5.test;
 import junit.framework.TestCase;
 
 import org.contract4j5.Contract;
+import org.contract4j5.Contract4J;
 import org.contract4j5.ContractError;
 import org.contract4j5.Invar;
-import org.contract4j5.aspects.Contract4J;
+import org.contract4j5.TestSpecificationError;
 import org.contract4j5.configurator.Configurator;
 import org.contract4j5.configurator.test.ConfiguratorForTesting;
 
@@ -40,7 +41,7 @@ public class ConstructorInvarTest extends TestCase {
 		public int getI() {	return i; }
 		public void setI(int i) { this.i = i; }		
 		
-		@Invar  // default test (nothing!)
+		@Invar  // default test; nothing so it will be a test specification error
 		public ConstructorInvarWithDefaultExpr (String name, int i) {
 			this.name = name;
 			this.i = i;
@@ -64,11 +65,14 @@ public class ConstructorInvarTest extends TestCase {
 		}
 	}
 
+	Contract4J c4j;
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		Configurator c = new ConfiguratorForTesting();
 		c.configure();
+		c4j = c.getContract4J();
 	}
 	
 	public void testWithDefaultFalse() {
@@ -78,13 +82,13 @@ public class ConstructorInvarTest extends TestCase {
 		t = doTestCtorWithDefault(false, "foo", 0); 
 		t = doTestCtorWithDefault(false, null,  0); 
 		// In order to test the setters, must construct an object while the empty-test issue is bypassed!
-		Contract4J.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(true);
+		c4j.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(true);
 		t = doTestCtorWithDefault(true, "foo", 1);  // Won't pass if empty test strings, but args irrelevant
 		doTestSetIWithDefault(t);
 		doTestSetNameWithDefault(t);
 	}
 	public void testWithDefaultTrue() {
-		Contract4J.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(true);
+		c4j.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(true);
 		ConstructorInvarWithDefaultExpr t = 
 			doTestCtorWithDefault(true, "foo", 1);  // Won't pass if empty test strings, but args irrelevant
 		t = doTestCtorWithDefault(true, null,  1); 
@@ -101,10 +105,12 @@ public class ConstructorInvarTest extends TestCase {
 				fail();
 			}
 			return t;
-		} catch (ContractError ce) {
+		} catch (TestSpecificationError tse) {
 			if (shouldPass) {
 				fail();
 			}
+		} catch (ContractError ce) {
+			fail();
 		}
 		return null;
 	}

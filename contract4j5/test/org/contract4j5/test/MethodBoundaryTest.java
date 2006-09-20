@@ -26,6 +26,7 @@ import org.contract4j5.Contract;
 import org.contract4j5.ContractError;
 import org.contract4j5.Post;
 import org.contract4j5.Pre;
+import org.contract4j5.TestSpecificationError;
 import org.contract4j5.configurator.Configurator;
 import org.contract4j5.configurator.test.ConfiguratorForTesting;
 
@@ -35,13 +36,13 @@ public class MethodBoundaryTest extends TestCase {
 		public String name = null;  // public to help tests below
 		@Post  // default test 
 		public String getName() { return name; }
-		@Pre  // default test (nothing!)
+		@Pre  // default test
 		public void setName(String name) { this.name = name; }		
 
 		public int i = 0;
-		@Post  // default test (nothing!)
+		@Post  // default test
 		public int getI() {	return i; }
-		@Pre  // default test (nothing!)
+		@Pre  // default test
 		public void setI(int i) { this.i = i; }		
 		
 		@Pre @Post
@@ -106,6 +107,7 @@ public class MethodBoundaryTest extends TestCase {
 			fail();  
 		}
 	}
+
 	public void testSetIWithDefaultPrePass2() {
 		MethodBoundaryWithDefaultExpr t = 
 			new MethodBoundaryWithDefaultExpr("foo", 1);
@@ -113,7 +115,7 @@ public class MethodBoundaryTest extends TestCase {
 			t.setI(0);
 			assertEquals(0, t.i);
 		} catch (ContractError ce) {
-			fail();  // see #testSetIWithDefaultOnBefore1()
+			fail();  // see #testSetIWithDefaultPrePass1
 		}
 	}
 
@@ -168,6 +170,8 @@ public class MethodBoundaryTest extends TestCase {
 		try {
 			t.doit(null, new Integer(1), new Float(1.0));
 			fail();
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError ce) {
 		}
 	}
@@ -176,6 +180,8 @@ public class MethodBoundaryTest extends TestCase {
 			new MethodBoundaryWithDefaultExpr("foo", 1);
 		try {
 			t.doit(new String("foo"), null, new Float(1.0));
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 		}
@@ -187,6 +193,8 @@ public class MethodBoundaryTest extends TestCase {
 		try {
 			t.doit(new String("foo"), new Integer(1), null);
 			fail();
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError ce) {
 		}
 	}
@@ -196,6 +204,8 @@ public class MethodBoundaryTest extends TestCase {
 		try {
 			// Fail the post condition
 			t.doit(new String("bad"), new Integer(1), new Float(1.0));
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 		}
@@ -217,6 +227,8 @@ public class MethodBoundaryTest extends TestCase {
 		try {
 			t.getI();
 			fail();
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError ce) {
 			assertEquals (0, t.i); 
 		}
@@ -226,6 +238,8 @@ public class MethodBoundaryTest extends TestCase {
 			new MethodBoundaryWithDefinedExpr(null, 1);
 		try {
 			t.getI();
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 			assertEquals (1, t.i);
@@ -248,6 +262,8 @@ public class MethodBoundaryTest extends TestCase {
 		try {
 			t.setName(null);
 			fail();  // fails because "$args[0] != null" fails.
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError ce) {
 			assertEquals ("foo", t.name);  // test fails before setting to null
 		}
@@ -279,6 +295,8 @@ public class MethodBoundaryTest extends TestCase {
 			new MethodBoundaryWithDefinedExpr("foo", 1);
 		try {
 			t.setName(null);
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 			assertEquals ("foo", t.name);  // fails before setting value
@@ -313,6 +331,8 @@ public class MethodBoundaryTest extends TestCase {
 		try {
 			t.getName();
 			fail(); 
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError ce) {
 			assertNull(t.name);
 		}
@@ -331,6 +351,8 @@ public class MethodBoundaryTest extends TestCase {
 			new MethodBoundaryWithDefinedExpr(null, 0);
 		try {
 			t.getName();
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 			assertNull(t.name);
@@ -353,6 +375,8 @@ public class MethodBoundaryTest extends TestCase {
 		try {
 			t.doit(null, new Integer(1), new Float(1.0));
 			fail();
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError ce) {
 		}
 	}
@@ -361,6 +385,8 @@ public class MethodBoundaryTest extends TestCase {
 			new MethodBoundaryWithDefinedExpr("foo", 1);
 		try {
 			t.doit(new String("foo"), null, new Float(1.0));
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 		}
@@ -371,6 +397,8 @@ public class MethodBoundaryTest extends TestCase {
 		try {
 			t.doit(new String("foo"), new Integer(1), null);
 			fail();
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError ce) {
 		}
 	}
@@ -380,6 +408,8 @@ public class MethodBoundaryTest extends TestCase {
 		try {
 			// Fail the post condition
 			t.doit(new String(""), new Integer(1), new Float(1.0));
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 		}
@@ -394,6 +424,4 @@ public class MethodBoundaryTest extends TestCase {
 			fail(ce.toString());
 		}
 	}
-	
-
 }

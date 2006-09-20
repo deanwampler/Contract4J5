@@ -26,9 +26,11 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.contract4j5.Contract4J;
 import org.contract4j5.Instance;
 import org.contract4j5.TestContext;
-import org.contract4j5.util.MiscUtils;
+import org.contract4j5.TestSpecificationError;
+import org.contract4j5.util.InstanceUtils;
 import org.contract4j5.util.reporter.Reporter;
 import org.contract4j5.util.reporter.Severity;
 
@@ -41,14 +43,6 @@ import org.contract4j5.util.reporter.Severity;
  */
 abstract public class ExpressionInterpreterHelper implements ExpressionInterpreter {
 
-	private Reporter reporter;
-	public Reporter getReporter() {
-		return reporter;
-	}
-	public void setReporter(Reporter reporter) {
-		this.reporter = reporter;
-	}
-	
 	boolean treatEmptyTestExpressionAsValidTest = false;
 	public boolean getTreatEmptyTestExpressionAsValidTest() {
 		return treatEmptyTestExpressionAsValidTest;
@@ -170,10 +164,10 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 		String warnStr = "";
 		if (empty(testExpression)) {
 			warnStr = "";
-			errStr  = InvalidTestExpression.EMPTY_EXPRESSION.toString();
+			errStr  = InvalidTestExpression.EMPTY_EXPRESSION_ERROR.toString();
 			if (getTreatEmptyTestExpressionAsValidTest()) { 
 				// If here, consider empty test "valid"; just warn about it.
-				warnStr = InvalidTestExpression.EMPTY_EXPRESSION.toString();
+				warnStr = InvalidTestExpression.EMPTY_EXPRESSION_WARNING.toString();
 				errStr  = "";
 			}
 			return makeValidateTestExpressionReturn (warnStr, errStr);
@@ -279,7 +273,8 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 				sb.append(warnStr);
 			}
 		}
-		return new TestResult (pass, sb.toString());
+		Throwable testExprErr = pass ? null : new TestSpecificationError();
+		return new TestResult (pass, sb.toString(), testExprErr);
 	}
 	
 	/**
@@ -402,7 +397,7 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 		if (context.getMethodResult() != null) {
 			recordContextChange ("c4jReturn", context.getMethodResult().getValue());
 		}
-		recordContextChange ("c4jArgs",   MiscUtils.getInstanceValues(context.getMethodArgs()));
+		recordContextChange ("c4jArgs",   InstanceUtils.getInstanceValues(context.getMethodArgs()));
 
 		testExpression = substituteArguments (testExpression, context);
 
@@ -549,4 +544,8 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 	public ExpressionInterpreterHelper() {
 		super();
 	}
+
+	protected Reporter getReporter() {
+		return Contract4J.getInstance().getReporter();
+	}	
 }

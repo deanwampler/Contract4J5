@@ -9,17 +9,20 @@ import java.util.Properties;
 
 import junit.framework.TestCase;
 
-import org.contract4j5.aspects.Contract4J;
+import org.contract4j5.Contract4J;
+import org.contract4j5.TestContext;
 import org.contract4j5.aspects.ConstructorBoundaryConditions;
 import org.contract4j5.aspects.MethodBoundaryConditions;
-import org.contract4j5.aspects.InvariantConditions;
-import org.contract4j5.ContractEnforcer;
-import org.contract4j5.NullContractEnforcer;
-import org.contract4j5.TestContext;
+import org.contract4j5.aspects.InvariantCtorConditions;
+import org.contract4j5.aspects.InvariantFieldConditions;
+import org.contract4j5.aspects.InvariantFieldCtorConditions;
+import org.contract4j5.aspects.InvariantMethodConditions;
+import org.contract4j5.aspects.InvariantTypeConditions;
 import org.contract4j5.configurator.AbstractConfigurator;
 import org.contract4j5.configurator.Configurator;
 import org.contract4j5.configurator.PropertiesConfigurator;
-import org.contract4j5.configurator.PropertiesConfigurator.KnownBeanKeys;
+import org.contract4j5.enforcer.ContractEnforcer;
+import org.contract4j5.enforcer.NullContractEnforcer;
 import org.contract4j5.interpreter.ExpressionInterpreter;
 import org.contract4j5.interpreter.TestResult;
 import org.contract4j5.testexpression.DefaultTestExpressionMaker;
@@ -31,7 +34,6 @@ import org.contract4j5.util.reporter.WriterReporter;
 public class PropertiesConfiguratorTest extends TestCase {
 	public static class StubConfigurator extends AbstractConfigurator {
 		public boolean wasCalled = false;
-		@Override
 		protected void doConfigure() {
 			wasCalled = true;
 		}
@@ -46,33 +48,30 @@ public class PropertiesConfiguratorTest extends TestCase {
 
 		public void setThreshold(Severity level) {
 		}
+		public void setThresholdUsingString(String level) throws IllegalArgumentException {
+		}
 	}
 	
-	public StubConfigurator configurator = null;
+	public StubConfigurator configurator;
+	public Contract4J c4j;
+	
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		StubOutputStream.invoked = false;
-		Contract4J.setSystemConfigurator(null);
 		configurator = new StubConfigurator();
-	}
-	
-	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
-		for (KnownBeanKeys beanKey: KnownBeanKeys.values()) {
-			unsetProp(beanKey.name());
-		}
+		c4j = Contract4J.getInstance();
+		c4j.setSystemConfigurator(null);
+		StubOutputStream.invoked = false;
 	}
 	
 	public void testDefaultConfiguratorIsSet() {
 		assertEquals (org.contract4j5.configurator.PropertiesConfigurator.class,
-				Contract4J.getSystemConfigurator().getClass());
+				c4j.getSystemConfigurator().getClass());
 	}
 	
 	public void testConfiguratorGetSet() {
-		Contract4J.setSystemConfigurator(configurator);
-		assertEquals (configurator,	Contract4J.getSystemConfigurator());
+		c4j.setSystemConfigurator(configurator);
+		assertEquals (configurator,	c4j.getSystemConfigurator());
 	}
 	
 	public void testSetReporterThroughProperty() {
@@ -80,7 +79,7 @@ public class PropertiesConfiguratorTest extends TestCase {
 				StubReporter.class.getName());
 		Configurator c = new PropertiesConfigurator();
 		c.configure();
-		Reporter r = c.getReporter();
+		Reporter r = c4j.getReporter();
 		assertEquals (PropertiesConfiguratorTest.StubReporter.class,
 				r.getClass());
 	}
@@ -89,7 +88,7 @@ public class PropertiesConfiguratorTest extends TestCase {
 		setProp(PropertiesConfigurator.KnownBeanKeys.GlobalReporter.name(), "");
 		Configurator c = new PropertiesConfigurator();
 		c.configure();
-		Reporter r = c.getReporter();
+		Reporter r = c4j.getReporter();
 		// defaults to WriterReporter?
 		assertEquals (WriterReporter.class,	r.getClass());
 	}
@@ -101,7 +100,7 @@ public class PropertiesConfiguratorTest extends TestCase {
 				Severity.DEBUG.name());
 		Configurator c = new PropertiesConfigurator();
 		c.configure();
-		Reporter r = c.getReporter();
+		Reporter r = c4j.getReporter();
 		assertEquals (Severity.DEBUG, r.getThreshold());
 	}
 
@@ -123,7 +122,7 @@ public class PropertiesConfiguratorTest extends TestCase {
 				StubWriter.class.getName());
 		Configurator c = new PropertiesConfigurator();
 		c.configure();
-		WriterReporter wr = (WriterReporter) c.getReporter();
+		WriterReporter wr = (WriterReporter) c4j.getReporter();
 		assertEquals (StubWriter.class, wr.getWriter(Severity.DEBUG).getClass());
 		assertEquals (StubWriter.class, wr.getWriter(Severity.ERROR).getClass());
 	}
@@ -135,7 +134,7 @@ public class PropertiesConfiguratorTest extends TestCase {
 				StubOutputStream.class.getName());
 		Configurator c = new PropertiesConfigurator();
 		c.configure();
-		WriterReporter wr = (WriterReporter) c.getReporter();
+		WriterReporter wr = (WriterReporter) c4j.getReporter();
 		wr.report(Severity.ERROR, this.getClass(), "hello!");
 		assertTrue (StubOutputStream.invoked);
 	}
@@ -145,7 +144,7 @@ public class PropertiesConfiguratorTest extends TestCase {
 				"NonexistentClass");
 		Configurator c = new PropertiesConfigurator();
 		c.configure();
-		Reporter r = c.getReporter();
+		Reporter r = c4j.getReporter();
 		assertEquals (WriterReporter.class, r.getClass());
 	}
 
@@ -158,9 +157,9 @@ public class PropertiesConfiguratorTest extends TestCase {
 				StubOutputStream.class.getName());
 		Configurator c = new PropertiesConfigurator();
 		c.configure();
-		assertTrue (c.getReporter() instanceof WriterReporter);
+		assertTrue (c4j.getReporter() instanceof WriterReporter);
 		StubOutputStream.invoked = false;
-		c.getReporter().report(Severity.ERROR, this.getClass(), "hello!");
+		c4j.getReporter().report(Severity.ERROR, this.getClass(), "hello!");
 		assertTrue (StubOutputStream.invoked);
 	}
 
@@ -173,8 +172,8 @@ public class PropertiesConfiguratorTest extends TestCase {
 				StubOutputStream.class.getName());
 		Configurator c = new PropertiesConfigurator();
 		c.configure();
-		assertFalse (c.getReporter() instanceof WriterReporter);
-		c.getReporter().report(Severity.ERROR, this.getClass(), "hello!");
+		assertFalse (c4j.getReporter() instanceof WriterReporter);
+		c4j.getReporter().report(Severity.ERROR, this.getClass(), "hello!");
 		assertFalse (StubOutputStream.invoked);
 	}
 
@@ -183,7 +182,7 @@ public class PropertiesConfiguratorTest extends TestCase {
 				NullContractEnforcer.class.getName());
 		Configurator c = new PropertiesConfigurator();
 		c.configure();
-		ContractEnforcer ce = Contract4J.getContractEnforcer();
+		ContractEnforcer ce = c4j.getContractEnforcer();
 		assertEquals (NullContractEnforcer.class, ce.getClass());
 	}
 	
@@ -194,15 +193,13 @@ public class PropertiesConfiguratorTest extends TestCase {
 				"true");
 		Configurator c = new PropertiesConfigurator();
 		c.configure();
-		ContractEnforcer ce = Contract4J.getContractEnforcer();
+		ContractEnforcer ce = c4j.getContractEnforcer();
 		assertTrue (ce.getIncludeStackTrace());
 	}
 	
 	
 	public static class StubExpressionInterpreter implements ExpressionInterpreter {
 		public Map<String, Object> determineOldValues(String testExpression, TestContext context) {	return null; }
-		public Reporter getReporter() {	return null; }
-		public void     setReporter(Reporter reporter) {}
 		private boolean empty = false;
 		public boolean getTreatEmptyTestExpressionAsValidTest() { return empty; }
 		public void    setTreatEmptyTestExpressionAsValidTest(boolean emptyOK) { empty=emptyOK; }
@@ -218,7 +215,7 @@ public class PropertiesConfiguratorTest extends TestCase {
 				StubExpressionInterpreter.class.getName());
 		Configurator c = new PropertiesConfigurator();
 		c.configure();
-		ExpressionInterpreter ei = Contract4J.getContractEnforcer().getExpressionInterpreter();
+		ExpressionInterpreter ei = c4j.getContractEnforcer().getExpressionInterpreter();
 		assertEquals (StubExpressionInterpreter.class, ei.getClass());
 	}
 	
@@ -228,7 +225,7 @@ public class PropertiesConfiguratorTest extends TestCase {
 		setProp(PropertiesConfigurator.KnownBeanKeys.ExpressionInterpreterEmptyTestExpressionsValid.name(), "true");
 		Configurator c = new PropertiesConfigurator();
 		c.configure();
-		ExpressionInterpreter ei = Contract4J.getContractEnforcer().getExpressionInterpreter();
+		ExpressionInterpreter ei = c4j.getContractEnforcer().getExpressionInterpreter();
 		assertTrue (ei.getTreatEmptyTestExpressionAsValidTest());
 	}
 
@@ -254,7 +251,7 @@ public class PropertiesConfiguratorTest extends TestCase {
 		setProp(PropertiesConfigurator.KnownBeanKeys.ExpressionInterpreterOptionalKeywordSubstitutions.name(), mapString);
 		Configurator c = new PropertiesConfigurator();
 		c.configure();
-		ExpressionInterpreter ei = Contract4J.getContractEnforcer().getExpressionInterpreter();
+		ExpressionInterpreter ei = c4j.getContractEnforcer().getExpressionInterpreter();
 		Map<String,String> subs = ei.getOptionalKeywordSubstitutions();
 		assertEquals (2,        subs.size());
 		assertEquals ("barfoo", subs.get("foobar"));
@@ -316,7 +313,7 @@ public class PropertiesConfiguratorTest extends TestCase {
 		Configurator c = new PropertiesConfigurator();
 		c.configure();
 		DefaultTestExpressionMaker dtem = 
-			InvariantConditions.InvariantFieldConditions.getDefaultFieldInvarTestExpressionMaker();	
+			InvariantFieldConditions.aspectOf().getDefaultFieldInvarTestExpressionMaker();	
 		assertEquals (StubDefaultTestExpressionMaker.class, dtem.getClass());
 	}
 	
@@ -326,7 +323,7 @@ public class PropertiesConfiguratorTest extends TestCase {
 		Configurator c = new PropertiesConfigurator();
 		c.configure();
 		DefaultTestExpressionMaker dtem = 
-			InvariantConditions.InvariantFieldCtorConditions.getDefaultFieldInvarTestExpressionMaker();	
+			InvariantFieldCtorConditions.aspectOf().getDefaultFieldInvarTestExpressionMaker();	
 		assertEquals (StubDefaultTestExpressionMaker.class, dtem.getClass());
 	}
 	
@@ -336,7 +333,7 @@ public class PropertiesConfiguratorTest extends TestCase {
 		Configurator c = new PropertiesConfigurator();
 		c.configure();
 		DefaultTestExpressionMaker dtem = 
-			InvariantConditions.InvariantMethodConditions.getDefaultMethodInvarTestExpressionMaker();	
+			InvariantMethodConditions.aspectOf().getDefaultMethodInvarTestExpressionMaker();	
 		assertEquals (StubDefaultTestExpressionMaker.class, dtem.getClass());
 	}
 	
@@ -346,7 +343,7 @@ public class PropertiesConfiguratorTest extends TestCase {
 		Configurator c = new PropertiesConfigurator();
 		c.configure();
 		DefaultTestExpressionMaker dtem = 
-			InvariantConditions.InvariantCtorConditions.getDefaultCtorInvarTestExpressionMaker();	
+			InvariantCtorConditions.aspectOf().getDefaultCtorInvarTestExpressionMaker();	
 		assertEquals (StubDefaultTestExpressionMaker.class, dtem.getClass());
 	}
 	
@@ -356,7 +353,7 @@ public class PropertiesConfiguratorTest extends TestCase {
 		Configurator c = new PropertiesConfigurator();
 		c.configure();
 		DefaultTestExpressionMaker dtem = 
-			InvariantConditions.InvariantTypeConditions.getDefaultTypeInvarTestExpressionMaker();	
+			InvariantTypeConditions.aspectOf().getDefaultTypeInvarTestExpressionMaker();	
 		assertEquals (StubDefaultTestExpressionMaker.class, dtem.getClass());
 	}
 	
@@ -366,7 +363,7 @@ public class PropertiesConfiguratorTest extends TestCase {
 		Configurator c = new PropertiesConfigurator();
 		c.configure();
 		DefaultTestExpressionMaker dtem = 
-			ConstructorBoundaryConditions.getDefaultPreTestExpressionMaker();	
+			ConstructorBoundaryConditions.aspectOf().getDefaultPreTestExpressionMaker();	
 		assertEquals (StubDefaultTestExpressionMaker.class, dtem.getClass());
 	}
 	
@@ -376,7 +373,7 @@ public class PropertiesConfiguratorTest extends TestCase {
 		Configurator c = new PropertiesConfigurator();
 		c.configure();
 		DefaultTestExpressionMaker dtem = 
-			ConstructorBoundaryConditions.getDefaultPostReturningVoidTestExpressionMaker();	
+			ConstructorBoundaryConditions.aspectOf().getDefaultPostReturningVoidTestExpressionMaker();	
 		assertEquals (StubDefaultTestExpressionMaker.class, dtem.getClass());
 	}
 	
@@ -386,7 +383,7 @@ public class PropertiesConfiguratorTest extends TestCase {
 		Configurator c = new PropertiesConfigurator();
 		c.configure();
 		DefaultTestExpressionMaker dtem = 
-			MethodBoundaryConditions.getDefaultPreTestExpressionMaker();	
+			MethodBoundaryConditions.aspectOf().getDefaultPreTestExpressionMaker();	
 		assertEquals (StubDefaultTestExpressionMaker.class, dtem.getClass());
 	}
 	
@@ -396,7 +393,7 @@ public class PropertiesConfiguratorTest extends TestCase {
 		Configurator c = new PropertiesConfigurator();
 		c.configure();
 		DefaultTestExpressionMaker dtem = 
-			MethodBoundaryConditions.getDefaultPostReturningVoidTestExpressionMaker();	
+			MethodBoundaryConditions.aspectOf().getDefaultPostReturningVoidTestExpressionMaker();	
 		assertEquals (StubDefaultTestExpressionMaker.class, dtem.getClass());
 	}
 	
@@ -406,7 +403,7 @@ public class PropertiesConfiguratorTest extends TestCase {
 		Configurator c = new PropertiesConfigurator();
 		c.configure();
 		DefaultTestExpressionMaker dtem = 
-			MethodBoundaryConditions.getDefaultPostTestExpressionMaker();	
+			MethodBoundaryConditions.aspectOf().getDefaultPostTestExpressionMaker();	
 		assertEquals (StubDefaultTestExpressionMaker.class, dtem.getClass());
 	}
 	
@@ -416,7 +413,7 @@ public class PropertiesConfiguratorTest extends TestCase {
 		Configurator c = new PropertiesConfigurator();
 		c.configure();
 		ParentTestExpressionFinder ptef = 
-			ConstructorBoundaryConditions.getParentTestExpressionFinder();	
+			ConstructorBoundaryConditions.aspectOf().getParentTestExpressionFinder();	
 		assertEquals (StubParentTestExpressionFinder.class, ptef.getClass());
 	}
 	
@@ -426,7 +423,7 @@ public class PropertiesConfiguratorTest extends TestCase {
 		Configurator c = new PropertiesConfigurator();
 		c.configure();
 		ParentTestExpressionFinder ptef = 
-			MethodBoundaryConditions.getParentTestExpressionFinder();	
+			MethodBoundaryConditions.aspectOf().getParentTestExpressionFinder();	
 		assertEquals (StubParentTestExpressionFinder.class, ptef.getClass());
 	}
 	
@@ -436,7 +433,7 @@ public class PropertiesConfiguratorTest extends TestCase {
 		Configurator c = new PropertiesConfigurator();
 		c.configure();
 		ParentTestExpressionFinder ptef = 
-			InvariantConditions.InvariantMethodConditions.getParentTestExpressionFinder();	
+			InvariantMethodConditions.aspectOf().getParentTestExpressionFinder();	
 		assertEquals (StubParentTestExpressionFinder.class, ptef.getClass());
 	}
 	
@@ -446,7 +443,7 @@ public class PropertiesConfiguratorTest extends TestCase {
 		Configurator c = new PropertiesConfigurator();
 		c.configure();
 		ParentTestExpressionFinder ptef = 
-			InvariantConditions.InvariantCtorConditions.getParentTestExpressionFinder();	
+			InvariantCtorConditions.aspectOf().getParentTestExpressionFinder();	
 		assertEquals (StubParentTestExpressionFinder.class, ptef.getClass());
 	}
 	
@@ -456,7 +453,7 @@ public class PropertiesConfiguratorTest extends TestCase {
 		Configurator c = new PropertiesConfigurator();
 		c.configure();
 		ParentTestExpressionFinder ptef = 
-			InvariantConditions.InvariantTypeConditions.getParentTestExpressionFinder();	
+			InvariantTypeConditions.aspectOf().getParentTestExpressionFinder();	
 		assertEquals (StubParentTestExpressionFinder.class, ptef.getClass());
 	}
 	
@@ -468,7 +465,7 @@ public class PropertiesConfiguratorTest extends TestCase {
 		Configurator c = new PropertiesConfigurator(props);
 		c.configure();
 		ParentTestExpressionFinder ptef = 
-			InvariantConditions.InvariantTypeConditions.getParentTestExpressionFinder();	
+			InvariantTypeConditions.aspectOf().getParentTestExpressionFinder();	
 		assertEquals (StubParentTestExpressionFinder.class, ptef.getClass());
 	}
 	
@@ -481,7 +478,7 @@ public class PropertiesConfiguratorTest extends TestCase {
 			PropertiesConfigurator.KnownBeanKeys.ExpressionInterpreterEmptyTestExpressionsValid.name(), "true");
 		Configurator c = new PropertiesConfigurator(props);
 		c.configure();
-		ExpressionInterpreter ei = Contract4J.getContractEnforcer().getExpressionInterpreter();
+		ExpressionInterpreter ei = c4j.getContractEnforcer().getExpressionInterpreter();
 		assertTrue (ei.getTreatEmptyTestExpressionAsValidTest());
 	}
 
@@ -529,9 +526,9 @@ public class PropertiesConfiguratorTest extends TestCase {
 		for (int i = 0; i < PropertiesConfigurator.enabledPropertyKeys.length; i++) {
 			unsetProp(PropertiesConfigurator.enabledPropertyKeys[i]);
 		}
-		Contract4J.setEnabled(Contract4J.TestType.Pre,   preFlag);
-		Contract4J.setEnabled(Contract4J.TestType.Post,  postFlag);
-		Contract4J.setEnabled(Contract4J.TestType.Invar, invarFlag);
+		c4j.setEnabled(Contract4J.TestType.Pre,   preFlag);
+		c4j.setEnabled(Contract4J.TestType.Post,  postFlag);
+		c4j.setEnabled(Contract4J.TestType.Invar, invarFlag);
 		doTestPrePostInvarValues(preFlag, postFlag, invarFlag);
 	}
 	
@@ -546,10 +543,9 @@ public class PropertiesConfiguratorTest extends TestCase {
 	}
 
 	private void doTestPrePostInvarValues(boolean preFlag, boolean postFlag, boolean invarFlag) {
-		boolean b =  Contract4J.isEnabled(Contract4J.TestType.Pre);
-		assertEquals(preFlag,   Contract4J.isEnabled(Contract4J.TestType.Pre));
-		assertEquals(postFlag,  Contract4J.isEnabled(Contract4J.TestType.Post));
-		assertEquals(invarFlag, Contract4J.isEnabled(Contract4J.TestType.Invar));
+		assertEquals(preFlag,   c4j.isEnabled(Contract4J.TestType.Pre));
+		assertEquals(postFlag,  c4j.isEnabled(Contract4J.TestType.Post));
+		assertEquals(invarFlag, c4j.isEnabled(Contract4J.TestType.Invar));
 	}
 
 	private void setProp(String name, String value) {

@@ -51,6 +51,16 @@ public class WriterReporterTest extends TestCase {
 		}
 	}
 
+	public void testSetThresholdUsingString() {
+		try {
+			reporter.setThresholdUsingString("bad");
+			fail();
+		} catch (IllegalArgumentException e) {
+		}
+		reporter.setThresholdUsingString("warn");
+		reporter.setThresholdUsingString("WARN");
+	}
+	
 	public void testThresholdCalls() {
 		for (Severity level: Severity.values()) {
 			reporter.setThreshold (level);

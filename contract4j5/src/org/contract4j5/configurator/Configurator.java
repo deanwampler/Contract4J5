@@ -1,15 +1,10 @@
 package org.contract4j5.configurator;
 
-import org.contract4j5.util.reporter.Reporter;
+import org.contract4j5.Contract4J;
+
 
 public interface Configurator {
 	void configure();
-	
-	/**
-	 * Set the reporter used by default. Implementers of this method should
-	 * override any reporters that have been set individually on other "beans"!
-	 * @param reporter
-	 */
-	void     setReporter(Reporter r);
-	Reporter getReporter();
+
+	public Contract4J getContract4J();
 }

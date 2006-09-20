@@ -7,15 +7,17 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.contract4j5.ContractEnforcer;
+import org.contract4j5.Contract4J;
 import org.contract4j5.ContractError;
 import org.contract4j5.TestContext;
 import org.contract4j5.aspects.ConstructorBoundaryConditions;
-import org.contract4j5.aspects.Contract4J;
-import org.contract4j5.aspects.InvariantConditions;
+import org.contract4j5.aspects.InvariantCtorConditions;
+import org.contract4j5.aspects.InvariantMethodConditions;
+import org.contract4j5.aspects.InvariantTypeConditions;
 import org.contract4j5.aspects.MethodBoundaryConditions;
 import org.contract4j5.configurator.AbstractConfigurator;
 import org.contract4j5.configurator.Configurator;
+import org.contract4j5.enforcer.ContractEnforcer;
 import org.contract4j5.interpreter.ExpressionInterpreter;
 import org.contract4j5.interpreter.TestResult;
 import org.contract4j5.testexpression.ParentTestExpressionFinder;
@@ -26,9 +28,6 @@ public class AbstractConfiguratorTest extends TestCase {
 	public static class StubExpressionInterpreter implements ExpressionInterpreter {
 		public Map<String, Object> determineOldValues(String testExpression, TestContext context) { return null; }
 		public Map<String, String> getOptionalKeywordSubstitutions() { return null;	}
-		private Reporter reporter = null;
-		public Reporter getReporter() {	return reporter; }
-		public void     setReporter(Reporter reporter) { this.reporter = reporter; }
 		public boolean getTreatEmptyTestExpressionAsValidTest() { return false;	}
 		public TestResult invokeTest(String testExpression, TestContext context) { return null; }
 		public void setOptionalKeywordSubstitutions(Map<String, String> optionalKeywordSubstitutions) {}
@@ -39,20 +38,17 @@ public class AbstractConfiguratorTest extends TestCase {
 	public static class StubContractEnforcer implements ContractEnforcer {
 		private ExpressionInterpreter expressionInterpreter = new StubExpressionInterpreter();
 		public ExpressionInterpreter getExpressionInterpreter() { return expressionInterpreter;	}
-		public boolean getIncludeStackTrace() {	return false; }
-		private Reporter reporter = null;
-		public Reporter getReporter() {	return reporter; }
-		public void     setReporter(Reporter reporter) { this.reporter = reporter; }
-		public void handleFailure(String message, Throwable throwable) throws ContractError {}
-		public void handleFailure(String message) throws ContractError {}
-		public void handleFailure() throws ContractError {}
-		public void invokeTest(String testExpression, String testPrefix, String extraMessage, TestContext context) {}
-		public String makeFailureMessage(String testExpression, String testPrefix, String extraMessage, TestContext context, TestResult testResult) { return null; }
 		public void setExpressionInterpreter(ExpressionInterpreter expressionInterpreter) {}
+		public void invokeTest(String testExpression, String testPrefix, String extraMessage, TestContext context)
+			throws ContractError {}
+		public void fail(String testExpression, String testPrefix, String extraMessage, TestContext context, Throwable th)
+			throws ContractError { throw new ContractError(testExpression + ": " + extraMessage, th); }
+		public boolean getIncludeStackTrace() {	return false; }
 		public void setIncludeStackTrace(boolean onOff) {}
 	}
 
 	public static class StubTestExpressionFinder implements ParentTestExpressionFinder {
+		private Contract4J c4j;
 		public TestResult findParentAdviceTestExpression(Annotation whichAnnotationType, Method advice, TestContext context) { return null;	}
 		public TestResult findParentAdviceTestExpressionIfEmpty(String testExpression, Annotation whichAnnotationType, Method advice, TestContext context) { return null; }
 		public TestResult findParentConstructorTestExpression(Annotation whichAnnotationType, Constructor constructor, TestContext context) { return null; }
@@ -61,41 +57,52 @@ public class AbstractConfiguratorTest extends TestCase {
 		public TestResult findParentMethodTestExpressionIfEmpty(String testExpression, Annotation whichAnnotationType, Method advice, TestContext context) { return null; }
 		public TestResult findParentTypeInvarTestExpression(Class clazz, TestContext context) {	return null; }
 		public TestResult findParentTypeInvarTestExpressionIfEmpty(String testExpression, Class clazz, TestContext context) { return null; }
-		private Reporter reporter = null;
-		public Reporter getReporter() {	return reporter; }
-		public void     setReporter(Reporter reporter) { this.reporter = reporter; }
+		public Reporter getReporter() { return c4j.getReporter(); }
+		public StubTestExpressionFinder(Contract4J c4j) { this.c4j = c4j; }
 	}
 	
 	public static class StubConfigurator extends AbstractConfigurator {
-		@Override
 		protected void doConfigure() {
-			Reporter r = new WriterReporter();
-			setReporter(r);
-			Contract4J.setContractEnforcer(new StubContractEnforcer()); 
-			ConstructorBoundaryConditions.setParentTestExpressionFinder(new StubTestExpressionFinder());
-			MethodBoundaryConditions.setParentTestExpressionFinder(new StubTestExpressionFinder());
-			InvariantConditions.InvariantTypeConditions.setParentTestExpressionFinder(new StubTestExpressionFinder());
-			InvariantConditions.InvariantMethodConditions.setParentTestExpressionFinder(new StubTestExpressionFinder());
-			InvariantConditions.InvariantCtorConditions.setParentTestExpressionFinder(new StubTestExpressionFinder());
-			setReporter(r);
+			Contract4J c4j = getContract4J();
+			c4j.setReporter(new WriterReporter());
+			c4j.setContractEnforcer(new StubContractEnforcer()); 
+			setParentTestExpressionFinder(new StubTestExpressionFinder(c4j));
+		}
+
+		private void setParentTestExpressionFinder(ParentTestExpressionFinder ptef) {
+			ConstructorBoundaryConditions.aspectOf().setParentTestExpressionFinder(ptef);
+			MethodBoundaryConditions.aspectOf().setParentTestExpressionFinder(ptef);
+			InvariantTypeConditions.aspectOf().setParentTestExpressionFinder(ptef);
+			InvariantMethodConditions.aspectOf().setParentTestExpressionFinder(ptef);
+			InvariantCtorConditions.aspectOf().setParentTestExpressionFinder(ptef);
+		}
+
+		public void unsetParentTestExpressionFinder() {
+			setParentTestExpressionFinder(null);
 		}
 	}
 	
-	private Configurator configurator = null;
+	private StubConfigurator configurator = null;
+	private Contract4J c4j;
 	
 	@Override
 	protected void setUp() throws Exception {
-		// TODO Auto-generated method stub
 		super.setUp();
 		configurator = new StubConfigurator();
 		configurator.configure();
+		c4j = configurator.getContract4J();
+	}
+	@Override
+	protected void tearDown() throws Exception {
+		super.tearDown();
+		configurator.unsetParentTestExpressionFinder();
 	}
 	
 	/*
 	 * Test method for 'org.contract4j5.configurator.AbstractConfigurator.getReporter()'
 	 */
 	public void testGetReporter() {
-		Reporter reporter = configurator.getReporter();
+		Reporter reporter = c4j.getReporter();
 		checkReporter(reporter);
 	}
 
@@ -104,8 +111,8 @@ public class AbstractConfiguratorTest extends TestCase {
 	 */
 	public void testSetReporter() {
 		WriterReporter wr = new WriterReporter();
-		configurator.setReporter(wr);
-		assertEquals(wr, configurator.getReporter());
+		c4j.setReporter(wr);
+		assertEquals(wr, c4j.getReporter());
 		checkReporter(wr);
 	}
 
@@ -114,13 +121,16 @@ public class AbstractConfiguratorTest extends TestCase {
 	 */
 	protected void checkReporter(Reporter reporter) {
 		assertEquals(WriterReporter.class, reporter.getClass());
-		assertEquals(reporter, Contract4J.getReporter());
-		assertEquals(reporter, Contract4J.getContractEnforcer().getReporter());
-		assertEquals(reporter, Contract4J.getContractEnforcer().getExpressionInterpreter().getReporter());
-		assertEquals(reporter, ConstructorBoundaryConditions.getParentTestExpressionFinder().getReporter());
-		assertEquals(reporter, MethodBoundaryConditions.getParentTestExpressionFinder().getReporter());
-		assertEquals(reporter, InvariantConditions.InvariantTypeConditions.getParentTestExpressionFinder().getReporter());
-		assertEquals(reporter, InvariantConditions.InvariantMethodConditions.getParentTestExpressionFinder().getReporter());
-		assertEquals(reporter, InvariantConditions.InvariantCtorConditions.getParentTestExpressionFinder().getReporter());
+		assertEquals(reporter, c4j.getReporter());
+		checkEachReporter(reporter, ConstructorBoundaryConditions.aspectOf().getParentTestExpressionFinder());
+		checkEachReporter(reporter, MethodBoundaryConditions.aspectOf().getParentTestExpressionFinder());
+		checkEachReporter(reporter, InvariantTypeConditions.aspectOf().getParentTestExpressionFinder());
+		checkEachReporter(reporter, InvariantMethodConditions.aspectOf().getParentTestExpressionFinder());
+		checkEachReporter(reporter, InvariantCtorConditions.aspectOf().getParentTestExpressionFinder());
+	}
+	protected void checkEachReporter(Reporter r, ParentTestExpressionFinder ptef) {
+		assertTrue(ptef instanceof StubTestExpressionFinder);
+		StubTestExpressionFinder stef = (StubTestExpressionFinder) ptef;
+		assertEquals(c4j.getReporter(), stef.getReporter());
 	}
 }

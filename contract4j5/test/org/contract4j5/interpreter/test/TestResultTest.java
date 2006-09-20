@@ -94,32 +94,4 @@ public class TestResultTest extends TestCase {
 		assertFalse (result.equals(null));
 		assertFalse (result.equals(new String("foo)")));
 	}
-
-	/*
-	 * Test method for 'org.contract4j5.interpreter.TestResult.TestResult()'
-	 */
-	public void testTestResult() {
-
-	}
-
-	/*
-	 * Test method for 'org.contract4j5.interpreter.TestResult.TestResult(boolean)'
-	 */
-	public void testTestResultBoolean() {
-
-	}
-
-	/*
-	 * Test method for 'org.contract4j5.interpreter.TestResult.TestResult(boolean, String)'
-	 */
-	public void testTestResultBooleanString() {
-
-	}
-
-	/*
-	 * Test method for 'org.contract4j5.interpreter.TestResult.TestResult(boolean, String, Throwable)'
-	 */
-	public void testTestResultBooleanStringThrowable() {
-	}
-
 }

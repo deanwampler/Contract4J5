@@ -20,7 +20,7 @@
 
 package org.contract4j5.policies;
 
-import org.contract4j5.aspects.Contract4J;
+import org.contract4j5.Contract4J;
 import org.contract4j5.util.reporter.Reporter;
 import org.contract4j5.util.reporter.Severity;
 
@@ -34,9 +34,9 @@ public aspect ReportIllegalAccessExceptions {
 		handler (IllegalAccessException) && 
 		within (org.contract4j..*) && 
 		args (iae) {
-		Reporter reporter = Contract4J.getReporter();
+		Reporter reporter = Contract4J.getInstance().getReporter();
 		if (reporter != null) {
-			reporter.report(Severity.ERROR, Contract4J.class, iae.toString());
+			reporter.report(Severity.ERROR, Contract4J.getInstance().getClass(), iae.toString());
 		}
 	}
 }

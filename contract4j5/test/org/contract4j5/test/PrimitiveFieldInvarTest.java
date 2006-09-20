@@ -23,10 +23,12 @@ package org.contract4j5.test;
 import junit.framework.TestCase;
 
 import org.contract4j5.Contract;
+import org.contract4j5.Contract4J;
 import org.contract4j5.ContractError;
 import org.contract4j5.Invar;
-import org.contract4j5.aspects.Contract4J;
-import org.contract4j5.aspects.InvariantConditions;
+import org.contract4j5.TestSpecificationError;
+import org.contract4j5.aspects.InvariantFieldConditions;
+import org.contract4j5.aspects.InvariantFieldCtorConditions;
 import org.contract4j5.configurator.Configurator;
 import org.contract4j5.configurator.test.ConfiguratorForTesting;
 import org.contract4j5.testexpression.DefaultFieldInvarTestExpressionMaker;
@@ -119,13 +121,15 @@ public class PrimitiveFieldInvarTest extends TestCase {
 		}
 	}
 	
-	FieldInvarWithDefaultExpr[] fdefault = null;
-
+	FieldInvarWithDefaultExpr[] fdefault;
+	Contract4J c4j;
+	
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		Configurator c = new ConfiguratorForTesting();
 		c.configure();
+		c4j = c.getContract4J();
 		initEnv (true, true);
 		// Construct the array of "default" objects.
 		fdefault = new FieldInvarWithDefaultExpr[] {
@@ -134,7 +138,7 @@ public class PrimitiveFieldInvarTest extends TestCase {
 				new FieldInvarWithDefaultExpr (2)
 		};
 	}
-	
+
 	/**
 	 * We must override tearDown() to reset the global static expression makers
 	 * to the normal defaults. Otherwise, while running a set of test cases, 
@@ -152,9 +156,9 @@ public class PrimitiveFieldInvarTest extends TestCase {
 		DefaultTestExpressionMaker maker = empty ?
 				new SimpleStringDefaultTestExpressionMaker() :
 				new DefaultFieldInvarTestExpressionMaker();
-		InvariantConditions.InvariantFieldConditions.setDefaultFieldInvarTestExpressionMaker(maker);
-		InvariantConditions.InvariantFieldCtorConditions.setDefaultFieldInvarTestExpressionMaker(maker);
-		Contract4J.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(allowed);
+		InvariantFieldConditions.aspectOf().setDefaultFieldInvarTestExpressionMaker(maker);
+		InvariantFieldCtorConditions.aspectOf().setDefaultFieldInvarTestExpressionMaker(maker);
+		c4j.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(allowed);
 	}
 	
 	public void testDefaultCtor() {
@@ -186,19 +190,19 @@ public class PrimitiveFieldInvarTest extends TestCase {
 			String msg = String.format("i=%d, empty? %b, allowed? %b", i, empty, allowed);
 			try {
 				t = new FieldInvarWithDefaultExpr(i);
-				if (!pass) {
+				if (!pass)
 					fail(msg);
-				}
+			} catch (TestSpecificationError tse) {
+				if (pass)
+					fail(msg);
 			} catch (ContractError ce) {
-				if (pass) {
-					fail(msg);
-				}
+				fail();
 			}
-			if (pass) {  // Only test if passed; otherwise "t" is null!
+			if (pass)   // Only test if passed; otherwise "t" is null!
 				assertFalse(msg, t.iRW);
-			}
 		}
 	}
+	
 	// setI will fail if allowed == false, because the test expression will always
 	// be empty, no matter what "empty" equals, since "i" is primitive.
 	public void doTestDefaultSet (boolean empty, boolean allowed) {
@@ -210,17 +214,16 @@ public class PrimitiveFieldInvarTest extends TestCase {
 			try {
 				t = fdefault[i];
 				t.setI(i);
-				if (!pass) {
+				if (!pass)
 					fail(msg);
-				}
+			} catch (TestSpecificationError tse) {
+				if (pass)
+					fail(msg);
 			} catch (ContractError ce) {
-				if (pass) {
-					fail(msg);
-				}
+				fail();
 			}
-			if (pass) {  // Only test if passed; otherwise "t" is null!
+			if (pass)   // Only test if passed; otherwise "t" is null!
 				assertTrue(msg, t.iRW);
-			}
 		}
 	}
 	// setI will fail if allowed == false, because the test expression will always
@@ -234,13 +237,13 @@ public class PrimitiveFieldInvarTest extends TestCase {
 			try {
 				t = fdefault[i];
 				t.getI();
-				if (!pass) {
+				if (!pass)
 					fail(msg);
-				}
+			} catch (TestSpecificationError tse) {
+				if (pass)
+					fail(msg);
 			} catch (ContractError ce) {
-				if (pass) {
-					fail(msg);
-				}
+				fail();
 			}
 			if (pass) {  // Only test if passed; otherwise "t" is null!
 				assertTrue(msg, t.iRW);
@@ -252,13 +255,13 @@ public class PrimitiveFieldInvarTest extends TestCase {
 		for (int i = 0; i < 3; i++) {
 			try {
 				new FieldInvarWithDefinedExpr (i);
-				if (i == 0) {
+				if (i == 0) 
 					fail();
-				}
+			} catch (TestSpecificationError tse) {
+				fail();
 			} catch (ContractError ce) {
-				if (i > 0) {
+				if (i > 0) 
 					fail();
-				}
 			}
 		}
 	}
@@ -267,6 +270,8 @@ public class PrimitiveFieldInvarTest extends TestCase {
 			new FieldInvarWithDefinedExpr (1);
 		try {
 			t.setI(0);
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 		}
@@ -299,6 +304,8 @@ public class PrimitiveFieldInvarTest extends TestCase {
 			try {
 				new DefaultFieldWithoutAccessor(i); 
 				fail("i="+i);
+			} catch (TestSpecificationError tse) {
+				fail();
 			} catch (ContractError ce) {
 				// Expected
 			}
@@ -309,6 +316,8 @@ public class PrimitiveFieldInvarTest extends TestCase {
 			try {
 				new PrivateFieldWithoutAccessor(i); 
 				fail("i="+i);
+			} catch (TestSpecificationError tse) {
+				fail();
 			} catch (ContractError ce) {
 				// Expected
 			}
@@ -319,6 +328,8 @@ public class PrimitiveFieldInvarTest extends TestCase {
 			try {
 				new ProtectedFieldWithoutAccessor(i); 
 				fail("i="+i);
+			} catch (TestSpecificationError tse) {
+				fail();
 			} catch (ContractError ce) {
 				// Expected
 			}
@@ -329,6 +340,8 @@ public class PrimitiveFieldInvarTest extends TestCase {
 			try {
 				new PublicFieldWithoutAccessor(i); 
 				fail("i="+i);
+			} catch (TestSpecificationError tse) {
+				fail();
 			} catch (ContractError ce) {
 				// Expected
 			}

@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
+import org.contract4j5.Contract4J;
 import org.contract4j5.Invar;
 import org.contract4j5.Post;
 import org.contract4j5.Pre;
@@ -68,14 +69,6 @@ public class ParentTestExpressionFinderImpl implements
 
 	static final NameDeterminator defaultNameDeterminator = new DefaultNameDeterminator();
 	static final NameDeterminator ctorNameDeterminator    = new CtorNameDeterminator();
-	
-	private Reporter reporter;
-	public Reporter getReporter() {
-		return reporter;
-	}
-	public void setReporter(Reporter reporter) {
-		this.reporter = reporter;
-	}
 	
 	/* (non-Javadoc)
 	 * @see org.contract4j5.testexpression.ParentTestExpressionFinder#findParentAdviceTestExpression(java.lang.annotation.Annotation, java.lang.reflect.Method, org.contract4j5.TestContext)
@@ -360,4 +353,9 @@ public class ParentTestExpressionFinderImpl implements
 	protected boolean empty(String s) {
 		return s == null || s.length() == 0;
 	}
+
+	protected Reporter getReporter() {
+		return Contract4J.getInstance().getReporter();
+	}
+	
 }

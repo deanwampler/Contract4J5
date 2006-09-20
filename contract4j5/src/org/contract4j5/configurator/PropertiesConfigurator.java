@@ -4,12 +4,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.contract4j5.aspects.Contract4J;
+import org.contract4j5.Contract4J;
 import org.contract4j5.aspects.ConstructorBoundaryConditions;
+import org.contract4j5.aspects.InvariantCtorConditions;
+import org.contract4j5.aspects.InvariantFieldConditions;
+import org.contract4j5.aspects.InvariantFieldCtorConditions;
+import org.contract4j5.aspects.InvariantMethodConditions;
+import org.contract4j5.aspects.InvariantTypeConditions;
 import org.contract4j5.aspects.MethodBoundaryConditions;
-import org.contract4j5.aspects.InvariantConditions;
+import org.contract4j5.enforcer.ContractEnforcer;
 import org.contract4j5.interpreter.ExpressionInterpreter;
-import org.contract4j5.ContractEnforcer;
 import org.contract4j5.testexpression.DefaultTestExpressionMaker;
 import org.contract4j5.testexpression.ParentTestExpressionFinder;
 import org.contract4j5.util.reporter.Reporter;
@@ -118,7 +122,7 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 		configureGlobalReporter();
 		if (errors.length() > 0) {
 			try {
-				getReporter().report (Severity.ERROR, this.getClass(), errors.toString());
+				getContract4J().getReporter().report (Severity.ERROR, this.getClass(), errors.toString());
 			} catch (NullPointerException npe) {
 				System.err.println("No \"reporter\" was defined using the System Properties (See PropertiesConfigurator.java)");
 				System.err.print(Severity.ERROR.name() + ": " + errors.toString());
@@ -133,13 +137,13 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 				try {
 					boolean value = convertToBoolean(propValue);
 					if (i == 0) {	// The overall "contract" key?
-						Contract4J.setEnabled(Contract4J.TestType.Pre,   value);
-						Contract4J.setEnabled(Contract4J.TestType.Post,  value);
-						Contract4J.setEnabled(Contract4J.TestType.Invar, value);
+						getContract4J().setEnabled(Contract4J.TestType.Pre,   value);
+						getContract4J().setEnabled(Contract4J.TestType.Post,  value);
+						getContract4J().setEnabled(Contract4J.TestType.Invar, value);
 						foundContractDisableProperty = !value;
 					} else {
 						if (! foundContractDisableProperty)
-							Contract4J.setEnabled(Contract4J.TestType.values()[i-1], value);
+							getContract4J().setEnabled(Contract4J.TestType.values()[i-1], value);
 					}
 				} catch (IllegalArgumentException iae) {
 					recordEnableTestTypeError(propKey, propValue);
@@ -210,100 +214,101 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 					{
 						DefaultTestExpressionMaker dtem = 
 							(DefaultTestExpressionMaker) propertyToObject(propValue);
-								InvariantConditions.InvariantFieldConditions.setDefaultFieldInvarTestExpressionMaker(dtem);
+						InvariantFieldConditions.aspectOf().setDefaultFieldInvarTestExpressionMaker(dtem);
 					}	
 					break;
 					case DefaultFieldCtorInvarTestExpressionMaker:
 					{
 						DefaultTestExpressionMaker dtem = 
 							(DefaultTestExpressionMaker) propertyToObject(propValue);
-						InvariantConditions.InvariantFieldCtorConditions.setDefaultFieldInvarTestExpressionMaker(dtem);
+						// Must set the static value for all aspect instances here.
+						InvariantFieldCtorConditions.aspectOf().setDefaultFieldInvarTestExpressionMaker(dtem);
 					}
 					break;
 					case DefaultMethodInvarTestExpressionMaker:
 					{
 						DefaultTestExpressionMaker dtem = 
 							(DefaultTestExpressionMaker) propertyToObject(propValue);
-						InvariantConditions.InvariantMethodConditions.setDefaultMethodInvarTestExpressionMaker(dtem);
+						InvariantMethodConditions.aspectOf().setDefaultMethodInvarTestExpressionMaker(dtem);
 					}
 					break;
 					case DefaultCtorInvarTestExpressionMaker:
 					{
 						DefaultTestExpressionMaker dtem = 
 							(DefaultTestExpressionMaker) propertyToObject(propValue);
-						InvariantConditions.InvariantCtorConditions.setDefaultCtorInvarTestExpressionMaker(dtem);
+						InvariantCtorConditions.aspectOf().setDefaultCtorInvarTestExpressionMaker(dtem);
 					}
 					break;
 					case DefaultTypeInvarTestExpressionMaker:
 					{
 						DefaultTestExpressionMaker dtem = 
 							(DefaultTestExpressionMaker) propertyToObject(propValue);
-						InvariantConditions.InvariantTypeConditions.setDefaultTypeInvarTestExpressionMaker(dtem);
+						InvariantTypeConditions.aspectOf().setDefaultTypeInvarTestExpressionMaker(dtem);
 					}
 					break;
 					case DefaultCtorPreTestExpressionMaker:
 					{
 						DefaultTestExpressionMaker dtem = 
 							(DefaultTestExpressionMaker) propertyToObject(propValue);
-						ConstructorBoundaryConditions.setDefaultPreTestExpressionMaker(dtem);
+						ConstructorBoundaryConditions.aspectOf().setDefaultPreTestExpressionMaker(dtem);
 					}
 					break;
 					case DefaultCtorPostReturningVoidTestExpressionMaker:
 					{
 						DefaultTestExpressionMaker dtem = 
 							(DefaultTestExpressionMaker) propertyToObject(propValue);
-						ConstructorBoundaryConditions.setDefaultPostReturningVoidTestExpressionMaker(dtem);
+						ConstructorBoundaryConditions.aspectOf().setDefaultPostReturningVoidTestExpressionMaker(dtem);
 					}
 					break;
 					case DefaultMethodPreTestExpressionMaker:
 					{
 						DefaultTestExpressionMaker dtem = 
 							(DefaultTestExpressionMaker) propertyToObject(propValue);
-						MethodBoundaryConditions.setDefaultPreTestExpressionMaker(dtem);
+						MethodBoundaryConditions.aspectOf().setDefaultPreTestExpressionMaker(dtem);
 					}
 					break;
 					case DefaultMethodPostTestExpressionMaker:
 					{
 						DefaultTestExpressionMaker dtem = 
 							(DefaultTestExpressionMaker) propertyToObject(propValue);
-						MethodBoundaryConditions.setDefaultPostTestExpressionMaker(dtem);
+						MethodBoundaryConditions.aspectOf().setDefaultPostTestExpressionMaker(dtem);
 					}
 					break;
 					case DefaultMethodPostReturningVoidTestExpressionMaker:
 					{
 						DefaultTestExpressionMaker dtem = 
 							(DefaultTestExpressionMaker) propertyToObject(propValue);
-						MethodBoundaryConditions.setDefaultPostReturningVoidTestExpressionMaker(dtem);
+						MethodBoundaryConditions.aspectOf().setDefaultPostReturningVoidTestExpressionMaker(dtem);
 					}
 					break;
 					case CtorParentTestExpressionFinder:
 					{
 						ParentTestExpressionFinder ptef = (ParentTestExpressionFinder) propertyToObject(propValue);
-						ConstructorBoundaryConditions.setParentTestExpressionFinder(ptef);
+						ConstructorBoundaryConditions.aspectOf().setParentTestExpressionFinder(ptef);
 					}
 					break;
 					case MethodParentTestExpressionFinder:
 					{
 						ParentTestExpressionFinder ptef = (ParentTestExpressionFinder) propertyToObject(propValue);
-						MethodBoundaryConditions.setParentTestExpressionFinder(ptef);
+						MethodBoundaryConditions.aspectOf().setParentTestExpressionFinder(ptef);
 					}
 					break;
 					case MethodInvarParentTestExpressionFinder:
 					{
 						ParentTestExpressionFinder ptef = (ParentTestExpressionFinder) propertyToObject(propValue);
-						InvariantConditions.InvariantMethodConditions.setParentTestExpressionFinder(ptef);
+						InvariantMethodConditions.aspectOf().setParentTestExpressionFinder(ptef);
 					}
 					break;
 					case CtorInvarParentTestExpressionFinder:
 					{
 						ParentTestExpressionFinder ptef = (ParentTestExpressionFinder) propertyToObject(propValue);
-						InvariantConditions.InvariantCtorConditions.setParentTestExpressionFinder(ptef);
+						InvariantCtorConditions.aspectOf().setParentTestExpressionFinder(ptef);
 					}
 					break;
 					case TypeInvarParentTestExpressionFinder:
 					{
 						ParentTestExpressionFinder ptef = (ParentTestExpressionFinder) propertyToObject(propValue);
-						InvariantConditions.InvariantTypeConditions.setParentTestExpressionFinder(ptef);
+						InvariantTypeConditions.aspectOf().setParentTestExpressionFinder(ptef);
 					}
 					break;
 					default:
@@ -352,9 +357,9 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 
 	private void configureContractEnforcer() {
 		if (ce == null) {
-			ce = Contract4J.getContractEnforcer();
+			ce = getContract4J().getContractEnforcer();
 		} else {
-			Contract4J.setContractEnforcer(ce);
+			getContract4J().setContractEnforcer(ce);
 		}
 		if (ce != null) {
 			if (includeStackTraceWasSet) {
@@ -377,7 +382,8 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 	}
 
 	private void configureGlobalReporter() {
-		setReporter(globalReporter);
+		initGlobalReporterIfNotInitialized();
+		getContract4J().setReporter(globalReporter);
 		if (globalReporterThreshold != null)
 			globalReporter.setThreshold(globalReporterThreshold);
 		if ((globalWriterReporterWriter != null ||
@@ -396,6 +402,11 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 					errors.append("Both a global java.io.OutputStream and java.io.Writer specified for the global \"Reporter\". The OutputStream will be used.\n");
 				}
 			}
+		}
+	}
+	private void initGlobalReporterIfNotInitialized() {
+		if (globalReporter == null) {
+			globalReporter = new WriterReporter();
 		}
 	}
 	

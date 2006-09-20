@@ -7,6 +7,7 @@ import org.contract4j5.ContractError;
 import org.contract4j5.Invar;
 import org.contract4j5.Post;
 import org.contract4j5.Pre;
+import org.contract4j5.TestSpecificationError;
 import org.contract4j5.configurator.Configurator;
 import org.contract4j5.configurator.test.ConfiguratorForTesting;
 
@@ -140,6 +141,8 @@ public class ContractInterfaceTest extends TestCase {
 		try {
 			implWithAnnos.setName(null);  // Breaks contract!
 			fail();
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError e) {
 			// Expected
 		}
@@ -162,6 +165,8 @@ public class ContractInterfaceTest extends TestCase {
 	public void testWithAnnosGetNameWithNull() {
 		try {
 			implWithAnnos.getName(); // Breaks contract!
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError e) {
 			// Expected
@@ -187,6 +192,8 @@ public class ContractInterfaceTest extends TestCase {
 		try {
 			implWithAnnos.m("toss"); // Breaks contract because name never initialized!
 			fail();
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError e) {
 			// Expected
 		}
@@ -199,6 +206,8 @@ public class ContractInterfaceTest extends TestCase {
 		try {
 			implWithAnnos.setName("");
 			implWithAnnos.m("toss"); // Breaks contract because name is empty!
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError e) {
 			// Expected

@@ -31,7 +31,6 @@ import org.contract4j5.TestContextImpl;
 import org.contract4j5.configurator.test.ConfiguratorForTesting;
 import org.contract4j5.interpreter.TestResult;
 import org.contract4j5.interpreter.jexl.JexlExpressionInterpreter;
-import org.contract4j5.util.reporter.WriterReporter;
 
 public class JexlExpressionInterpreterTest extends TestCase {
 	public static class Foo {
@@ -57,7 +56,6 @@ public class JexlExpressionInterpreterTest extends TestCase {
 		super.setUp();
 		/* Configurator c = */ new ConfiguratorForTesting();
 		interpreter = new JexlExpressionInterpreter();
-		interpreter.setReporter(new WriterReporter());
 	}
 
 	/*

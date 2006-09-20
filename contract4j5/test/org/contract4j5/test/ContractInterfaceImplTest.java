@@ -23,6 +23,7 @@ package org.contract4j5.test;
 import junit.framework.TestCase;
 
 import org.contract4j5.ContractError;
+import org.contract4j5.TestSpecificationError;
 import org.contract4j5.configurator.Configurator;
 import org.contract4j5.configurator.test.ConfiguratorForTesting;
 
@@ -59,6 +60,8 @@ public class ContractInterfaceImplTest extends TestCase {
 		try {
 			obj.getName();
 			fail();
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError ce) {
 			// Expected
 		}		
@@ -70,6 +73,8 @@ public class ContractInterfaceImplTest extends TestCase {
 	public void testSetName() {
 		try {
 			obj.setName(null);
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 			// Expected
@@ -91,6 +96,8 @@ public class ContractInterfaceImplTest extends TestCase {
 		try {
 			obj = new ContractInterfaceImpl(0, 2);  
 			fail();
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError ce) {
 			// Expected
 		}		
@@ -110,12 +117,16 @@ public class ContractInterfaceImplTest extends TestCase {
 		try {
 			obj.m("bad");
 			fail();
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError ce) {
 		}		
 		// Trigger failure of m invariant...
 		try {
 			obj = new ContractInterfaceImpl(0, 4);
 			obj.m("bad");
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 			// Expected
@@ -129,6 +140,8 @@ public class ContractInterfaceImplTest extends TestCase {
 		try {
 			obj = new ContractInterfaceImpl(0);  // Fail class invariant
 			fail();
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError ce) {
 			// Expected
 		}
@@ -138,6 +151,8 @@ public class ContractInterfaceImplTest extends TestCase {
 		try {
 			obj = new ContractInterfaceImpl(100);  // Fail the c'tor precondition.
 			fail();
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError ce) {
 			// Expected
 		}
@@ -146,6 +161,8 @@ public class ContractInterfaceImplTest extends TestCase {
 	public void testClassImplContractInterface3() {
 		try {
 			obj = new ContractInterfaceImpl(1, 2); // Fail the c'tor postcondition
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 			// Expected
@@ -161,6 +178,8 @@ public class ContractInterfaceImplTest extends TestCase {
 		try {
 			obj.getName();
 			fail();
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError ce) {
 			// Expected	to now fail!
 		}
@@ -169,6 +188,8 @@ public class ContractInterfaceImplTest extends TestCase {
 	public void testClassImplContractInterface5() {
 		try {
 			obj = new ContractInterfaceImpl(1, 5);  // Fail the "b" field invariant
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 			// Expected
@@ -180,6 +201,5 @@ public class ContractInterfaceImplTest extends TestCase {
 		assertTrue (f > 0);
 		boolean b = obj.getB();
 		assertTrue (b);
-		
 	}
 }

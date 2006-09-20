@@ -23,10 +23,12 @@ package org.contract4j5.test;
 import junit.framework.TestCase;
 
 import org.contract4j5.Contract;
+import org.contract4j5.Contract4J;
 import org.contract4j5.ContractError;
 import org.contract4j5.Invar;
-import org.contract4j5.aspects.Contract4J;
-import org.contract4j5.aspects.InvariantConditions;
+import org.contract4j5.TestSpecificationError;
+import org.contract4j5.aspects.InvariantFieldConditions;
+import org.contract4j5.aspects.InvariantFieldCtorConditions;
 import org.contract4j5.configurator.Configurator;
 import org.contract4j5.configurator.test.ConfiguratorForTesting;
 import org.contract4j5.testexpression.DefaultFieldInvarTestExpressionMaker;
@@ -83,14 +85,37 @@ public class ObjectFieldInvarTest extends TestCase {
 		}
 	}
 
-	FieldInvarWithDefaultExpr[] fdefault = null;
-
+	FieldInvarWithDefaultExpr[] fdefault;
+	Contract4J c4j;
+//	DefaultTestExpressionMaker savedMaker =
+//		InvariantFieldCtorConditions.getStaticDefaultFieldInvarTestExpressionMaker();
+	
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		Configurator c = new ConfiguratorForTesting();
 		c.configure();
-		initEnv (true, true);
+		c4j = c.getContract4J();
+	}
+
+	@Override
+	protected void tearDown() throws Exception {
+		super.tearDown();
+		// Reset this one static field change!
+		initExpressionMakersAndEmptyTestFlag(false, false);
+//		InvariantFieldCtorConditions.setStaticDefaultFieldInvarTestExpressionMaker(savedMaker);
+	}
+	
+	private void initExpressionMakersAndEmptyTestFlag (boolean empty, boolean allowed) {
+		DefaultTestExpressionMaker maker = empty ?
+				new SimpleStringDefaultTestExpressionMaker() :
+				new DefaultFieldInvarTestExpressionMaker();
+		InvariantFieldConditions.aspectOf().setDefaultFieldInvarTestExpressionMaker(maker);
+		InvariantFieldCtorConditions.aspectOf().setDefaultFieldInvarTestExpressionMaker(maker);
+		c4j.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(allowed);
+	}
+	
+	private void createObjects() {
 		// Construct the array of "default" objects.
 		fdefault = new FieldInvarWithDefaultExpr[] {
 				new FieldInvarWithDefaultExpr (null),
@@ -99,28 +124,6 @@ public class ObjectFieldInvarTest extends TestCase {
 		};
 	}
 
-	/**
-	 * We must override tearDown() to reset the global static expression makers
-	 * to the normal defaults. Otherwise, while running a set of test cases, 
-	 * subsequent cases may fail because the static makers have unexpected,
-	 * non-default values!
-	 * @see junit.framework.TestCase#tearDown()
-	 */
-	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
-		initEnv (false, false);
-	}
-	
-	private void initEnv (boolean empty, boolean allowed) {
-		DefaultTestExpressionMaker maker = empty ?
-				new SimpleStringDefaultTestExpressionMaker() :
-				new DefaultFieldInvarTestExpressionMaker();
-		InvariantConditions.InvariantFieldConditions.setDefaultFieldInvarTestExpressionMaker(maker);
-		InvariantConditions.InvariantFieldCtorConditions.setDefaultFieldInvarTestExpressionMaker(maker);
-		Contract4J.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(allowed);
-	}
-	
 	public void testDefaultCtor() {
 		doTestDefaultCtor (true,  true);
 		doTestDefaultCtor (true,  false);
@@ -145,7 +148,7 @@ public class ObjectFieldInvarTest extends TestCase {
 	};
 	
 	public void doTestDefaultCtor (boolean empty, boolean allowed) {
-		initEnv (empty, allowed);
+		initExpressionMakersAndEmptyTestFlag(empty, allowed);
 		FieldInvarWithDefaultExpr t = null; 
 		for (int i = 0; i < 3; i++) {
 			// If i=0 (name used is "null"), then tests should pass if empty && allowed only.
@@ -157,6 +160,9 @@ public class ObjectFieldInvarTest extends TestCase {
 				if (!pass) {
 					fail(msg);
 				}
+			} catch (TestSpecificationError tse) {
+				if (empty && allowed)
+					fail(msg);
 			} catch (ContractError ce) {
 				if (pass) {
 					fail(msg);
@@ -168,7 +174,7 @@ public class ObjectFieldInvarTest extends TestCase {
 		}
 	}
 	public void doTestDefaultSet (boolean empty, boolean allowed) {
-		initEnv (empty, allowed);
+		specialInit(empty, allowed);
 		FieldInvarWithDefaultExpr t = null; 
 		for (int i = 0; i < 3; i++) {
 			// If i=0 (name used is "null"), then tests should pass if empty && allowed only.
@@ -181,6 +187,9 @@ public class ObjectFieldInvarTest extends TestCase {
 				if (!pass) {
 					fail(msg);
 				}
+			} catch (TestSpecificationError tse) {
+				if (empty && allowed)
+					fail(msg);
 			} catch (ContractError ce) {
 				if (pass) {
 					fail(msg);
@@ -191,8 +200,17 @@ public class ObjectFieldInvarTest extends TestCase {
 			}
 		}
 	}
+
+	private void specialInit(boolean empty, boolean allowed) {
+		// Allow anything to be created...
+		initExpressionMakersAndEmptyTestFlag(true, true);
+		createObjects();
+		// ... now set fields as desired.
+		initExpressionMakersAndEmptyTestFlag(empty, allowed);
+	}
+
 	public void doTestDefaultGet (boolean empty, boolean allowed) {
-		initEnv (empty, allowed);
+		specialInit(empty, allowed);
 		FieldInvarWithDefaultExpr t = null; 
 		for (int i = 0; i < 3; i++) {
 			// If i=0 (name used is "null"), then tests should pass if empty && allowed only.
@@ -205,6 +223,9 @@ public class ObjectFieldInvarTest extends TestCase {
 				if (!pass) {
 					fail(msg);
 				}
+			} catch (TestSpecificationError tse) {
+				if (empty && allowed)
+					fail(msg);
 			} catch (ContractError ce) {
 				if (pass) {
 					fail(msg);
@@ -217,6 +238,8 @@ public class ObjectFieldInvarTest extends TestCase {
 	}
 
 	public void testDefinedCtor () {
+		initExpressionMakersAndEmptyTestFlag(true, true);
+		//createObjects();
 		for (int i = 0; i < 3; i++) {
 			try {
 				new FieldInvarWithDefinedExpr (names[i]);
@@ -231,20 +254,29 @@ public class ObjectFieldInvarTest extends TestCase {
 		}
 	}
 	public void testDefinedSetFail () {
+		initExpressionMakersAndEmptyTestFlag(true, true);
+		createObjects();
 		FieldInvarWithDefinedExpr t = 
 			new FieldInvarWithDefinedExpr (names[1]);
 		try {
 			t.setName(null);
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 		}
 		try {
 			t.setName("bad");
 			fail();
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError ce) {
 		}
 	}
+
 	public void testDefinedSetPass () {
+		initExpressionMakersAndEmptyTestFlag(true, true);
+		createObjects();
 		FieldInvarWithDefinedExpr t = 
 			new FieldInvarWithDefinedExpr (names[1]);
 		try {
@@ -255,6 +287,8 @@ public class ObjectFieldInvarTest extends TestCase {
 	}
 
 	public void testDefinedGetPass () {
+		initExpressionMakersAndEmptyTestFlag(true, true);
+		createObjects();
 		FieldInvarWithDefinedExpr t = 
 			new FieldInvarWithDefinedExpr (names[1]);
 		try {
@@ -263,5 +297,4 @@ public class ObjectFieldInvarTest extends TestCase {
 			fail();
 		}
 	}
-
 }

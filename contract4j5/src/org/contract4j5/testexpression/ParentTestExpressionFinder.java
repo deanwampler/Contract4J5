@@ -25,7 +25,6 @@ import java.lang.reflect.Method;
 
 import org.contract4j5.TestContext;
 import org.contract4j5.interpreter.TestResult;
-import org.contract4j5.util.reporter.Reporter;
 
 /**
  * Utility class for finding a corresponding annotation in a parent class,
@@ -148,8 +147,5 @@ public interface ParentTestExpressionFinder {
 			String      testExpression,
 			Class       clazz,
 			TestContext context);
-
-	Reporter getReporter();
-	void setReporter(Reporter reporter);
 
 }

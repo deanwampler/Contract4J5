@@ -66,6 +66,13 @@ public abstract class ReporterHelper implements Reporter {
 		threshold = level;
 	}
 	
+	public void setThresholdUsingString(String level) throws IllegalArgumentException {
+		Severity s = Severity.parse(level);
+		if (s == null)
+			throw new IllegalArgumentException("Invalid string for Severity: \""+level+"\".");
+		threshold = s;
+	}
+	
 	/**
 	 * Default constructor. Sets the threshold to {@link Severity#Warn}.
 	 */

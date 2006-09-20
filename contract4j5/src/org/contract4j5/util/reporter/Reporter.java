@@ -52,4 +52,11 @@ public interface Reporter {
 	 * @param level for the threshold
 	 */
 	void setThreshold(Severity level);
+
+	/**
+	 * Set the threshold for reporting messages using a string. 
+	 * @param level string representing the threshold
+	 * @throws IllegalArgumentException if the string is invalid
+	 */
+	void setThresholdUsingString(String level) throws IllegalArgumentException;
 }

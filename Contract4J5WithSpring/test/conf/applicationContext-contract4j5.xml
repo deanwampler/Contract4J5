@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd" >
+<!-- 
+	Example wiring of Contract4J with Spring. Most of the available dependencies
+	and bean properties are shown. Note that some of the property values are read
+	from the corresponding /conf/contract4j.properties.
+-->
+
+<beans>
+	<bean id="contract4j5"
+	  class="org.contract4j5.Contract4J">
+		<property name="preTestsEnabled" value="${org.contract4j5.Pre}" />
+		<property name="postTestsEnabled" value="${org.contract4j5.Post}" />
+		<property name="invarTestsEnabled" value="${org.contract4j5.Invar}" />		
+		<property name="contractEnforcer" ref="contractEnforcer" />
+		<property name="reporter" ref="globalReporter" />
+		<!-- Wire a no-op configurator when using Spring instead: -->
+		<property name="systemConfigurator">
+			<bean class="org.contract4j5.configurator.NullConfigurator" />
+		</property>
+	</bean>
+	<bean id="constructorBoundaryConditions"
+	  class="org.contract4j5.aspects.ConstructorBoundaryConditions" factory-method="aspectOf">
+		<property name="defaultPreTestExpressionMaker" ref="defaultPreTestExpressionMaker" />
+		<property name="defaultPostReturningVoidTestExpressionMaker"
+			ref="defaultPostReturningVoidTestExpressionMaker" /> 
+		<property name="parentTestExpressionFinder" ref="parentTestExpressionFinder" />
+	</bean>  
+	<bean id="methodBoundaryConditions"
+	  class="org.contract4j5.aspects.MethodBoundaryConditions" factory-method="aspectOf">
+		<property name="defaultPreTestExpressionMaker" ref="defaultPreTestExpressionMaker" />
+		<property name="defaultPostTestExpressionMaker" ref="defaultPostTestExpressionMaker" />
+		<property name="defaultPostReturningVoidTestExpressionMaker" 
+			ref="defaultPostReturningVoidTestExpressionMaker" /> 
+		<property name="parentTestExpressionFinder" ref="parentTestExpressionFinder" />
+	</bean>
+	<bean id="invariantCtorConditions"
+	  class="org.contract4j5.aspects.InvariantCtorConditions" factory-method="aspectOf">
+		<property name="defaultCtorInvarTestExpressionMaker" ref="simpleStringDefaultTestExpressionMaker" />
+		<property name="parentTestExpressionFinder" ref="parentTestExpressionFinder" />
+	</bean>
+	<bean id="invariantFieldConditions"
+	  class="org.contract4j5.aspects.InvariantFieldConditions" factory-method="aspectOf">
+		<property name="defaultFieldInvarTestExpressionMaker" ref="defaultFieldInvarTestExpressionMaker" />
+	</bean>
+	<bean id="invariantFieldCtorConditions"
+	  class="org.contract4j5.aspects.InvariantFieldCtorConditions" factory-method="aspectOf">
+		<property name="defaultFieldInvarTestExpressionMaker" ref="defaultFieldInvarTestExpressionMaker" />
+	</bean>
+	<bean id="invariantMethodConditions"
+	  class="org.contract4j5.aspects.InvariantMethodConditions" factory-method="aspectOf">
+		<property name="defaultMethodInvarTestExpressionMaker" ref="simpleStringDefaultTestExpressionMaker" />
+		<property name="parentTestExpressionFinder" ref="parentTestExpressionFinder" />
+	</bean>
+	<bean id="invariantTypeConditions"
+	  class="org.contract4j5.aspects.InvariantTypeConditions" factory-method="aspectOf">
+		<property name="defaultTypeInvarTestExpressionMaker" ref="simpleStringDefaultTestExpressionMaker" />
+		<property name="parentTestExpressionFinder" ref="parentTestExpressionFinder" />
+	</bean>
+	<bean id="contractEnforcer" class="org.contract4j5.enforcer.ContractEnforcerImpl">
+		<property name="expressionInterpreter" ref="expressionInterpreter" />
+		<property name="includeStackTrace" 
+			value="${org.contract4j5.ContractEnforcerIncludeStackTrace}" />
+	</bean>
+	<bean id="expressionInterpreter"
+		class="org.contract4j5.interpreter.jexl.JexlExpressionInterpreter">
+		<property name="treatEmptyTestExpressionAsValidTest" value="false" />
+		<property name="optionalKeywordSubstitutions"> <!-- fake example shown here! -->
+			<map>
+				<entry>
+					<key><value>FOO</value></key>
+					<value>foo</value>
+				</entry>
+				<entry>
+					<key><value>BAR</value></key>
+					<value>bar</value>
+				</entry>
+			</map>
+		</property>
+	</bean>
+	<bean id="globalReporter" class="org.contract4j5.util.reporter.WriterReporter">
+		<property name="thresholdUsingString" value="${org.contract4j5.GlobalReporterThreshold}" />
+	</bean>
+	<bean id="defaultPreTestExpressionMaker"
+		class="org.contract4j5.testexpression.DefaultPreTestExpressionMaker" />
+	<bean id="defaultPostTestExpressionMaker"
+		class="org.contract4j5.testexpression.DefaultPostTestExpressionMaker" />
+	<bean id="defaultPostReturningVoidTestExpressionMaker" 
+		class="org.contract4j5.testexpression.SimpleStringDefaultTestExpressionMaker" />
+	<bean id="defaultFieldInvarTestExpressionMaker"
+		class="org.contract4j5.testexpression.DefaultFieldInvarTestExpressionMaker" />
+	<bean id="parentTestExpressionFinder"
+		class="org.contract4j5.testexpression.ParentTestExpressionFinderImpl" />
+	<bean id="simpleStringDefaultTestExpressionMaker"
+		class="org.contract4j5.testexpression.SimpleStringDefaultTestExpressionMaker" />
+
+	<bean id="propertyPlaceholderConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location"><value>/conf/contract4j.properties</value></property>
+	</bean>
+</beans>

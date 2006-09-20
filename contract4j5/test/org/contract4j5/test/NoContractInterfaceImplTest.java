@@ -123,6 +123,5 @@ public class NoContractInterfaceImplTest extends TestCase {
 		assertTrue (f > 0);
 		boolean b = obj.getB();
 		assertFalse (b);
-		
 	}
 }

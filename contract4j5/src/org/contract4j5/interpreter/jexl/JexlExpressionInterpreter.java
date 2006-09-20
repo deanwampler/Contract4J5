@@ -27,6 +27,7 @@ import org.apache.commons.jexl.ExpressionFactory;
 import org.apache.commons.jexl.JexlContext;
 import org.apache.commons.jexl.JexlHelper;
 import org.contract4j5.TestContext;
+import org.contract4j5.TestSpecificationError;
 import org.contract4j5.interpreter.ExpressionInterpreterHelper;
 import org.contract4j5.interpreter.TestResult;
 
@@ -47,13 +48,15 @@ public class JexlExpressionInterpreter extends ExpressionInterpreterHelper {
 		try {
 			expr = ExpressionFactory.createExpression (exprStr);
 		} catch (Throwable th) {
-			return new TestResult (false, "Failed to create the Jexl expression for \""+exprStr+"\".", th);
+			String msg = "Failed to create the Jexl expression for \""+exprStr+"\".";
+			return new TestResult (false, msg, new TestSpecificationError(msg, th));
 		}
 		try {
 			Object o = expr.evaluate(jexlContext);
 			return o;
 		} catch (Throwable th2) {
-			return new TestResult (false, "Failed to evaluate the Jexl expression for \""+exprStr+"\".", th2);
+			String msg = "Failed to evaluate the Jexl expression for \""+exprStr+"\".";
+			return new TestResult (false, msg, new TestSpecificationError(msg, th2));
 		}
 	}
 	
@@ -70,7 +73,8 @@ public class JexlExpressionInterpreter extends ExpressionInterpreterHelper {
 		try {
 			expr = ExpressionFactory.createExpression (testExpression);
 		} catch (Throwable th) {
-			return new TestResult (false, "Failed to create a Jexl Expression object.", th);
+			String msg = "Failed to create a Jexl Expression object.";
+			return new TestResult (false, msg, new TestSpecificationError(msg, th));
 		}
 		try {
 			Object o = expr.evaluate(jexlContext);

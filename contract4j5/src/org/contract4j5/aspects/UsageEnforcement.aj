@@ -23,7 +23,6 @@ package org.contract4j5.aspects;
 import org.contract4j5.Invar;
 import org.contract4j5.Post;
 import org.contract4j5.Pre;
-import org.contract4j5.aspects.Contract4J;
 
 /**
  * Aspect to look for invalid usage of Contract4J. The following generate
@@ -41,15 +40,15 @@ import org.contract4j5.aspects.Contract4J;
  */
 public aspect UsageEnforcement {
 	pointcut preNotInContract() : 
-		! within (Contract4J.ContractMarker+) &&
+		! within (AbstractConditions.ContractMarker+) &&
 		(execution (@Pre * *.*(..)) || execution (@Pre *.new(..)));
 
 	pointcut postNotInContract() : 
-		! within (Contract4J.ContractMarker+) &&
+		! within (AbstractConditions.ContractMarker+) &&
 		(execution (@Post * *.*(..)) || execution (@Post *.new(..)));
 	
 	pointcut invarNotInContract() : 
-		! within (Contract4J.ContractMarker+) &&
+		! within (AbstractConditions.ContractMarker+) &&
 		(execution (@Invar * *.*(..)) || execution (@Invar *.new(..)) ||
 		 get (@Invar * *) || set (@Invar * *));
 

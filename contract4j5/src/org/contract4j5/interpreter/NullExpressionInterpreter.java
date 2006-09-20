@@ -24,8 +24,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.contract4j5.TestContext;
-import org.contract4j5.util.reporter.NullReporter;
-import org.contract4j5.util.reporter.Reporter;
 
 /**
  * Uses the "Null Object Pattern" to define an interpreter that does nothing. It
@@ -54,16 +52,5 @@ public class NullExpressionInterpreter implements ExpressionInterpreter {
 	
 	public TestResult invokeTest(String testExpression, TestContext context) {
 		return new TestResult(true);
-	}
-	
-	private Reporter reporter = null;
-	public Reporter getReporter() {
-		if (reporter == null) {
-			reporter = new NullReporter();
-		}
-		return reporter;
-	}
-	public void setReporter(Reporter reporter) {
-		this.reporter = reporter;
 	}
 }

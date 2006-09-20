@@ -38,7 +38,6 @@ import org.contract4j5.interpreter.TestResult;
 import org.contract4j5.test.OverriddenContractBase;
 import org.contract4j5.test.OverriddenContractDerived;
 import org.contract4j5.testexpression.ParentTestExpressionFinderImpl;
-import org.contract4j5.util.reporter.WriterReporter;
 
 public class ParentTestExpressionFinderImplTest extends TestCase {
 	ParentTestExpressionFinderImpl finder = null;
@@ -63,7 +62,6 @@ public class ParentTestExpressionFinderImplTest extends TestCase {
 		Configurator c = new ConfiguratorForTesting();
 		c.configure();
 		finder   = new ParentTestExpressionFinderImpl();
-		finder.setReporter(new WriterReporter());
 		base     = new OverriddenContractBase("f1", "f2", "f3");
 		derived  = new OverriddenContractDerived("f1", "f2", "f3");
 		itemName = "";

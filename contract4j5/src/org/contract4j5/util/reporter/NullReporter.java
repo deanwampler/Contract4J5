@@ -34,4 +34,6 @@ public class NullReporter implements Reporter {
 		return Severity.OFF;
 	}
 	public void setThreshold(Severity level) {}
+	public void setThresholdUsingString(String level) throws IllegalArgumentException {
+	}
 }

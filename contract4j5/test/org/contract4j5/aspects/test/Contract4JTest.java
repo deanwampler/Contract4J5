@@ -1,16 +1,22 @@
 package org.contract4j5.aspects.test;
 
 import junit.framework.TestCase;
-import org.contract4j5.aspects.*;
+
+import org.contract4j5.Contract4J;
 
 public class Contract4JTest extends TestCase {
-	@Override
+	Contract4J c4j;
+	
+	protected void setUp() throws Exception {
+		super.setUp();
+		c4j = new Contract4J();
+	}
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		// Leave test with all enabled statically.
-		Contract4J.setEnabled(Contract4J.TestType.Pre,   true);
-		Contract4J.setEnabled(Contract4J.TestType.Post,  true);
-		Contract4J.setEnabled(Contract4J.TestType.Invar, true);
+		c4j.setEnabled(Contract4J.TestType.Pre,   true);
+		c4j.setEnabled(Contract4J.TestType.Post,  true);
+		c4j.setEnabled(Contract4J.TestType.Invar, true);
 	}
 	
 	public void testEnableAll() {
@@ -38,20 +44,20 @@ public class Contract4JTest extends TestCase {
 		doSetCheckNewStyle(false, false, true);
 	}
 	
-	private static void doSetCheckOldStyle(boolean pre, boolean post, boolean invar) {
-		Contract4J.setEnabled(Contract4J.TestType.Pre,   pre);
-		Contract4J.setEnabled(Contract4J.TestType.Post,  post);
-		Contract4J.setEnabled(Contract4J.TestType.Invar, invar);
-		assertEquals(pre, Contract4J.isEnabled(Contract4J.TestType.Pre));
-		assertEquals(post, Contract4J.isEnabled(Contract4J.TestType.Post));
-		assertEquals(invar, Contract4J.isEnabled(Contract4J.TestType.Invar));
+	private void doSetCheckOldStyle(boolean pre, boolean post, boolean invar) {
+		c4j.setEnabled(Contract4J.TestType.Pre,   pre);
+		c4j.setEnabled(Contract4J.TestType.Post,  post);
+		c4j.setEnabled(Contract4J.TestType.Invar, invar);
+		assertEquals(pre, c4j.isEnabled(Contract4J.TestType.Pre));
+		assertEquals(post, c4j.isEnabled(Contract4J.TestType.Post));
+		assertEquals(invar, c4j.isEnabled(Contract4J.TestType.Invar));
 	}
-	private static void doSetCheckNewStyle(boolean pre, boolean post, boolean invar) {
-		Contract4J.setPreTestsEnabled(pre);
-		Contract4J.setPostTestsEnabled(post);
-		Contract4J.setInvarTestsEnabled(invar);
-		assertEquals(pre, Contract4J.isPreTestsEnabled());
-		assertEquals(post, Contract4J.isPostTestsEnabled());
-		assertEquals(invar, Contract4J.isInvarTestsEnabled());
+	private void doSetCheckNewStyle(boolean pre, boolean post, boolean invar) {
+		c4j.setPreTestsEnabled(pre);
+		c4j.setPostTestsEnabled(post);
+		c4j.setInvarTestsEnabled(invar);
+		assertEquals(pre, c4j.isPreTestsEnabled());
+		assertEquals(post, c4j.isPostTestsEnabled());
+		assertEquals(invar, c4j.isInvarTestsEnabled());
 	}
 }

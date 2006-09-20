@@ -27,6 +27,7 @@ import org.contract4j5.ContractError;
 import org.contract4j5.Invar;
 import org.contract4j5.Post;
 import org.contract4j5.Pre;
+import org.contract4j5.TestSpecificationError;
 import org.contract4j5.configurator.Configurator;
 import org.contract4j5.configurator.test.ConfiguratorForTesting;
 
@@ -105,6 +106,8 @@ public class AnnotationMessageTest extends TestCase {
 			Foo f = new Foo();
 			f.setI(0);
 			fail();
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError ce) {
 			// Expected
 		}
@@ -114,6 +117,8 @@ public class AnnotationMessageTest extends TestCase {
 		try {
 			Foo f = new Foo();
 			f.setJ(1);
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 			// Expected
@@ -125,6 +130,8 @@ public class AnnotationMessageTest extends TestCase {
 			Foo f = new Foo();
 			f.doit(1);
 			fail();
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError ce) {
 			// Expected
 		}
@@ -134,6 +141,8 @@ public class AnnotationMessageTest extends TestCase {
 		try {
 			Foo f = new Foo();
 			f.setK(0);
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 			// Expected
@@ -145,6 +154,8 @@ public class AnnotationMessageTest extends TestCase {
 			Foo f = new Foo();
 			f.setK(-1);
 			fail();
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError ce) {
 			// Expected
 		}
@@ -155,6 +166,8 @@ public class AnnotationMessageTest extends TestCase {
 			Foo f = new Foo();
 			f.voidK();
 			fail();
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError ce) {
 			// Expected
 		}
@@ -163,6 +176,8 @@ public class AnnotationMessageTest extends TestCase {
 	public void testCtorInvar() {
 		try {
 			new Foo(false);
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 			// Expected
@@ -173,6 +188,8 @@ public class AnnotationMessageTest extends TestCase {
 		try {
 			new Foo(0);
 			fail();
+		} catch (TestSpecificationError tse) {
+			fail();
 		} catch (ContractError ce) {
 			// Expected
 		}
@@ -181,6 +198,8 @@ public class AnnotationMessageTest extends TestCase {
 	public void testCtorPost() {
 		try {
 			new Foo(1.0f);
+			fail();
+		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 			// Expected

@@ -20,6 +20,8 @@
 
 package org.contract4j5.interpreter;
 
+import org.contract4j5.TestSpecificationError;
+
 /**
  * Value object for a test result, not only pass or fail, but the cause of a failure.
  */
@@ -50,26 +52,77 @@ public class TestResult {
 	
 	Throwable failureCause = null;
 	/**
-	 * @return Returns the Throwable associated with a failure or null
+	 * @return The Throwable associated with a failure or null
 	 * if the test passed or it failed, but there was no exception thrown.
 	 */
 	public Throwable getFailureCause() {
 		return failureCause;
 	}
 	
+	/**
+	 * @return The actual failure, which will equal the result of 
+	 * {@link getFailureCause()}, or a throwable that it may contain or null.
+	 */
+	public Throwable getActualFailureCause() {
+		Throwable failureCause = getFailureCause();
+		if (isFailureCauseATestSpecificationFailure()) {
+			Throwable nestedCause = failureCause.getCause();
+			return nestedCause != null ? nestedCause : failureCause;
+		}		
+		return failureCause;
+	}
+
+	public boolean isFailureCauseATestSpecificationFailure() {
+		return failureCause != null && 
+		(failureCause.getClass() == TestSpecificationError.class);
+	}
+	
+	public String getFailureCauseMessage() {
+		StringBuffer sb = new StringBuffer(256);
+		Throwable failureCause = getFailureCause();
+		if (isFailureCauseATestSpecificationFailure()) {
+			sb.append("Test specification error (invalid, parse failure, ...), actual failure cause = ");
+			Throwable actualFailureCause = failureCause.getCause(); 
+			sb.append(actualFailureCause !=  null ? actualFailureCause : "<null>");
+		} else {
+			sb.append("failure cause = ").append(failureCause);
+		}
+		return sb.toString();
+	}
+	
+	public String getFailureCauseStackTrace() {
+		Throwable failureCause = getFailureCause();
+		if (isFailureCauseATestSpecificationFailure()) {
+			Throwable actualFailureCause = getActualFailureCause();
+			return getStackTraceString(actualFailureCause != null ? actualFailureCause : failureCause);
+		}
+		return getStackTraceString(failureCause);
+	}
+	
+	protected String getStackTraceString(Throwable throwable) {
+		if (throwable == null) {
+			return "";
+		}
+		StringBuffer sb = new StringBuffer(256);
+		sb.append("\nStack Trace: [");
+		StackTraceElement[] elems = getFailureCause().getStackTrace();
+		for (StackTraceElement elem: elems) {
+			sb.append("\n  ");
+			sb.append(elem.toString());
+		}
+		sb.append("\n]");
+		return sb.toString();
+	}
+	
 	public String toString() {
 		StringBuffer sb = new StringBuffer(256);
 		sb.append("TestResult: passed = ").append(isPassed());
 		sb.append(", message = \"").append(getMessage()).append("\"");
-		if (getFailureCause() !=  null) {
+		sb.append(getFailureCauseMessage());
+		if (failureCause !=  null) {
 			sb.append(", failure cause = ").append(getFailureCause());
-			sb.append("\nStack Trace: [");
-			StackTraceElement[] elems = getFailureCause().getStackTrace();
-			for (StackTraceElement elem: elems) {
-				sb.append("\n  ");
-				sb.append(elem.toString());
-			}
-			sb.append("\n]\n");
+			sb.append(getFailureCauseStackTrace());
+			sb.append("\n");
 		}
 		return sb.toString();
 	}

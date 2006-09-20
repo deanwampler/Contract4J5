@@ -1,7 +1,7 @@
 Contract4J5 0.5.0 README  
 
 Contract4J5 (Annotation form)
-v0.5.1.0   May 19, 2006
+v0.6.0.0   October 1, 2006
 v0.5.0.0   February 20, 2006
 v0.1.1.0   October 4, 2005
 v0.1.0.2   April 24, 2005
@@ -1152,7 +1152,22 @@ without embedding the ad hoc Reporter objects.
 
 ** Notes for Each Release
 
-*** v0.5.1 May 19, 2006
+*** v0.6.0 October 1, 2006
+
+Major refactoring to improve the internal structure, e.g., to reduce the 
+over-reliance on singletons. Defining contracts is unchanged (except for some 
+bug fixes), but the configuration API has changed (this is still pre-1.0 
+software); see below.
+
+Added an example using the Spring Framework v1.2.5 to configure Contract4J (see
+http://www.springframework.org). See the separate "src" folder called
+"Contract4J5WithSpring". Spring v2.0 configuration should be backwards 
+compatable, if not easier with new 2.0 features. However, using Contract4J with
+Spring v2.0 was not tested.
+
+Greatly improved the options for using system properties or properties files to
+"wire" Contract4J, as an alternative to using Spring. See the tests in 
+"org.contract4j5.configurator.test" for examples.
 
 Added examples to the build process of doing binary (jar) and load-time weaving,
 in addition to the compile time weaving in the 0.5.0 examples. "Binary" weaving
@@ -1162,13 +1177,6 @@ Load-time weaving is done as the application loads class files, using a special
 "java agent" for this purpose. See the section "Invocation and Configuration of 
 Contract4J5" for more details.
 
-Added an example using the Spring framework to configure Contract4J. It requires
-that you have Spring v1.2+ installed (see http://www.springframework.org).
-
-At the same time, greatly improved the options for using system properties or 
-properties files to "wire" Contract4J, as an alternative to using Spring. See 
-the tests in "org.contract4j5.configurator.test" for examples.
-
 Replaced the entity definitions in the build-related XML files with the ant
 <import> task. Apparently, NetBeans doesn't like the entity definitions. (Thanks
 to Matthew Harrison for bringing this to my attention and for providing 
@@ -1176,11 +1184,32 @@ refactored build files.)
 
 Added more tests that explicitly demonstrate that contract expressions that
 access instance properties only work if the properties have JavaBeans getter
-methods (Jexl limitation).
+methods. This is an unfortunate Jexl limitation.
 
 Fixed some bugs, including a few warnings related to generics. (Thanks to Falk 
 Bruegmann for a generics warning fix.)
 
+Some of the API Changes:
+
+Removed the API calls to set separate "Reporter" objects (for logging) in each
+major component. This greatly reduced some boilerplate code with a small 
+reduction in flexibility which had dubious value. Now, a global Reporter is
+used, the one set in the "Contract4J" class.
+
+All properties on aspects are no longer static methods. Use the "aspectOf()"
+method to get the instance. So for example, 
+  ConstructorBoundaryConditions.getDefaultPreTestExpressionMaker();
+is now
+  ConstructorBoundaryConditions.aspectOf().getDefaultPreTestExpressionMaker();
+
+"Contract4J" is no longer an aspect, but a class. The aspect code was moved to 
+a separate aspect called "AbstractConditions", leaving only pure-Java code. The
+conversion to Java made it easier to instant these objects as needed and also
+to exploit the more complete support for Java in Eclipse (e.g., for 
+refactorings). Note that this change means that any properties that were
+previously set on "Contract4J" are not changed to use "aspectOf", as just 
+described for the aspects. Instead, use for example,
+  Contract4J.getInstance().setEnabled(Contract4J.TestType.Pre, true);
 
 *** v0.5.0 February 20, 2006
 
