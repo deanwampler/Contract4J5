@@ -44,7 +44,7 @@ case "$osname" in
 		;;
 esac
 
-: ${CONTRACT4J5_HOME:=$HOME/src/java/contract4j5_050/contract4j5}
+: ${CONTRACT4J5_HOME:=$HOME/src/java/contract4j5_060/contract4j5}
 : ${ANT_HOME:=$TOOL_HOME/Apache/apache-ant-1.6.2}
 : ${ASPECTJ_HOME:=$TOOL_HOME/aspectj1.5}
 : ${JAVA_HOME:=$TOOL_HOME/jdk$JDK_VERSION}
