@@ -81,14 +81,13 @@ The "5" emphasizes that it requires Java 5 annotations
 "ContractBeans" Form:
 	Contract4J v2.X.Y --> Contract4JBeans v.0.2.X.Y
 
-The newest release described in these notes is "Contract4J5 v.0.5.0". 
-As discussed below, it is a major rewrite of the "v0.1" stream, which caused 
-some non-backwards-compatible API changes, but offers significant advantages
-over the previous V0.1.1 release. Once the API is clearly stable (and some other
-"TODO" items are finished), I will release it as the "real" v1.0.
+The newest release described in these notes is "Contract4J5 v.0.6.0". 
+As discussed below, the last several "0.X" releases have introduced some 
+non-backwards-compatible API changes, but they offer significant advantages
+over the previous releases. Once the API is stable and some other "TODO" items 
+are finished, I will release Contract4J5 as the "real" v1.0. Note that 
+development has stoped on the "ContractBeans" implementation.
 
-Sorry for the confusion.
- 
 
 ** What Is "Contract4J"?
 
@@ -245,7 +244,7 @@ distinguish between these two types should follow this idiom:
     ...
   }
 
-Contract4J5 v0.5 embeds the Jakarta "Jexl" interpreter, an expression evaluator,
+Contract4J5 embeds the Jakarta "Jexl" interpreter, an expression evaluator,
 to evaluate the test expressions in the annotations. (See  
 http://jakarta.apache.org/commons/Jexl/ for more information on Jexl. Note,
 that there are quirks and limitations of Jexl that are discussed throughout this
@@ -320,16 +319,9 @@ annotation without a test expression and C4J5 will find the parent expression.
 
 --- How Do I Use Contract4J?
 
-This section describes how to use Contract4J5 V0.5. For information on using
-earlier versions, see the README files in their distributions.
-
 The distribution contains ant files and examples of how to use Contract4J. 
-The examples are actually part of the unit/acceptance test suite. If your are 
-using Eclipse, the project configuration files are also in the source 
-distribution. You may or may not want to remove them.
-
-*** NOTE ***  The tests/examples are the best way to see how to write test
-expressions correctly.
+The examples are actually part of the unit/acceptance test suite. The tests are
+the best way to see how to write test expressions correctly.
 
 ---- Installation:
 
@@ -352,6 +344,23 @@ Contract4J, use the ant driver script "build.sh" or "build.bat", edit the file
 and change the environment variable definitions to point to appropriate 
 locations for your environment. Or, you can define the appropriate environment
 variables in your environment and use the build.xml ant script directly.
+
+To use Contract4J in your own projects, add the jar to your class path and add
+a binary weaving step to your build, if you are not already using the AspectJ
+"ajc" compiler to compile your Java and AspectJ sources. To see how to do a
+binary weaving step, consult the Ant build files in the distribution, in 
+particular, the "test" target and dependencies. The "compile.test" target uses
+javac to compile the JUnit test code. The "project-test.jar" target uses ajc to
+do binary weaving, where the compiled class files are read by ajc, aspects are
+woven into them (the "aspectpath" option to ajc) and the contract4j5-test.jar
+file is output. The ant/targets.xml defines the "binaryWeaveTemplate" used for
+this process.
+
+To see the ajc command in action, invoke ant with the option 
+  -Dbuild.compiler.verbose=true
+which will cause ajc to print the command-line options used. Look for the output
+that is part of the compile.test target. This output may be easier to understand
+than trying to understand the ant files!
 
 The distribution has the following structure. In the "contract4j5" directory,
 you will find the following:
@@ -391,23 +400,64 @@ If you want to build Contract4J:
 or
 	1c) ant all
 
+Building "all" creates the jar files "contract4j5.jar" and "contract4j-test.jar"
+in the current directory and runs the JUnit-based unit and acceptance tests in 
+the "test" directory tree. 
+
 To build the corresponding Spring example:
 
 	2a) ./build.sh all.spring (*nix)
 	2b) build.bat all.spring  (windows)
 or
 	2c) ant all.spring
-
+	
 (See ../Contract4J5WithSpring/README.txt for more information on this example.)
 
-Building "all" creates the jar files "contract4j5.jar" and "contract4j-test.jar"
-in the current directory and runs the unit and acceptance tests in the "test"
-directory tree. 
+A preliminary example of using Contract4J with Load-Time Weaving (LTW) is 
+included. Unfortunately, it is not complete because of an AspectJ bug, 
+#158179, that prevents Contract4J from being used with load-time weaving.
+(The bug involves weaving of annotations that are themselves annotated with
+"@Inherited".) Once a patched version of AspectJ is available that fixes this
+bug, I will do a "0.6.1" release with the completed LTW support example.
 
-The tests generate a LOT of output, but they should all pass. There will some
+To run the tests using load-time weaving (discussed below), first build all,
+then build the following arget:
+
+	2a) ./build.sh test.loadtime.weaving (*nix)
+	2b) build.bat test.loadtime.weaving  (windows)
+or
+	2c) ant test.loadtime.weaving
+
+This runs the tests and does load-time weaving of the aspects on the fly.
+
+
+Three different build approaches are demonstrated:
+
+1) Weaving During Compilation:
+The "src" directory is built with ajc, so weaving happens as part of 
+compilation. In the build.xml and ant/targets.xml, see the "project.jar" and
+"compile" targets for details.
+
+2) Binary Weaving After Compilation
+The "test" directory is built with javac (it contains only Java files), then 
+binary weaving is used to weave in the aspects from the "contract4j5.jar" built
+from "src". See the ant targets "compile-test" and "project-test.jar".
+
+3) Load-Time Weaving
+This is the least disruptive approach for using Contract4J in a pure Java 
+environment, as it requires no ajc build step. Instead, you use the special 
+"-javaagent:..." option for the JVM when starting your test runs. See the
+target "_junitTemplate.loadtime.weaving" in ant/targets.xml, which demonstrates
+invoking junit tests and doing load-time weaving. (Not yet working; see note
+above.)
+
+
+The tests generate a LOT of output, but they should all pass. You'll see words
+like "Error" and "Fatal" go buy. That's okay. There will be some expected 
 warnings that fall into two categories:
 1) Warnings in some unit tests when test annotations are used without the
-required @Contract annotation. This is deliberate for those tests.
+required @Contract annotation or when tests are defined for static methods, 
+which isn't supported. These are deliberate for those tests.
 2) Some unchecked casts involving generics.
 3) The javadocs target also generates warnings for references to aspects
 from Java files, which javadoc doesn't know how to resolve. The following 
@@ -1198,22 +1248,22 @@ which it is redundant.
 
 *** v0.6.0 October 1, 2006
 
-Major refactoring to improve the internal structure, e.g., to reduce the 
+- Major refactoring to improve the internal structure, e.g., to reduce the 
 over-reliance on singletons and to improve the "wiring" options. Defining 
 contracts is unchanged (except for some bug fixes), but the configuration API 
 has changed (this is still pre-1.0 software).
 
-Added an example using the Spring Framework v1.2.5 to configure Contract4J (see
-http://www.springframework.org). See the separate "src" folder called
+- Added an example using the Spring Framework v1.2.5 to configure Contract4J
+(see http://www.springframework.org). See the separate "src" folder called
 "Contract4J5WithSpring". Spring v2.0 configuration should be backwards 
-compatable, if not easier with new 2.0 features. However, using Contract4J with
-Spring v2.0 was not tested.
+compatable, if not easier with new 2.0 features. However, using Contract4J 
+with Spring v2.0 was not tested.
 
-Greatly improved the options for using properties files to "wire" Contract4J, 
+- Greatly improved the options for using properties files to "wire" Contract4J, 
 as an alternative to using Spring. See the tests in 
 "org.contract4j5.configurator.test" for examples.
-
-If a test fails because the expression is empty or can't be evaluated by Jexl,
+ 
+- If a test fails because the expression is empty or can't be evaluated by Jexl,
 a subclass of ContractError, TestSpecificationError, is now thrown. This makes 
 it easier to determine when a test failed because the test itself was bad, as
 opposed to the class under test failing to meet the contract. Using a subclass
@@ -1228,46 +1278,53 @@ between the two types of errors should use this idiom:
     ...
   }
   
-Added examples to the build process of doing binary (jar) and load-time weaving,
-in addition to the compile time weaving in the previous releases. 
+- The build process now uses  binary (jar) weaving when the "tests" are built,
+providing an example of using Contract4J with this approach. Preliminary 
+support for a load-time weaving (LTW) example is also provided. However, it
+is not yet complete, pending an AspectJ bug fix (see above).
 
 "Binary" weaving is weaving done after compiling all code, using a 
 post-compilation weaving step. It is useful for organizations that prefer to use
-javac for all java files. 
+javac for all java files. The unit tests are built using binary weaving, as 
+discussed earlier in this README.
 
 Load-time weaving is done as the application loads class files, using a special
 "java agent" for this purpose. See the section "Invocation and Configuration of 
 Contract4J5" for more details.
 
-Replaced the entity definitions in the build-related XML files with the ant
+Previous releases just used compile-time weaving, where ajc was used to compile
+all sources and weave the class files. This approach is still used to build
+Contract4J's non-test code and to create the contract4j5.jar file.
+
+- Replaced the entity definitions in the build-related XML files with the ant
 <import> task. Apparently, NetBeans doesn't like the entity definitions. (Thanks
 to Matthew Harrison for bringing this to my attention and for providing 
 refactored build files.)
 
-Added more tests that explicitly demonstrate that contract expressions that
+- Added more tests that explicitly demonstrate that contract expressions that
 access instance properties only work if the properties have JavaBeans getter
 methods. This is an unfortunate Jexl limitation.
 
-Fixed some bugs, including a few warnings related to generics. (Thanks to Falk 
-Bruegmann for a generics warning fix.)
+- Fixed some bugs, including a few warnings related to generics. (Thanks to 
+Falk Bruegmann for a generics warning fix.)
 
 Some of the API Changes:
 
-Removed the API calls to set separate "Reporter" objects (for logging) in each
-major component. This greatly reduced some boilerplate code with a small 
+- Removed the API calls to set separate "Reporter" objects (for logging) in
+each major component. This greatly reduced some boilerplate code with a small 
 reduction in flexibility which had dubious value. Now, a global Reporter is
 used, the one set in the "Contract4J" class.
 
-All properties on aspects are no longer static methods. Use the "aspectOf()"
+- All properties on aspects are no longer static methods. Use the "aspectOf()"
 method to get the instance. So for example, 
   ConstructorBoundaryConditions.getDefaultPreTestExpressionMaker();
 is now
   ConstructorBoundaryConditions.aspectOf().getDefaultPreTestExpressionMaker();
 
-"Contract4J" is no longer an aspect, but a class. The aspect code was moved to 
-a separate aspect called "AbstractConditions", leaving only pure-Java code. The
-conversion to Java made it easier to instant these objects as needed and also
-to exploit the more complete support for Java in Eclipse (e.g., for 
+- "Contract4J" is no longer an aspect, but a class. The aspect code was moved
+to a separate aspect called "AbstractConditions", leaving only pure-Java code.
+The conversion to Java made it easier to instant these objects as needed and
+also to exploit the more complete support for Java in Eclipse (e.g., for 
 refactorings). Note that this change means that any properties that were
 previously set on "Contract4J" are not changed to use "aspectOf", as just 
 described for the aspects. Instead, use for example,

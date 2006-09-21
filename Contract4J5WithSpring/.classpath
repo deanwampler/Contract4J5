@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry path="org.eclipse.jdt.launching.JRE_CONTAINER" kind="con"/>
+	<classpathentry path="ASPECTJRT_LIB" kind="var"/>
+	<classpathentry path="test" kind="src"/>
+	<classpathentry path="C:/tools/javatools/Spring/spring-framework-1.2.5-with-dependencies/spring-framework-1.2.5/dist/spring.jar" kind="lib"/>
+	<classpathentry sourcepath="ECLIPSE_HOME/plugins/org.eclipse.jdt.source_3.1.0/src/org.junit_3.8.1/junitsrc.zip" path="JUNIT_HOME/junit.jar" kind="var"/>
+	<classpathentry path="/Contract4J5_050" combineaccessrules="false" kind="src"/>
+	<classpathentry path="bin" kind="output"/>
+</classpath>

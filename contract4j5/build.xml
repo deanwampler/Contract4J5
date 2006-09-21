@@ -75,15 +75,13 @@
 				includes="**/*.properties" />
 		</jar>
 	</target>
+
 	<target name="project-test.jar" depends="compile-test">
-		<jar destfile="${project.test.jar}">  
-			<fileset dir="${test.classes.reldir}"
-			    includes="**/test/**" />
-			<fileset dir="${test.reldir}"
-				includes="**/*.properties" />
-			<fileset dir="${test.reldir}"
-				includes="**/*.xml" />
-		</jar>
+		<antcall target="binaryWeaveTemplate">
+			<param name="src.reldir"  value="${test.reldir}" />
+			<param name="classes.reldir" value="${test.classes.reldir}" />
+			<param name="aspectpath"  value="${project.jar}" />
+		</antcall>
 	</target>
 	
 	<!-- Compile the library's java and aj files with ajc -->
@@ -94,12 +92,12 @@
 		</antcall>
 	</target>
 	
-	<!-- Compile the test java and aj files with ajc. The output will include the library code. -->
+	<!-- Compile the test java files with javac (there are no aj files), then use
+	     binary weaving in the jar step above. -->
 	<target name="compile-test" depends="init">
-		<antcall target="compileAspectJTemplate">
+		<antcall target="compileJavaCTemplate">
 			<param name="src.reldir"  value="${test.reldir}" />
 			<param name="classes.reldir" value="${test.classes.reldir}" />
-			<param name="aspectpath"  value="${project.jar}" />
 		</antcall>
 	</target>
 	
@@ -108,11 +106,38 @@
 		    <include name="org/contract4j5/**/test/*Test.java" />
 		</fileset>
 		<antcall target="junitTemplate">
-			<param name="test.jar"     value="${project.test.jar}" />
+			<param name="test.jar"    value="${project.test.jar}" />
 			<!--param name="test.fileset" value="${test.fileset}" /-->
 		</antcall>
 	</target>
 
+	<!-- Run the tests using load-time weaving (LTW).
+		 WARNING: This is a work in progress; there is an AspectJ bug, #158179, that
+		 prevents Contract4J from being used with load-time weaving. I'll do a "0.6.1"
+		 release with completed LTW support when this bug is fixed.
+	 -->
+	<target name="test.loadtime.weaving" depends="compile-test, project.unwoven.test.jar">
+		<fileset dir="${test.reldir}" id="test.fileset">
+		    <include name="org/contract4j5/**/test/*Test.java" />
+		</fileset>
+		<antcall target="junitTemplate.loadtime.weaving">
+			<param name="test.jar"    value="unwoven-${project.test.jar}" />
+			<param name="aspectpath"  value="${project.jar}" />
+		</antcall>
+	</target>
+	
+	<target name="project.unwoven.test.jar">
+		<jar destfile="unwoven-${project.test.jar}">  
+			<fileset dir="${test.classes.reldir}"
+			    includes="**/test/**" />
+			<fileset dir="${test.reldir}"
+				includes="**/*.properties" />
+			<fileset dir="${test.reldir}"
+				includes="**/*.xml" />
+		</jar>
+	</target>
+
+	
 	<!-- Do any required test setup. -->
 	<target name="test-setup">
 	</target>

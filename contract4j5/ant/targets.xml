@@ -64,7 +64,13 @@
 			<include name="**/aspectjtools.jar"/>
 		</fileset>
 	</path>
-		
+
+	<path id="aspectj.weaver.classpath">
+		<fileset dir="${aspectj.home}/lib">
+			<include name="**/aspectjweaver.jar"/>
+		</fileset>
+	</path>
+	
 	<path id="junit.classpath">
 		<fileset dir="${junit.home}">
 			<include name="**/junit.jar"/>
@@ -85,7 +91,7 @@
 	
 	<path id="spring.classpath">
 		<fileset dir="${spring.home}/dist">
-			<include name="**/*.jar"/>
+			<include name="**/spring.jar"/>
 		</fileset>
 	</path>
 	
@@ -149,6 +155,7 @@
 		<mkdir dir="${classes.reldir}"/>
 		<javac
 			destdir="${classes.reldir}"
+			srcdir="${src.reldir}"
 			debug="${build.compiler.debug}"
 			debuglevel="${build.compiler.debuglevel}"
 			optimize="${build.compiler.optimize}">
@@ -156,10 +163,6 @@
 			<include name="**/*.java" />
 			<patternset refid="common.exclusions" />
 			<patternset refid="java.exclusions" />
-			<srcdir>
-				<pathelement location="${src.reldir}" />
-				<pathelement location="${test.reldir}" />
-			</srcdir>
 		</javac>
 	</target>
 	
@@ -178,12 +181,7 @@
 		 use the workaround of putting them in a file (.../ajc.args.list) and
 		 including them through the "argfiles" option.
 	-->
-	<target name="compileAspectJTemplate">
-		<!-- Define AspectJ tasks -->
-		<taskdef
-			resource="org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties"
-			classpathref="aspectj.classpath" />
-		
+	<target name="compileAspectJTemplate" depends="init.aspectj.tasks">
 		<mkdir dir="${classes.reldir}"/>
 		<!-- We use an ajc.args.lst file to handle the ajc options that aren't yet 
 			 supported by the ant task.-->
@@ -193,9 +191,8 @@
 			debug="${build.compiler.debug}"
 			debuglevel="${build.compiler.debuglevel}"
 			deprecation="true"
-			verbose="true"
+			verbose="${build.compiler.verbose}"
 			argfiles="${contract4j5.home}/ant/ajc.args.lst">
-			<!-- verbose="${build.compiler.verbose}" -->
 			<srcdir> 
 				<pathelement location="${src.reldir}" />
 			</srcdir>
@@ -210,16 +207,67 @@
 		</iajc>
 	</target>
 	
-	<!-- Template for JUnit tests.
+	<!-- Template target for binary weaving of aspects into Java class files using iajc. 
+		 Demonstrates binary weaving.
+		 The following property is required: 
+			  src.reldir 
+		 Note: <iajc> does not yet have options for all AspectJ5 options. So, we
+		 use the workaround of putting them in a file (.../ajc.args.list) and
+		 including them through the "argfiles" option.
+	-->
+	<target name="binaryWeaveTemplate" depends="init.aspectj.tasks">
+		<copy todir="${classes.reldir}">  
+			<fileset dir="${test.reldir}"
+				includes="**/*.properties" />
+			<fileset dir="${test.reldir}"
+				includes="**/*.xml" />
+		</copy>
+
+		<!-- We use an ajc.args.lst file to handle the ajc options that aren't yet 
+			 supported by the ant task.-->
+		<iajc
+			inpath="${classes.reldir}"
+			outjar="${project.test.jar}"
+			aspectpath="${aspectpath}"  
+			debug="${build.compiler.debug}"
+			debuglevel="${build.compiler.debuglevel}"
+			deprecation="true"
+			verbose="${build.compiler.verbose}"
+			inpathDirCopyFilter="**/.svn/*,**/*.java,**/*.aj,**/*.class"
+			argfiles="${contract4j5.home}/ant/ajc.args.lst">
+			<classpath>
+				<path refid="project.classpath"/>
+			</classpath>
+			<patternset refid="common.exclusions" />
+			<patternset refid="java.exclusions" />
+			<patternset refid="aspectj.exclusions" />
+		</iajc>
+	</target>
+
+	<target name="init.aspectj.tasks">
+		<!-- Define AspectJ tasks -->
+		<taskdef
+			resource="org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties"
+			classpathref="aspectj.classpath" />
+	</target>
+		
+	<!-- Two templates for JUnit tests, without and with load-time weaving.
 		 Must invoke with the following defined parameters:
 		   test.jar      The relative path to the jar that contains the driver.
 		   test.fileset  The name of the fileset with tests to run.
+		   aspectpath    For the load-time weaving variant, only.
 	-->
-	<target name="junitTemplate">
+	<target name="junitTemplate" depends="junit.begin, _junitTemplate, junit.end" />
+	<target name="junitTemplate.loadtime.weaving" depends="junit.begin, _junitTemplate.loadtime.weaving, junit.end" />
+
+	<target name="junit.begin">
 		<tstamp>
 			<format property="start" pattern="MM/dd/yyyy hh:mm:ss.SS" />
 		</tstamp>
 		<echo>  Test start time: ${start}</echo>
+	</target>
+
+	<target name="_junitTemplate">
 		<junit printsummary="yes" haltonfailure="yes" showoutput="true" fork="yes">
 			<jvmarg value="-ea"/>
 			<formatter type="brief" usefile="true"/>
@@ -232,13 +280,33 @@
 				<fileset refid="test.fileset" />
 			</batchtest>
 		</junit>
+	</target>
+		
+	<target name="_junitTemplate.loadtime.weaving">
+		<junit printsummary="yes" haltonfailure="yes" showoutput="true" fork="yes">
+			<formatter type="brief" usefile="true"/>
+			<jvmarg value="-ea"/>
+			<jvmarg value="-javaagent:${aspectj.home}/lib/aspectjweaver.jar"/>
+			<classpath>
+				<pathelement location="${test.jar}"/>
+				<pathelement location="${project.jar}"/>
+				<path refid="project.classpath"/>
+				<path refid="aspectj.weaver.classpath"/>
+			</classpath>
+			<batchtest>
+				<fileset refid="test.fileset" />
+			</batchtest>
+		</junit>
+	</target>
+		
+	<target name="junit.end">
 		<tstamp>
 			<format property="stop" pattern="MM/dd/yyyy hh:mm:ss.SS" />
 		</tstamp>
 		<echo>  Test finish time: ${stop}</echo>
 		<echo>  Test start  time: ${start}</echo>
 	</target>
-		
+
 	<!-- Template to build ajdocs. 
 		 For some reason, there doesn't appear to be an ajdoc task
 		 defined in org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties, even

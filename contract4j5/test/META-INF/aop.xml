@@ -1,0 +1,39 @@
+<!-- 
+Example aop.xml file, used for the load-time weaving test example.
+See http://www.eclipse.org/aspectj/doc/released/devguide/ltw-configuration.html
+for more details.
+-->
+<aspectj>
+	<aspects>
+		<aspect name="org.contract4j5.aspects.AbstractConditions"/>
+		<aspect name="org.contract4j5.aspects.ConstructorBoundaryConditions"/>
+		<aspect name="org.contract4j5.aspects.DeclareContractPrecedence"/>
+		<aspect name="org.contract4j5.aspects.InvariantCtorConditions"/>
+		<aspect name="org.contract4j5.aspects.InvariantFieldConditions"/>
+		<aspect name="org.contract4j5.aspects.InvariantFieldCtorConditions"/>
+		<aspect name="org.contract4j5.aspects.InvariantFieldCtorConditions$InvariantFieldCtorConditionsPerCtor"/>
+		<aspect name="org.contract4j5.aspects.InvariantMethodConditions"/>
+		<aspect name="org.contract4j5.aspects.InvariantTypeConditions"/>
+		<aspect name="org.contract4j5.aspects.MethodBoundaryConditions"/>
+		<aspect name="org.contract4j5.aspects.UsageEnforcement"/>
+		<aspect name="org.contract4j5.configurator.Contract4JConfigurationEnsurer"/>
+		<aspect name="org.contract4j5.policies.ReportIllegalAccessExceptions"/>
+		<aspect name="org.contract4j5.util.debug.ReportThrows"/>
+	</aspects>
+  <weaver options="-verbose"> 
+    <!-- Weave types that are within the test contract4j5 packages -->
+    <include within="org.contract4j5..test..*"/>
+    
+    <!-- Dump all types within the "org.contract4j5.." package
+         to the "./_ajdump" folder on disk (for diagnostic purposes) 
+    <dump within="org.contract4j5..*"/>
+    -->
+
+    <!-- Dump all types within the "org.contract4j5.." package and sub-packages,
+         both before are after they are woven,which can be used for byte-code 
+         generated at runtime
+      <dump within="org.contract4j5..*" beforeandafter="true"/> 
+    -->
+   </weaver>
+</aspectj>
+
