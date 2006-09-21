@@ -1,7 +1,7 @@
 Contract4J5 0.5.0 README  
 
 Contract4J5 (Annotation form)
-v0.6.0.0   October 1, 2006
+v0.6.0.0   September 21, 2006
 v0.5.0.0   February 20, 2006
 v0.1.1.0   October 4, 2005
 v0.1.0.2   April 24, 2005
@@ -413,12 +413,9 @@ or
 	
 (See ../Contract4J5WithSpring/README.txt for more information on this example.)
 
-A preliminary example of using Contract4J with Load-Time Weaving (LTW) is 
-included. Unfortunately, it is not complete because of an AspectJ bug, 
-#158179, that prevents Contract4J from being used with load-time weaving.
-(The bug involves weaving of annotations that are themselves annotated with
-"@Inherited".) Once a patched version of AspectJ is available that fixes this
-bug, I will do a "0.6.1" release with the completed LTW support example.
+An example of using Contract4J with Load-Time Weaving (LTW) is included. 
+WARNING: it requires AspectJ 1.5.2a to work, due to a bug in 1.5.2 that 
+prevents Contract4J from being used with load-time weaving.
 
 To run the tests using load-time weaving (discussed below), first build all,
 then build the following arget:
@@ -448,8 +445,7 @@ This is the least disruptive approach for using Contract4J in a pure Java
 environment, as it requires no ajc build step. Instead, you use the special 
 "-javaagent:..." option for the JVM when starting your test runs. See the
 target "_junitTemplate.loadtime.weaving" in ant/targets.xml, which demonstrates
-invoking junit tests and doing load-time weaving. (Not yet working; see note
-above.)
+invoking junit tests and doing load-time weaving. 
 
 
 The tests generate a LOT of output, but they should all pass. You'll see words
@@ -1246,7 +1242,7 @@ which it is redundant.
 
 ** Notes for Each Release
 
-*** v0.6.0 October 1, 2006
+*** v0.6.0 September 21, 2006
 
 - Major refactoring to improve the internal structure, e.g., to reduce the 
 over-reliance on singletons and to improve the "wiring" options. Defining 
@@ -1279,9 +1275,8 @@ between the two types of errors should use this idiom:
   }
   
 - The build process now uses  binary (jar) weaving when the "tests" are built,
-providing an example of using Contract4J with this approach. Preliminary 
-support for a load-time weaving (LTW) example is also provided. However, it
-is not yet complete, pending an AspectJ bug fix (see above).
+providing an example of using Contract4J with this approach. An example of 
+using load-time weaving (LTW) is also provided (see the details above).
 
 "Binary" weaving is weaving done after compiling all code, using a 
 post-compilation weaving step. It is useful for organizations that prefer to use
