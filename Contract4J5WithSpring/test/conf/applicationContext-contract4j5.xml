@@ -8,7 +8,7 @@
 
 <beans>
 	<bean id="contract4j5"
-	  class="org.contract4j5.Contract4J">
+	  class="org.contract4j5.controller.Contract4J">
 		<property name="preTestsEnabled" value="${org.contract4j5.Pre}" />
 		<property name="postTestsEnabled" value="${org.contract4j5.Post}" />
 		<property name="invarTestsEnabled" value="${org.contract4j5.Invar}" />		
@@ -78,7 +78,7 @@
 			</map>
 		</property>
 	</bean>
-	<bean id="globalReporter" class="org.contract4j5.util.reporter.WriterReporter">
+	<bean id="globalReporter" class="org.contract4j5.reporter.WriterReporter">
 		<property name="thresholdUsingString" value="${org.contract4j5.GlobalReporterThreshold}" />
 	</bean>
 	<bean id="defaultPreTestExpressionMaker"
