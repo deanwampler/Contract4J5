@@ -19,10 +19,10 @@
  */
 package org.contract4j5.enforcer;
 
-import org.contract4j5.Contract4J;
-import org.contract4j5.ContractError;
-import org.contract4j5.TestContext;
-import org.contract4j5.Contract4J.TestType;
+import org.contract4j5.context.TestContext;
+import org.contract4j5.controller.Contract4J;
+import org.contract4j5.controller.Contract4J.TestType;
+import org.contract4j5.errors.ContractError;
 import org.contract4j5.interpreter.ExpressionInterpreter;
 import org.contract4j5.interpreter.NullExpressionInterpreter;
 

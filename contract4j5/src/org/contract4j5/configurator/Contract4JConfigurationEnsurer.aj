@@ -1,11 +1,11 @@
 package org.contract4j5.configurator;
 
-import org.contract4j5.Contract4J;
+import org.contract4j5.controller.Contract4J;
 import org.contract4j5.enforcer.ContractEnforcerImpl;
 import org.contract4j5.interpreter.jexl.JexlExpressionInterpreter;
-import org.contract4j5.util.reporter.Reporter;
-import org.contract4j5.util.reporter.Severity;
-import org.contract4j5.util.reporter.WriterReporter;
+import org.contract4j5.reporter.Reporter;
+import org.contract4j5.reporter.Severity;
+import org.contract4j5.reporter.WriterReporter;
 
 /**
  * "Last resort" initialization; User's of C4J should explicitly initialize C4J

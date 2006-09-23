@@ -20,7 +20,7 @@
 
 package org.contract4j5.test;
 
-import org.contract4j5.ContractError;
+import org.contract4j5.errors.ContractError;
 
 public class NoContractInterfaceDerivedImplTest extends NoContractInterfaceImplTest {
 	NoContractInterfaceDerivedImpl obj2 = null;

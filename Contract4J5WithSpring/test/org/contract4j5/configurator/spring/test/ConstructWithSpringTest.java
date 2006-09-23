@@ -4,12 +4,15 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.contract4j5.Contract4J;
 import org.contract4j5.configurator.NullConfigurator;
+import org.contract4j5.controller.Contract4J;
 import org.contract4j5.enforcer.ContractEnforcer;
 import org.contract4j5.enforcer.ContractEnforcerImpl;
 import org.contract4j5.interpreter.ExpressionInterpreter;
 import org.contract4j5.interpreter.jexl.JexlExpressionInterpreter;
+import org.contract4j5.reporter.Reporter;
+import org.contract4j5.reporter.Severity;
+import org.contract4j5.reporter.WriterReporter;
 import org.contract4j5.testexpression.DefaultFieldInvarTestExpressionMaker;
 import org.contract4j5.testexpression.DefaultPostTestExpressionMaker;
 import org.contract4j5.testexpression.DefaultPreTestExpressionMaker;
@@ -17,9 +20,6 @@ import org.contract4j5.testexpression.DefaultTestExpressionMaker;
 import org.contract4j5.testexpression.ParentTestExpressionFinder;
 import org.contract4j5.testexpression.ParentTestExpressionFinderImpl;
 import org.contract4j5.testexpression.SimpleStringDefaultTestExpressionMaker;
-import org.contract4j5.util.reporter.Reporter;
-import org.contract4j5.util.reporter.Severity;
-import org.contract4j5.util.reporter.WriterReporter;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 

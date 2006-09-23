@@ -20,8 +20,8 @@
 
 package org.contract4j5.testexpression;
 
-import org.contract4j5.Instance;
-import org.contract4j5.TestContext;
+import org.contract4j5.context.TestContext;
+import org.contract4j5.instance.Instance;
 
 /**
  * Make default test expressions for field invariant tests.
@@ -30,7 +30,7 @@ import org.contract4j5.TestContext;
 public class DefaultFieldInvarTestExpressionMaker extends DefaultTestExpressionMakerHelper {
 	/**
 	 * Require the "target", which represents the field value, to be non-null.
-	 * @see org.contract4j5.testexpression.DefaultTestExpressionMaker#makeDefaultTestExpression(org.contract4j5.TestContext)
+	 * @see org.contract4j5.testexpression.DefaultTestExpressionMaker#makeDefaultTestExpression(org.contract4j5.context.TestContext)
 	 */
 	public String makeDefaultTestExpression(TestContext context) {
 		Instance i = context.getField();

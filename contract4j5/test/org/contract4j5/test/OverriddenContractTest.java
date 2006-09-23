@@ -22,10 +22,10 @@ package org.contract4j5.test;
 
 import junit.framework.TestCase;
 
-import org.contract4j5.ContractError;
-import org.contract4j5.TestSpecificationError;
 import org.contract4j5.configurator.Configurator;
 import org.contract4j5.configurator.test.ConfiguratorForTesting;
+import org.contract4j5.errors.ContractError;
+import org.contract4j5.errors.TestSpecificationError;
 
 /**
  * Tests behavior when a base class' contract is overridden by a 

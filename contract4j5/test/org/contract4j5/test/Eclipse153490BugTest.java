@@ -1,11 +1,11 @@
 package org.contract4j5.test;
 
-import org.contract4j5.Contract;
-import org.contract4j5.Contract4J;
-import org.contract4j5.ContractError;
-import org.contract4j5.Post;
-import org.contract4j5.Pre;
-import org.contract4j5.TestSpecificationError;
+import org.contract4j5.contract.Contract;
+import org.contract4j5.contract.Post;
+import org.contract4j5.contract.Pre;
+import org.contract4j5.controller.Contract4J;
+import org.contract4j5.errors.ContractError;
+import org.contract4j5.errors.TestSpecificationError;
 
 import junit.framework.TestCase;
 

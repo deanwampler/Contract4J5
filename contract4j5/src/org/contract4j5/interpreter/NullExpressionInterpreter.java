@@ -23,7 +23,7 @@ package org.contract4j5.interpreter;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.contract4j5.TestContext;
+import org.contract4j5.context.TestContext;
 
 /**
  * Uses the "Null Object Pattern" to define an interpreter that does nothing. It

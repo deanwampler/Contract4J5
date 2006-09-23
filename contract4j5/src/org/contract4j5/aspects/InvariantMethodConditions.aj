@@ -3,15 +3,15 @@ package org.contract4j5.aspects;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.aspectj.lang.reflect.SourceLocation;
-import org.contract4j5.Instance;
-import org.contract4j5.Invar;
-import org.contract4j5.TestContext;
-import org.contract4j5.TestContextImpl;
-import org.contract4j5.TestSpecificationError;
+import org.contract4j5.context.TestContext;
+import org.contract4j5.context.TestContextImpl;
+import org.contract4j5.contract.Invar;
+import org.contract4j5.errors.TestSpecificationError;
 import org.contract4j5.interpreter.TestResult;
 import org.contract4j5.testexpression.DefaultTestExpressionMaker;
 import org.contract4j5.testexpression.SimpleStringDefaultTestExpressionMaker;
-import org.contract4j5.util.InstanceUtils;
+import org.contract4j5.instance.Instance;
+import org.contract4j5.instance.InstanceUtils;
 
 /** 
  * Invariant tests for methods. 

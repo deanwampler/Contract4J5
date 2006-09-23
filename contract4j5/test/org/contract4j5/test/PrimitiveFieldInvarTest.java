@@ -22,15 +22,15 @@ package org.contract4j5.test;
 
 import junit.framework.TestCase;
 
-import org.contract4j5.Contract;
-import org.contract4j5.Contract4J;
-import org.contract4j5.ContractError;
-import org.contract4j5.Invar;
-import org.contract4j5.TestSpecificationError;
 import org.contract4j5.aspects.InvariantFieldConditions;
 import org.contract4j5.aspects.InvariantFieldCtorConditions;
 import org.contract4j5.configurator.Configurator;
 import org.contract4j5.configurator.test.ConfiguratorForTesting;
+import org.contract4j5.contract.Contract;
+import org.contract4j5.contract.Invar;
+import org.contract4j5.controller.Contract4J;
+import org.contract4j5.errors.ContractError;
+import org.contract4j5.errors.TestSpecificationError;
 import org.contract4j5.testexpression.DefaultFieldInvarTestExpressionMaker;
 import org.contract4j5.testexpression.DefaultTestExpressionMaker;
 import org.contract4j5.testexpression.SimpleStringDefaultTestExpressionMaker;

@@ -18,7 +18,7 @@
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 
-package org.contract4j5;
+package org.contract4j5.errors;
 
 /**
  * ContractError is an <i>unchecked</i> Error thrown when 

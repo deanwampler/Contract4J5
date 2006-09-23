@@ -20,8 +20,8 @@
 
 package org.contract4j5.enforcer;
 
-import org.contract4j5.ContractError;
-import org.contract4j5.TestContext;
+import org.contract4j5.context.TestContext;
+import org.contract4j5.errors.ContractError;
 import org.contract4j5.interpreter.ExpressionInterpreter;
 
 /**

@@ -26,8 +26,8 @@ import org.apache.commons.jexl.Expression;
 import org.apache.commons.jexl.ExpressionFactory;
 import org.apache.commons.jexl.JexlContext;
 import org.apache.commons.jexl.JexlHelper;
-import org.contract4j5.TestContext;
-import org.contract4j5.TestSpecificationError;
+import org.contract4j5.context.TestContext;
+import org.contract4j5.errors.TestSpecificationError;
 import org.contract4j5.interpreter.ExpressionInterpreterHelper;
 import org.contract4j5.interpreter.TestResult;
 
@@ -63,7 +63,7 @@ public class JexlExpressionInterpreter extends ExpressionInterpreterHelper {
 	/**
 	 * Do the test. The input test expression already has all required subsitutions
 	 * made.
-	 * @see org.contract4j5.interpreter.ExpressionInterpreterHelper#doTest(java.lang.String, org.contract4j5.TestContext)
+	 * @see org.contract4j5.interpreter.ExpressionInterpreterHelper#doTest(java.lang.String, org.contract4j5.context.TestContext)
 	 */
 	@Override
 	protected TestResult doTest(

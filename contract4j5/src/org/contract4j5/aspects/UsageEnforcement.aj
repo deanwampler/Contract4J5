@@ -20,9 +20,9 @@
 
 package org.contract4j5.aspects;
 
-import org.contract4j5.Invar;
-import org.contract4j5.Post;
-import org.contract4j5.Pre;
+import org.contract4j5.contract.Invar;
+import org.contract4j5.contract.Post;
+import org.contract4j5.contract.Pre;
 
 /**
  * Aspect to look for invalid usage of Contract4J. The following generate

@@ -26,14 +26,14 @@ import java.lang.reflect.Method;
 
 import junit.framework.TestCase;
 
-import org.contract4j5.Instance;
-import org.contract4j5.Invar;
-import org.contract4j5.Post;
-import org.contract4j5.Pre;
-import org.contract4j5.TestContext;
-import org.contract4j5.TestContextImpl;
 import org.contract4j5.configurator.Configurator;
 import org.contract4j5.configurator.test.ConfiguratorForTesting;
+import org.contract4j5.context.TestContext;
+import org.contract4j5.context.TestContextImpl;
+import org.contract4j5.contract.Invar;
+import org.contract4j5.contract.Post;
+import org.contract4j5.contract.Pre;
+import org.contract4j5.instance.Instance;
 import org.contract4j5.interpreter.TestResult;
 import org.contract4j5.test.OverriddenContractBase;
 import org.contract4j5.test.OverriddenContractDerived;

@@ -21,9 +21,9 @@ package org.contract4j5.aspects.test;
 
 import junit.framework.TestCase;
 
-import org.contract4j5.Invar;
-import org.contract4j5.Post;
-import org.contract4j5.Pre;
+import org.contract4j5.contract.Invar;
+import org.contract4j5.contract.Post;
+import org.contract4j5.contract.Pre;
 
 public class UsageTest extends TestCase {
 	@SuppressWarnings("The @Pre, @Post, and @Invar Contract4J annotations require the class annotation @Contract")

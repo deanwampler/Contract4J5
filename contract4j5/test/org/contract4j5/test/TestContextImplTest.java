@@ -22,8 +22,8 @@ package org.contract4j5.test;
 
 import junit.framework.TestCase;
 
-import org.contract4j5.Instance;
-import org.contract4j5.TestContextImpl;
+import org.contract4j5.context.TestContextImpl;
+import org.contract4j5.instance.Instance;
 
 /**
  * Test {@link TestContextImpl}. Mostly, we test the nested 

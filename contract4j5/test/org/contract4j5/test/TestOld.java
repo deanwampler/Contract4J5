@@ -22,11 +22,11 @@ package org.contract4j5.test;
 
 import junit.framework.TestCase;
 
-import org.contract4j5.Contract;
-import org.contract4j5.ContractError;
-import org.contract4j5.Post;
 import org.contract4j5.configurator.Configurator;
 import org.contract4j5.configurator.test.ConfiguratorForTesting;
+import org.contract4j5.contract.Contract;
+import org.contract4j5.contract.Post;
+import org.contract4j5.errors.ContractError;
 
 public class TestOld extends TestCase {
 	@Contract

@@ -20,7 +20,7 @@
 
 package org.contract4j5.testexpression;
 
-import org.contract4j5.TestContext;
+import org.contract4j5.context.TestContext;
 
 /**
  * Interface for objects that know how to construct a "default" test expression 

@@ -17,10 +17,12 @@
  *
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
-package org.contract4j5;
+package org.contract4j5.context;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import org.contract4j5.instance.Instance;
 
 /**
  * Default implementation of the {@link TestContext} interface.

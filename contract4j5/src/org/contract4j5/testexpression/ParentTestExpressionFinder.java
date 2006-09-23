@@ -23,7 +23,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
-import org.contract4j5.TestContext;
+import org.contract4j5.context.TestContext;
 import org.contract4j5.interpreter.TestResult;
 
 /**

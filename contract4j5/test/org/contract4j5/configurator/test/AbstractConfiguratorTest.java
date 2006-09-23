@@ -7,9 +7,6 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.contract4j5.Contract4J;
-import org.contract4j5.ContractError;
-import org.contract4j5.TestContext;
 import org.contract4j5.aspects.ConstructorBoundaryConditions;
 import org.contract4j5.aspects.InvariantCtorConditions;
 import org.contract4j5.aspects.InvariantMethodConditions;
@@ -17,12 +14,15 @@ import org.contract4j5.aspects.InvariantTypeConditions;
 import org.contract4j5.aspects.MethodBoundaryConditions;
 import org.contract4j5.configurator.AbstractConfigurator;
 import org.contract4j5.configurator.Configurator;
+import org.contract4j5.context.TestContext;
+import org.contract4j5.controller.Contract4J;
 import org.contract4j5.enforcer.ContractEnforcer;
+import org.contract4j5.errors.ContractError;
 import org.contract4j5.interpreter.ExpressionInterpreter;
 import org.contract4j5.interpreter.TestResult;
+import org.contract4j5.reporter.Reporter;
+import org.contract4j5.reporter.WriterReporter;
 import org.contract4j5.testexpression.ParentTestExpressionFinder;
-import org.contract4j5.util.reporter.Reporter;
-import org.contract4j5.util.reporter.WriterReporter;
 
 public class AbstractConfiguratorTest extends TestCase {
 	public static class StubExpressionInterpreter implements ExpressionInterpreter {

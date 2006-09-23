@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.contract4j5.Contract4J;
 import org.contract4j5.aspects.ConstructorBoundaryConditions;
 import org.contract4j5.aspects.InvariantCtorConditions;
 import org.contract4j5.aspects.InvariantFieldConditions;
@@ -12,13 +11,14 @@ import org.contract4j5.aspects.InvariantFieldCtorConditions;
 import org.contract4j5.aspects.InvariantMethodConditions;
 import org.contract4j5.aspects.InvariantTypeConditions;
 import org.contract4j5.aspects.MethodBoundaryConditions;
+import org.contract4j5.controller.Contract4J;
 import org.contract4j5.enforcer.ContractEnforcer;
 import org.contract4j5.interpreter.ExpressionInterpreter;
+import org.contract4j5.reporter.Reporter;
+import org.contract4j5.reporter.Severity;
+import org.contract4j5.reporter.WriterReporter;
 import org.contract4j5.testexpression.DefaultTestExpressionMaker;
 import org.contract4j5.testexpression.ParentTestExpressionFinder;
-import org.contract4j5.util.reporter.Reporter;
-import org.contract4j5.util.reporter.Severity;
-import org.contract4j5.util.reporter.WriterReporter;
 
 /**
  * Configure Contract4J using properties.  The System properties

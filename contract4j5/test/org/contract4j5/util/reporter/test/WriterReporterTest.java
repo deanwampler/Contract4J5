@@ -25,8 +25,8 @@ import java.io.Writer;
 
 import junit.framework.TestCase;
 
-import org.contract4j5.util.reporter.Severity;
-import org.contract4j5.util.reporter.WriterReporter;
+import org.contract4j5.reporter.Severity;
+import org.contract4j5.reporter.WriterReporter;
 
 public class WriterReporterTest extends TestCase {
 	WriterReporter reporter;

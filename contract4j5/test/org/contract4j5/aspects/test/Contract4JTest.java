@@ -2,7 +2,7 @@ package org.contract4j5.aspects.test;
 
 import junit.framework.TestCase;
 
-import org.contract4j5.Contract4J;
+import org.contract4j5.controller.Contract4J;
 
 public class Contract4JTest extends TestCase {
 	Contract4J c4j;

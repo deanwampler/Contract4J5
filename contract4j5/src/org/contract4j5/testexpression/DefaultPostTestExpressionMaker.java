@@ -20,7 +20,7 @@
 
 package org.contract4j5.testexpression;
 
-import org.contract4j5.TestContext;
+import org.contract4j5.context.TestContext;
 
 /**
  * Make default test expressions for postcondition tests for methods that don't return void.
@@ -29,7 +29,7 @@ import org.contract4j5.TestContext;
 public class DefaultPostTestExpressionMaker extends DefaultTestExpressionMakerHelper {
 	/**
 	 * Require the return value, if not a primitive, to be non-null.
-	 * @see org.contract4j5.testexpression.DefaultTestExpressionMaker#makeDefaultTestExpression(org.contract4j5.TestContext)
+	 * @see org.contract4j5.testexpression.DefaultTestExpressionMaker#makeDefaultTestExpression(org.contract4j5.context.TestContext)
 	 */
 	public String makeDefaultTestExpression(TestContext context) {
 		Object r = context.getMethodResult();

@@ -1,6 +1,7 @@
 package org.contract4j5.configurator;
 
-import org.contract4j5.Contract4J;
+import org.contract4j5.controller.Contract4J;
+
 
 
 public interface Configurator {

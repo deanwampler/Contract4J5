@@ -20,8 +20,8 @@
 
 package org.contract4j5.test;
 
-import org.contract4j5.Contract;
-import org.contract4j5.Invar;
+import org.contract4j5.contract.Contract;
+import org.contract4j5.contract.Invar;
 
 /**
  * Class subclassing {@link ContractInterfaceImpl}, which 

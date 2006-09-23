@@ -25,11 +25,11 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.contract4j5.Instance;
-import org.contract4j5.TestContext;
-import org.contract4j5.TestContextImpl;
 import org.contract4j5.configurator.Configurator;
 import org.contract4j5.configurator.test.ConfiguratorForTesting;
+import org.contract4j5.context.TestContext;
+import org.contract4j5.context.TestContextImpl;
+import org.contract4j5.instance.Instance;
 import org.contract4j5.interpreter.ExpressionInterpreter;
 import org.contract4j5.interpreter.ExpressionInterpreterHelper;
 import org.contract4j5.interpreter.TestResult;

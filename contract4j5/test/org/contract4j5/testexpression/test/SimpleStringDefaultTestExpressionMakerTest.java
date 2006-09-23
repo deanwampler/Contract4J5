@@ -22,8 +22,8 @@ package org.contract4j5.testexpression.test;
 
 import junit.framework.TestCase;
 
-import org.contract4j5.TestContext;
-import org.contract4j5.TestContextImpl;
+import org.contract4j5.context.TestContext;
+import org.contract4j5.context.TestContextImpl;
 import org.contract4j5.testexpression.SimpleStringDefaultTestExpressionMaker;
 
 public class SimpleStringDefaultTestExpressionMakerTest extends TestCase {

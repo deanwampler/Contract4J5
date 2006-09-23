@@ -7,12 +7,12 @@ import java.util.Map;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.FieldSignature;
 import org.aspectj.lang.reflect.SourceLocation;
-import org.contract4j5.Instance;
-import org.contract4j5.Invar;
-import org.contract4j5.TestContext;
-import org.contract4j5.TestContextImpl;
 import org.contract4j5.testexpression.DefaultFieldInvarTestExpressionMaker;
 import org.contract4j5.testexpression.DefaultTestExpressionMaker;
+import org.contract4j5.context.TestContext;
+import org.contract4j5.context.TestContextImpl;
+import org.contract4j5.contract.Invar;
+import org.contract4j5.instance.Instance;
 
 /** 
  * Test for field invariants in a constructor context. There is no pointcut 

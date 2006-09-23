@@ -20,10 +20,10 @@
 
 package org.contract4j5.aspects.test;
 
-import org.contract4j5.Contract;
-import org.contract4j5.Invar;
-import org.contract4j5.Post;
-import org.contract4j5.Pre;
+import org.contract4j5.contract.Contract;
+import org.contract4j5.contract.Invar;
+import org.contract4j5.contract.Post;
+import org.contract4j5.contract.Pre;
 
 /**
  * Class with static methods that declare tests. The compiler should warn that

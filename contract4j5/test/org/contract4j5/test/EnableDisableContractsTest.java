@@ -22,11 +22,11 @@ package org.contract4j5.test;
 
 import junit.framework.TestCase;
 
-import org.contract4j5.Contract4J;
-import org.contract4j5.ContractError;
-import org.contract4j5.TestSpecificationError;
 import org.contract4j5.configurator.Configurator;
 import org.contract4j5.configurator.test.ConfiguratorForTesting;
+import org.contract4j5.controller.Contract4J;
+import org.contract4j5.errors.ContractError;
+import org.contract4j5.errors.TestSpecificationError;
 
 /**
  * Test API programmatic manipulation of properties, as opposed to configuration

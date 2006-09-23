@@ -9,8 +9,6 @@ import java.util.Properties;
 
 import junit.framework.TestCase;
 
-import org.contract4j5.Contract4J;
-import org.contract4j5.TestContext;
 import org.contract4j5.aspects.ConstructorBoundaryConditions;
 import org.contract4j5.aspects.MethodBoundaryConditions;
 import org.contract4j5.aspects.InvariantCtorConditions;
@@ -21,15 +19,17 @@ import org.contract4j5.aspects.InvariantTypeConditions;
 import org.contract4j5.configurator.AbstractConfigurator;
 import org.contract4j5.configurator.Configurator;
 import org.contract4j5.configurator.PropertiesConfigurator;
+import org.contract4j5.context.TestContext;
+import org.contract4j5.controller.Contract4J;
 import org.contract4j5.enforcer.ContractEnforcer;
 import org.contract4j5.enforcer.NullContractEnforcer;
 import org.contract4j5.interpreter.ExpressionInterpreter;
 import org.contract4j5.interpreter.TestResult;
+import org.contract4j5.reporter.Reporter;
+import org.contract4j5.reporter.Severity;
+import org.contract4j5.reporter.WriterReporter;
 import org.contract4j5.testexpression.DefaultTestExpressionMaker;
 import org.contract4j5.testexpression.ParentTestExpressionFinder;
-import org.contract4j5.util.reporter.Reporter;
-import org.contract4j5.util.reporter.Severity;
-import org.contract4j5.util.reporter.WriterReporter;
 
 public class PropertiesConfiguratorTest extends TestCase {
 	public static class StubConfigurator extends AbstractConfigurator {

@@ -18,7 +18,7 @@
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 
-package org.contract4j5;
+package org.contract4j5.instance;
 
 /**
  * Encapsulate a particular "instance" of a class as part of the context

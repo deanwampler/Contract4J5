@@ -1,4 +1,4 @@
-package org.contract4j5;
+package org.contract4j5.errors;
 
 /**
  * The special case of ContractError that is thrown when a test itself is 

@@ -1,4 +1,4 @@
-package org.contract4j5;
+package org.contract4j5.controller;
 
 /*
  * Copyright 2005, 2006 Dean Wampler. All rights reserved.
@@ -24,8 +24,8 @@ import org.contract4j5.configurator.Configurator;
 import org.contract4j5.configurator.PropertiesConfigurator;
 import org.contract4j5.enforcer.ContractEnforcer;
 import org.contract4j5.enforcer.ContractEnforcerImpl;
-import org.contract4j5.util.reporter.Reporter;
-import org.contract4j5.util.reporter.WriterReporter;
+import org.contract4j5.reporter.Reporter;
+import org.contract4j5.reporter.WriterReporter;
 
 /**
  * Global services for Contract4J classes and aspects.

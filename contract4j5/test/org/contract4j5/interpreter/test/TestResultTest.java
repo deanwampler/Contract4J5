@@ -22,7 +22,7 @@ package org.contract4j5.interpreter.test;
 
 import junit.framework.TestCase;
 
-import org.contract4j5.ContractError;
+import org.contract4j5.errors.ContractError;
 import org.contract4j5.interpreter.TestResult;
 
 public class TestResultTest extends TestCase {

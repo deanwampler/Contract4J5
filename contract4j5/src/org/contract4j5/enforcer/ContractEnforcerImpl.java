@@ -20,18 +20,16 @@
 
 package org.contract4j5.enforcer;
 
-import junit.extensions.TestSetup;
-
-import org.contract4j5.Contract4J;
-import org.contract4j5.ContractError;
-import org.contract4j5.Instance;
-import org.contract4j5.TestContext;
-import org.contract4j5.TestSpecificationError;
+import org.contract4j5.context.TestContext;
+import org.contract4j5.controller.Contract4J;
+import org.contract4j5.errors.ContractError;
+import org.contract4j5.errors.TestSpecificationError;
+import org.contract4j5.instance.Instance;
 import org.contract4j5.interpreter.ExpressionInterpreter;
 import org.contract4j5.interpreter.TestResult;
 import org.contract4j5.interpreter.jexl.JexlExpressionInterpreter;
-import org.contract4j5.util.reporter.Reporter;
-import org.contract4j5.util.reporter.Severity;
+import org.contract4j5.reporter.Reporter;
+import org.contract4j5.reporter.Severity;
 
 /**
  * Class that implements {@link ContractEnforcer}. Most of the interesting work is

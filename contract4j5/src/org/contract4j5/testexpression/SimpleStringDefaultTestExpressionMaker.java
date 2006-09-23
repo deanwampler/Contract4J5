@@ -20,7 +20,7 @@
 
 package org.contract4j5.testexpression;
 
-import org.contract4j5.TestContext;
+import org.contract4j5.context.TestContext;
 
 /**
  * A default test expression maker that returns a simple string, specified for the maker instance.
@@ -47,7 +47,7 @@ public class SimpleStringDefaultTestExpressionMaker extends DefaultTestExpressio
 	}
 	/**
 	 * No default is defined; return an empty (not null) string.
-	 * @see org.contract4j5.testexpression.DefaultTestExpressionMaker#makeDefaultTestExpression(org.contract4j5.TestContext)
+	 * @see org.contract4j5.testexpression.DefaultTestExpressionMaker#makeDefaultTestExpression(org.contract4j5.context.TestContext)
 	 */
 	public String makeDefaultTestExpression(TestContext context) {
 		return getExpression();

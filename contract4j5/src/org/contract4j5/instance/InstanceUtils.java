@@ -18,9 +18,8 @@
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 
-package org.contract4j5.util;
+package org.contract4j5.instance;
 
-import org.contract4j5.Instance;
 
 /**
  * "Miscellaneous", generic utilities. Some of them are here because we can't add static method

@@ -25,15 +25,15 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
-import org.contract4j5.Contract4J;
-import org.contract4j5.Invar;
-import org.contract4j5.Post;
-import org.contract4j5.Pre;
-import org.contract4j5.TestContext;
+import org.contract4j5.context.TestContext;
+import org.contract4j5.contract.Invar;
+import org.contract4j5.contract.Post;
+import org.contract4j5.contract.Pre;
+import org.contract4j5.controller.Contract4J;
 import org.contract4j5.interpreter.ExpressionInterpreter;
 import org.contract4j5.interpreter.TestResult;
-import org.contract4j5.util.reporter.Reporter;
-import org.contract4j5.util.reporter.Severity;
+import org.contract4j5.reporter.Reporter;
+import org.contract4j5.reporter.Severity;
 
 /**
  * Default implementation.

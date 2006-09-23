@@ -17,7 +17,7 @@
  *
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
-package org.contract4j5;
+package org.contract4j5.contract;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

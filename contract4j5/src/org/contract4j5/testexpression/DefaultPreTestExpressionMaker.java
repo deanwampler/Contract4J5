@@ -19,7 +19,7 @@
  */
 package org.contract4j5.testexpression;
 
-import org.contract4j5.TestContext;
+import org.contract4j5.context.TestContext;
 
 /**
  * Make default test expressions for precondition tests.
@@ -28,7 +28,7 @@ import org.contract4j5.TestContext;
 public class DefaultPreTestExpressionMaker extends DefaultTestExpressionMakerHelper {
 	/**
 	 * Require each non-primitive argument to the method to be non-null.
-	 * @see org.contract4j5.testexpression.DefaultTestExpressionMaker#makeDefaultTestExpression(org.contract4j5.TestContext)
+	 * @see org.contract4j5.testexpression.DefaultTestExpressionMaker#makeDefaultTestExpression(org.contract4j5.context.TestContext)
 	 */
 	public String makeDefaultTestExpression(TestContext context) {
 		return makeArgsNotNullExpression (context);

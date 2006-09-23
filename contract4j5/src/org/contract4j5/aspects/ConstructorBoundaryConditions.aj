@@ -26,17 +26,17 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.ConstructorSignature;
 import org.aspectj.lang.reflect.SourceLocation;
-import org.contract4j5.Instance;
-import org.contract4j5.Post;
-import org.contract4j5.Pre;
-import org.contract4j5.TestContext;
-import org.contract4j5.TestContextImpl;
-import org.contract4j5.TestSpecificationError;
+import org.contract4j5.context.TestContext;
+import org.contract4j5.context.TestContextImpl;
+import org.contract4j5.contract.Post;
+import org.contract4j5.contract.Pre;
+import org.contract4j5.errors.TestSpecificationError;
 import org.contract4j5.interpreter.TestResult;
 import org.contract4j5.testexpression.DefaultPreTestExpressionMaker;
 import org.contract4j5.testexpression.DefaultTestExpressionMaker;
 import org.contract4j5.testexpression.SimpleStringDefaultTestExpressionMaker;
-import org.contract4j5.util.InstanceUtils;
+import org.contract4j5.instance.Instance;
+import org.contract4j5.instance.InstanceUtils;
 
 /**
  * Test the constructor preconditions and postconditions. Note that when

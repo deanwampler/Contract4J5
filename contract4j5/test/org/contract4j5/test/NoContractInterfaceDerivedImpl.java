@@ -20,7 +20,7 @@
 
 package org.contract4j5.test;
 
-import org.contract4j5.Post;
+import org.contract4j5.contract.Post;
 
 /**
  * Class subclassing the {@link NoContractInterfaceImpl} class the implements

@@ -20,7 +20,7 @@
 
 package org.contract4j5.interpreter;
 
-import org.contract4j5.TestSpecificationError;
+import org.contract4j5.errors.TestSpecificationError;
 
 /**
  * Value object for a test result, not only pass or fail, but the cause of a failure.

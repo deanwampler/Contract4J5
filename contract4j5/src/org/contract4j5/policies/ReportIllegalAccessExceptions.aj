@@ -20,9 +20,9 @@
 
 package org.contract4j5.policies;
 
-import org.contract4j5.Contract4J;
-import org.contract4j5.util.reporter.Reporter;
-import org.contract4j5.util.reporter.Severity;
+import org.contract4j5.controller.Contract4J;
+import org.contract4j5.reporter.Reporter;
+import org.contract4j5.reporter.Severity;
 
 /**
  * Report when {@link IllegalAccessException}'s are caught while doing reflection.

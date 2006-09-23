@@ -24,19 +24,19 @@ import java.io.StringWriter;
 
 import junit.framework.TestCase;
 
-import org.contract4j5.Contract4J;
-import org.contract4j5.ContractError;
-import org.contract4j5.TestContextImpl;
-import org.contract4j5.TestSpecificationError;
 import org.contract4j5.configurator.Configurator;
 import org.contract4j5.configurator.test.ConfiguratorForTesting;
+import org.contract4j5.context.TestContextImpl;
+import org.contract4j5.controller.Contract4J;
 import org.contract4j5.enforcer.ContractEnforcer;
 import org.contract4j5.enforcer.ContractEnforcerImpl;
+import org.contract4j5.errors.ContractError;
+import org.contract4j5.errors.TestSpecificationError;
 import org.contract4j5.interpreter.ExpressionInterpreter;
 import org.contract4j5.interpreter.jexl.JexlExpressionInterpreter;
-import org.contract4j5.util.reporter.Reporter;
-import org.contract4j5.util.reporter.Severity;
-import org.contract4j5.util.reporter.WriterReporter;
+import org.contract4j5.reporter.Reporter;
+import org.contract4j5.reporter.Severity;
+import org.contract4j5.reporter.WriterReporter;
 
 /**
  * Test ContractEnforcerImpl, except for test invocation, which is tested in a separate
