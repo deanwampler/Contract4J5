@@ -57,8 +57,12 @@
 		<property name="defaultTypeInvarTestExpressionMaker" ref="simpleStringDefaultTestExpressionMaker" />
 		<property name="parentTestExpressionFinder" ref="parentTestExpressionFinder" />
 	</bean>
-	<bean id="contractEnforcer" class="org.contract4j5.enforcer.ContractEnforcerImpl">
+	<bean id="contractEnforcer" class="org.contract4j5.enforcer.defaultimpl.DefaultContractEnforcer">
 		<property name="expressionInterpreter" ref="expressionInterpreter" />
+		<property name="reportErrors" 
+			value="${org.contract4j5.ContractEnforcerReportErrors}" />
+		<property name="errorReportingSeverityLevel" 
+			value="${org.contract4j5.ContractEnforcerErrorReportingSeverityLevel}" />
 		<property name="includeStackTrace" 
 			value="${org.contract4j5.ContractEnforcerIncludeStackTrace}" />
 	</bean>

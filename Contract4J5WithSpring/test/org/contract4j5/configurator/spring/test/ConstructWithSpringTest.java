@@ -7,7 +7,7 @@ import junit.framework.TestCase;
 import org.contract4j5.configurator.NullConfigurator;
 import org.contract4j5.controller.Contract4J;
 import org.contract4j5.enforcer.ContractEnforcer;
-import org.contract4j5.enforcer.ContractEnforcerImpl;
+import org.contract4j5.enforcer.defaultimpl.DefaultContractEnforcer;
 import org.contract4j5.interpreter.ExpressionInterpreter;
 import org.contract4j5.interpreter.jexl.JexlExpressionInterpreter;
 import org.contract4j5.reporter.Reporter;
@@ -53,7 +53,9 @@ public class ConstructWithSpringTest extends TestCase {
 		assertEquals(Severity.WARN, reporter.getThreshold());
 
 		ContractEnforcer contractEnforcer = (ContractEnforcer) applicationContext.getBean("contractEnforcer");
-		assertEquals(ContractEnforcerImpl.class, contractEnforcer.getClass());
+		assertEquals(DefaultContractEnforcer.class, contractEnforcer.getClass());
+		assertTrue(contractEnforcer.getReportErrors());
+		assertEquals(Severity.FATAL, contractEnforcer.getErrorReportingSeverityLevel());
 		assertFalse(contractEnforcer.getIncludeStackTrace());
 		
 		ExpressionInterpreter expressionInterpreter = (ExpressionInterpreter) applicationContext.getBean("expressionInterpreter");
