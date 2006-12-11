@@ -10,7 +10,7 @@ import org.contract4j5.aspects.MethodBoundaryConditions;
 import org.contract4j5.configurator.AbstractConfigurator;
 import org.contract4j5.controller.Contract4J;
 import org.contract4j5.enforcer.ContractEnforcer;
-import org.contract4j5.enforcer.ContractEnforcerImpl;
+import org.contract4j5.enforcer.defaultimpl.DefaultContractEnforcer;
 import org.contract4j5.interpreter.ExpressionInterpreter;
 import org.contract4j5.interpreter.jexl.JexlExpressionInterpreter;
 import org.contract4j5.reporter.Reporter;
@@ -29,7 +29,7 @@ public class ConfiguratorForTesting extends AbstractConfigurator {
 		c4j.setEnabled(Contract4J.TestType.Invar, true);
 		Reporter reporter = new WriterReporter();
 		c4j.setReporter(reporter);
-		ContractEnforcer ce = new ContractEnforcerImpl(); 
+		ContractEnforcer ce = new DefaultContractEnforcer(); 
 		c4j.setContractEnforcer(ce);
 		ExpressionInterpreter ei = new JexlExpressionInterpreter();
 		ce.setExpressionInterpreter(ei);

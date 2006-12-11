@@ -1,0 +1,23 @@
+findbugs.txt
+
+How to run "findbugs" on Contract4J5.
+
+
+1) Install findbugs (http://findbugs.sourceforge.net).
+2) Run the "findbugs" command, which invokes its own GUI.
+3) Using the File menu, open the project file "contract4j5.fb".
+4) Click the "find bugs" button to generate a report.
+
+Note that there is a few message about an unused field in an aspect. This 
+appears to be an internally generated field. Also, we ignore a few other
+warnings about exposing the internals of a class when a reference to an
+array field is accessed through a getter and setter.
+
+Findbugs is quite useful. For example, it found a few cases where we had
+
+if (string == null && string.length() == 0)...
+
+when it should have been
+
+if (string == null || string.length() == 0)...
+

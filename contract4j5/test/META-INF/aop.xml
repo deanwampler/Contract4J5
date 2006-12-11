@@ -16,9 +16,9 @@ for more details.
 		<aspect name="org.contract4j5.aspects.InvariantTypeConditions"/>
 		<aspect name="org.contract4j5.aspects.MethodBoundaryConditions"/>
 		<aspect name="org.contract4j5.aspects.UsageEnforcement"/>
-		<aspect name="org.contract4j5.configurator.Contract4JConfigurationEnsurer"/>
+		<aspect name="org.contract4j5.configurator.ensurer.Contract4JConfigurationEnsurer"/>
 		<aspect name="org.contract4j5.policies.ReportIllegalAccessExceptions"/>
-		<aspect name="org.contract4j5.util.debug.ReportThrows"/>
+		<aspect name="org.contract4j5.debug.ReportThrows"/>
 	</aspects>
   <weaver options="-verbose"> 
     <!-- Weave types that are within the test contract4j5 packages -->

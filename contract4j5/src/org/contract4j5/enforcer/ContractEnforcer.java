@@ -22,7 +22,10 @@ package org.contract4j5.enforcer;
 
 import org.contract4j5.context.TestContext;
 import org.contract4j5.errors.ContractError;
+import org.contract4j5.errors.TestSpecificationError;
 import org.contract4j5.interpreter.ExpressionInterpreter;
+import org.contract4j5.interpreter.TestResult;
+import org.contract4j5.reporter.Severity;
 
 /**
  * Interface for the component that invokes tests and handles failures.
@@ -58,7 +61,19 @@ public interface ContractEnforcer {
 			Throwable   optionalThrowable) throws ContractError;
 	
 	/**
-	 * Turn on or off inclusion of stack traces in error messages.
+	 * Turn on or off reporting of error messages. Defaults to on.
+	 * @param onOff
+	 */
+	void setReportErrors(boolean onOff);
+	
+	/**
+	 * Return whether or not reporting of error messages is enabled. Defaults to true.
+	 */
+	boolean getReportErrors();
+	
+	/**
+	 * Turn on or off inclusion of stack traces in error messages. Ignored if
+	 * {@link #getReportErrors()} is false.
 	 * @param onOff enables inclusion if <code>true</code> or disables it if <code>false</code>
 	 */
 	void setIncludeStackTrace(boolean onOff);
@@ -68,6 +83,17 @@ public interface ContractEnforcer {
 	 *         or disabled (<code>false</code>).
 	 */
 	boolean getIncludeStackTrace();
+	
+	/**
+	 * Set the severity level to use when reporting the error. Defaults to FATAL.
+	 * @param Severity level.
+	 */
+	void setErrorReportingSeverityLevel(Severity severity);
+	
+	/**
+	 * Get the severity level to use when reporting the error. Defaults to FATAL.
+	 */
+	Severity getErrorReportingSeverityLevel();
 	
 	/**
 	 * Set the ExpressionInterpreter that parses and evaluates the test 
@@ -82,4 +108,7 @@ public interface ContractEnforcer {
 	 * @return ExpressionInterpreter that if null results in no contract tests being executed.
 	 */
 	ExpressionInterpreter getExpressionInterpreter();
+
+	public void handleFailure(String testExpression, String testPrefix, String extraMessage,
+			TestContext context, TestResult testResult) throws ContractError;
 }

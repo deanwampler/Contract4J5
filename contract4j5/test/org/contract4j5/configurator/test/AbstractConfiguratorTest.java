@@ -13,7 +13,6 @@ import org.contract4j5.aspects.InvariantMethodConditions;
 import org.contract4j5.aspects.InvariantTypeConditions;
 import org.contract4j5.aspects.MethodBoundaryConditions;
 import org.contract4j5.configurator.AbstractConfigurator;
-import org.contract4j5.configurator.Configurator;
 import org.contract4j5.context.TestContext;
 import org.contract4j5.controller.Contract4J;
 import org.contract4j5.enforcer.ContractEnforcer;
@@ -21,6 +20,7 @@ import org.contract4j5.errors.ContractError;
 import org.contract4j5.interpreter.ExpressionInterpreter;
 import org.contract4j5.interpreter.TestResult;
 import org.contract4j5.reporter.Reporter;
+import org.contract4j5.reporter.Severity;
 import org.contract4j5.reporter.WriterReporter;
 import org.contract4j5.testexpression.ParentTestExpressionFinder;
 
@@ -43,8 +43,17 @@ public class AbstractConfiguratorTest extends TestCase {
 			throws ContractError {}
 		public void fail(String testExpression, String testPrefix, String extraMessage, TestContext context, Throwable th)
 			throws ContractError { throw new ContractError(testExpression + ": " + extraMessage, th); }
-		public boolean getIncludeStackTrace() {	return false; }
-		public void setIncludeStackTrace(boolean onOff) {}
+		public boolean  getIncludeStackTrace() {	return false; }
+		public void     setIncludeStackTrace(boolean onOff) {}
+		public Severity getErrorReportingSeverityLevel() { return Severity.FATAL; }
+		public void     setErrorReportingSeverityLevel(Severity severity) {}
+		public boolean  getReportErrors() { return true; }
+		public void     setReportErrors(boolean onOff) {}
+		public void handleFailure(String testExpression, String testPrefix,
+				String extraMessage, TestContext context, TestResult testResult)
+				throws ContractError {
+			throw new ContractError(testExpression);
+		}
 	}
 
 	public static class StubTestExpressionFinder implements ParentTestExpressionFinder {
@@ -63,7 +72,7 @@ public class AbstractConfiguratorTest extends TestCase {
 	
 	public static class StubConfigurator extends AbstractConfigurator {
 		protected void doConfigure() {
-			Contract4J c4j = getContract4J();
+			Contract4J c4j = Contract4J.getInstance();
 			c4j.setReporter(new WriterReporter());
 			c4j.setContractEnforcer(new StubContractEnforcer()); 
 			setParentTestExpressionFinder(new StubTestExpressionFinder(c4j));
@@ -90,7 +99,8 @@ public class AbstractConfiguratorTest extends TestCase {
 		super.setUp();
 		configurator = new StubConfigurator();
 		configurator.configure();
-		c4j = configurator.getContract4J();
+//		c4j = configurator.getContract4J();
+		c4j = Contract4J.getInstance();
 	}
 	@Override
 	protected void tearDown() throws Exception {

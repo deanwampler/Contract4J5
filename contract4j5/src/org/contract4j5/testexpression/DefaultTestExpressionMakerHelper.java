@@ -48,7 +48,7 @@ abstract public class DefaultTestExpressionMakerHelper implements
 	public String makeArgsNotNullExpression (TestContext context) {
 		StringBuffer test = new StringBuffer();
 		Object[] args = context.getMethodArgs();
-		if (args != null || args.length > 0) {
+		if (args != null && args.length > 0) {
 			boolean first = true;
 			for (int i=0; i<args.length; i++) {
 				Class argClass = args[i] != null ? args[i].getClass() : null;

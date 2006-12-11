@@ -25,6 +25,8 @@ import org.contract4j5.controller.Contract4J.TestType;
 import org.contract4j5.errors.ContractError;
 import org.contract4j5.interpreter.ExpressionInterpreter;
 import org.contract4j5.interpreter.NullExpressionInterpreter;
+import org.contract4j5.interpreter.TestResult;
+import org.contract4j5.reporter.Severity;
 
 /**
  * Uses the "Null Object Pattern" to define a contract enforcer that does nothing,
@@ -43,10 +45,6 @@ public class NullContractEnforcer implements ContractEnforcer {
 		throw new ContractError(testExpression + ": " + extraMessage, th); 
 	}
 	
-	boolean includeStackTrace = false;
-	public void setIncludeStackTrace(boolean onOff) { includeStackTrace = onOff; }
-	public boolean getIncludeStackTrace() { return includeStackTrace; }
-
 	private ExpressionInterpreter expressionInterpreter = 
 		new NullExpressionInterpreter();
 	public void setExpressionInterpreter(
@@ -56,4 +54,21 @@ public class NullContractEnforcer implements ContractEnforcer {
 	public ExpressionInterpreter getExpressionInterpreter() {
 		return expressionInterpreter;
 	}
+	public void handleFailure(String testExpression, String testPrefix,
+			String extraMessage, TestContext context, TestResult testResult)
+			throws ContractError {
+		throw new ContractError(testExpression);
+	}
+
+	boolean includeStackTrace = false;
+	public void setIncludeStackTrace(boolean onOff) { includeStackTrace = onOff; }
+	public boolean getIncludeStackTrace() { return includeStackTrace; }
+
+	boolean reportErrors = false;
+	public boolean getReportErrors() { return reportErrors; }
+	public void setReportErrors(boolean onOff) { reportErrors = onOff; }
+
+	Severity severity = Severity.FATAL;
+	public Severity getErrorReportingSeverityLevel() { return severity; }
+	public void setErrorReportingSeverityLevel(Severity severity) { this.severity = severity; }
 }

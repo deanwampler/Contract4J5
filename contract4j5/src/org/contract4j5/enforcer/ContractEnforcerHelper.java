@@ -37,7 +37,7 @@ import org.contract4j5.reporter.Severity;
  * 
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
-public class ContractEnforcerImpl implements ContractEnforcer {
+public abstract class ContractEnforcerHelper implements ContractEnforcer {
 
 	private ExpressionInterpreter expressionInterpreter = null;
 	
@@ -49,6 +49,16 @@ public class ContractEnforcerImpl implements ContractEnforcer {
 	public void setExpressionInterpreter(ExpressionInterpreter expressionInterpreter) {
 		this.expressionInterpreter = expressionInterpreter;
 	}
+	
+	private boolean reportError = true;
+
+	public void    setReportErrors(boolean onOff) { reportError = onOff; }
+	public boolean getReportErrors()              { return reportError; }
+
+	private Severity errorReportingSeverity = Severity.FATAL;
+	
+	public void     setErrorReportingSeverityLevel(Severity severity) { errorReportingSeverity = severity; }
+	public Severity getErrorReportingSeverityLevel()                  { return errorReportingSeverity; }
 	
 	private boolean includeStackTrace = false;
 	
@@ -69,7 +79,7 @@ public class ContractEnforcerImpl implements ContractEnforcer {
 		ExpressionInterpreter interpreter = getExpressionInterpreter();
 		if (interpreter == null) {
 			if (warnedOnce == false) {
-				getReporter().report (Severity.FATAL, this.getClass(), "No ExpressionInterpreter is defined for the ContractEnforcer!");
+				getReporter().report (getErrorReportingSeverityLevel(), this.getClass(), "No ExpressionInterpreter is defined for the ContractEnforcer!");
 				warnedOnce = true;
 			}
 			return;
@@ -77,7 +87,7 @@ public class ContractEnforcerImpl implements ContractEnforcer {
 		getReporter().report(Severity.DEBUG, this.getClass(), "Invoking \""+testPrefix+"\" test: \""+testExpression+"\".");
 		TestResult testResult = interpreter.invokeTest(testExpression, context);
 		if (testResult.isPassed() == false) {
-			reportFailureAndThrowContractError(testExpression, testPrefix, extraMessage, context, testResult);
+			handleFailure(testExpression, testPrefix, extraMessage, context, testResult);
 		}
 	}
 
@@ -89,18 +99,29 @@ public class ContractEnforcerImpl implements ContractEnforcer {
 			Throwable optionalThrowable) throws ContractError {
 		getReporter().report(Severity.DEBUG, this.getClass(), "fail() called!");
 		TestResult testResult = new TestResult(false, "", optionalThrowable);
-		reportFailureAndThrowContractError(testExpression, testPrefix, extraMessage, context, testResult);
+		handleFailure(testExpression, testPrefix, extraMessage, context, testResult);
 	}
 
-	protected void reportFailureAndThrowContractError(String testExpression, String testPrefix, String extraMessage, TestContext context, TestResult testResult) throws ContractError {
+	public void handleFailure(String testExpression, String testPrefix, String extraMessage, TestContext context, TestResult testResult) throws ContractError {
 		String msg = makeFailureMessage(testExpression, testPrefix, extraMessage, context, testResult);
 		reportContractFailure(msg, testResult.getFailureCause());
-		throw makeContractError(msg, testResult.getFailureCause());
+		finishFailureHandling(testResult, msg);
 	}
+
+	/**
+	 * Override this method to complete failure handling, <i>e.g.,</i> to throw a 
+	 * {@link ContractError}, it will have to subclass {@link ContractError}, which
+	 * is unchecked.
+	 * @param testResult
+	 * @param msg
+	 */
+	protected abstract void finishFailureHandling(TestResult testResult, String msg) throws ContractError;
 	
 	protected void reportContractFailure (String message, Throwable throwable) {
+		if (getReportErrors() == false)
+			return;
 		String report = makeStackDumpMessage(message, throwable);
-		getReporter().report (Severity.FATAL, this.getClass(), report);
+		getReporter().report (getErrorReportingSeverityLevel(), this.getClass(), report);
 	}
 	
 	protected String makeStackDumpMessage(String message, Throwable throwable) {
@@ -136,6 +157,13 @@ public class ContractEnforcerImpl implements ContractEnforcer {
 		}
 	}
 
+	/**
+	 * Instantiates the appropriate subclass of {@link ContractError}. Override if
+	 * you introduce new custom subclasses.
+	 * @param message used to construct the ContractError.
+	 * @param throwable that originally caused the failure.
+	 * @return newly constructed ContractError.
+	 */
 	protected ContractError makeContractError(String message, Throwable throwable) {
 		if (throwable instanceof TestSpecificationError)
 			return new TestSpecificationError(message, throwable);
@@ -174,12 +202,10 @@ public class ContractEnforcerImpl implements ContractEnforcer {
 		if (!empty(extraMessage)) {
 			msg.append(" ").append(extraMessage);
 		}
-		if (testResult != null) {
-			if(!empty(testResult.getMessage())) {
-				msg.append(" (").append(testResult.getMessage()).append(")");
-			}
-			msg.append(" [").append(testResult.getFailureCauseMessage()).append("]");
+		if(!empty(testResult.getMessage())) {
+			msg.append(" (").append(testResult.getMessage()).append(")");
 		}
+		msg.append(" [").append(testResult.getFailureCauseMessage()).append("]");
 		return msg.toString();
 	}
 	
@@ -192,7 +218,7 @@ public class ContractEnforcerImpl implements ContractEnforcer {
 	 * @param expressionInterpreter
 	 * @param includeStackTrace
 	 */
-	public ContractEnforcerImpl(
+	public ContractEnforcerHelper(
 			ExpressionInterpreter expressionInterpreter,
 			boolean includeStackTrace) {
 		setExpressionInterpreter(expressionInterpreter);
@@ -203,7 +229,7 @@ public class ContractEnforcerImpl implements ContractEnforcer {
 	 * Default Constructor. By default, don't include the stack trace in error
 	 * messages and set the expression interpreter to null (not recommended!).
 	 */
-	public ContractEnforcerImpl() {
+	public ContractEnforcerHelper() {
 		setExpressionInterpreter(null);
 		setIncludeStackTrace(false);
 	}

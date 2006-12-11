@@ -60,41 +60,41 @@ public class Instance {
 		return sb.toString();
 	}
 	
-	public boolean equals (Object o) {
-		if (this == o) {
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((clazz == null) ? 0 : clazz.hashCode());
+		result = prime * result
+				+ ((itemName == null) ? 0 : itemName.hashCode());
+		result = prime * result + ((value == null) ? 0 : value.hashCode());
+		return result;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		}
-		if (o == null || !(o instanceof Instance)) {
+		if (obj == null)
 			return false;
-		}
-		Instance i = (Instance) o;
-		if (getItemName() == null) {
-			if (i.getItemName() != null) {
+		if (getClass() != obj.getClass())
+			return false;
+		final Instance other = (Instance) obj;
+		if (clazz == null) {
+			if (other.clazz != null)
 				return false;
-			}
-		} else if (i.getItemName() == null) {
+		} else if (!clazz.equals(other.clazz))
 			return false;
-		} else if (!getItemName().equals(i.getItemName())) {
-			return false;
-		}
-		if (getClazz() == null) {
-			if (i.getClazz() != null) {
+		if (itemName == null) {
+			if (other.itemName != null)
 				return false;
-			}
-		} else if (i.getClazz() == null) {
+		} else if (!itemName.equals(other.itemName))
 			return false;
-		} else if (!getClazz().equals(i.getClazz())) {
-			return false;
-		}
-		if (getValue() == null) {
-			if (i.getValue() != null) {
+		if (value == null) {
+			if (other.value != null)
 				return false;
-			}
-		} else if (i.getValue() == null) {
+		} else if (!value.equals(other.value))
 			return false;
-		} else if (!getValue().equals(i.getValue())) {
-			return false;
-		}
 		return true;
 	}
 }

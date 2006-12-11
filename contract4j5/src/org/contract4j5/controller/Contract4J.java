@@ -21,9 +21,9 @@ package org.contract4j5.controller;
  */
 
 import org.contract4j5.configurator.Configurator;
-import org.contract4j5.configurator.PropertiesConfigurator;
+import org.contract4j5.configurator.properties.PropertiesConfigurator;
 import org.contract4j5.enforcer.ContractEnforcer;
-import org.contract4j5.enforcer.ContractEnforcerImpl;
+import org.contract4j5.enforcer.defaultimpl.DefaultContractEnforcer;
 import org.contract4j5.reporter.Reporter;
 import org.contract4j5.reporter.WriterReporter;
 
@@ -100,7 +100,7 @@ public class Contract4J {
 	}
 	public ContractEnforcer getContractEnforcer() { 
 		if (contractEnforcer == null)
-			contractEnforcer = new ContractEnforcerImpl();
+			contractEnforcer = new DefaultContractEnforcer();
 		return contractEnforcer; 
 	}
 	
@@ -119,7 +119,8 @@ public class Contract4J {
 			Configurator systemConfigurator,
 			ContractEnforcer contractEnforcer,
 			Reporter reporter) {
-		this.isEnabled = isEnabledFlags;
+		for (int i=0; i< isEnabledFlags.length; i++) 
+			this.isEnabled[i] = isEnabledFlags[i];  // allow size mismatch to throw exception
 		this.systemConfigurator = systemConfigurator;
 		this.contractEnforcer = contractEnforcer;
 		this.reporter = reporter;

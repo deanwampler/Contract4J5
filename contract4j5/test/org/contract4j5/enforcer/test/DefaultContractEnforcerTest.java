@@ -29,7 +29,7 @@ import org.contract4j5.configurator.test.ConfiguratorForTesting;
 import org.contract4j5.context.TestContextImpl;
 import org.contract4j5.controller.Contract4J;
 import org.contract4j5.enforcer.ContractEnforcer;
-import org.contract4j5.enforcer.ContractEnforcerImpl;
+import org.contract4j5.enforcer.defaultimpl.DefaultContractEnforcer;
 import org.contract4j5.errors.ContractError;
 import org.contract4j5.errors.TestSpecificationError;
 import org.contract4j5.interpreter.ExpressionInterpreter;
@@ -39,10 +39,10 @@ import org.contract4j5.reporter.Severity;
 import org.contract4j5.reporter.WriterReporter;
 
 /**
- * Test ContractEnforcerImpl, except for test invocation, which is tested in a separate
+ * Test DefaultContractEnforcerImpl, except for test invocation, which is tested in a separate
  * TestCase.
  */
-public class ContractEnforcerImplTest extends TestCase {
+public class DefaultContractEnforcerTest extends TestCase {
 	Contract4J c4j;
 	ContractEnforcer contractEnforcer;
 	ExpressionInterpreter interpreter;
@@ -52,7 +52,8 @@ public class ContractEnforcerImplTest extends TestCase {
 		reporter = new WriterReporter(Severity.WARN, new StringWriter(1024));
 		Configurator c = new ConfiguratorForTesting();
 		c.configure();
-		c4j = c.getContract4J();
+//		c4j = c.getContract4J();
+		c4j = Contract4J.getInstance();
 		c4j.setReporter(reporter);
 		contractEnforcer = c4j.getContractEnforcer();
 		contractEnforcer.setIncludeStackTrace(true);
@@ -60,15 +61,15 @@ public class ContractEnforcerImplTest extends TestCase {
 	}
 
 	public void testConstructor1() {
-		ContractEnforcer ce1 = new ContractEnforcerImpl(interpreter, true);
+		ContractEnforcer ce1 = new DefaultContractEnforcer(interpreter, true);
 		assertTrue(ce1.getIncludeStackTrace());
 		assertSame(interpreter, ce1.getExpressionInterpreter());
-		ContractEnforcer ce2 = new ContractEnforcerImpl(interpreter, false);
+		ContractEnforcer ce2 = new DefaultContractEnforcer(interpreter, false);
 		assertFalse(ce2.getIncludeStackTrace());
 	}
 
 	public void testConstructor2() {
-		ContractEnforcer ce = new ContractEnforcerImpl();
+		ContractEnforcer ce = new DefaultContractEnforcer();
 		assertFalse(ce.getIncludeStackTrace());
 		assertTrue(JexlExpressionInterpreter.class == ce.getExpressionInterpreter().getClass());
 	}

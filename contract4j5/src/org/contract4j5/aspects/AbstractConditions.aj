@@ -50,8 +50,7 @@ abstract public aspect AbstractConditions {
 		return Contract4J.getInstance();
 	}
 
-	private ParentTestExpressionFinder parentTestExpressionFinder = 
-		new ParentTestExpressionFinderImpl();
+	private ParentTestExpressionFinder parentTestExpressionFinder = null;
 
 	/**
 	 * Get the object that determines the test expression from a corresponding
@@ -60,6 +59,8 @@ abstract public aspect AbstractConditions {
 	 * be a corresponding parent test.
 	 */
 	public ParentTestExpressionFinder getParentTestExpressionFinder() {
+		if (parentTestExpressionFinder == null) 
+			parentTestExpressionFinder = new ParentTestExpressionFinderImpl();
 		return parentTestExpressionFinder;
 	}
 

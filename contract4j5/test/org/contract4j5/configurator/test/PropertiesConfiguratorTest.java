@@ -18,7 +18,8 @@ import org.contract4j5.aspects.InvariantMethodConditions;
 import org.contract4j5.aspects.InvariantTypeConditions;
 import org.contract4j5.configurator.AbstractConfigurator;
 import org.contract4j5.configurator.Configurator;
-import org.contract4j5.configurator.PropertiesConfigurator;
+import org.contract4j5.configurator.properties.PropertiesConfigurator;
+import org.contract4j5.configurator.properties.PropertiesConfigurator.EnabledPropertyKeys;
 import org.contract4j5.context.TestContext;
 import org.contract4j5.controller.Contract4J;
 import org.contract4j5.enforcer.ContractEnforcer;
@@ -63,9 +64,16 @@ public class PropertiesConfiguratorTest extends TestCase {
 		c4j.setSystemConfigurator(null);
 		StubOutputStream.invoked = false;
 	}
+
+	@Override
+	protected void tearDown() throws Exception {
+		super.tearDown();
+		c4j.setSystemConfigurator(null); // reset
+		Contract4J.setInstance(null);  
+	}
 	
 	public void testDefaultConfiguratorIsSet() {
-		assertEquals (org.contract4j5.configurator.PropertiesConfigurator.class,
+		assertEquals (org.contract4j5.configurator.properties.PropertiesConfigurator.class,
 				c4j.getSystemConfigurator().getClass());
 	}
 	
@@ -184,6 +192,28 @@ public class PropertiesConfiguratorTest extends TestCase {
 		c.configure();
 		ContractEnforcer ce = c4j.getContractEnforcer();
 		assertEquals (NullContractEnforcer.class, ce.getClass());
+	}
+	
+	public void testSetReportErrors() {
+		setProp(PropertiesConfigurator.KnownBeanKeys.ContractEnforcer.name(), 
+				NullContractEnforcer.class.getName());
+		setProp(PropertiesConfigurator.KnownBeanKeys.ContractEnforcerReportErrors.name(), 
+				"true");
+		Configurator c = new PropertiesConfigurator();
+		c.configure();
+		ContractEnforcer ce = c4j.getContractEnforcer();
+		assertTrue (ce.getReportErrors());
+	}
+	
+	public void testSetErrorReportingSeverity() {
+		setProp(PropertiesConfigurator.KnownBeanKeys.ContractEnforcer.name(), 
+				NullContractEnforcer.class.getName());
+		setProp(PropertiesConfigurator.KnownBeanKeys.ContractEnforcerErrorReportingSeverity.name(), 
+				"ERROR");
+		Configurator c = new PropertiesConfigurator();
+		c.configure();
+		ContractEnforcer ce = c4j.getContractEnforcer();
+		assertEquals(Severity.ERROR, ce.getErrorReportingSeverityLevel());
 	}
 	
 	public void testSetIncludeStackTrace() {
@@ -523,8 +553,8 @@ public class PropertiesConfiguratorTest extends TestCase {
 	}
 
 	private void setupEnabledFlags(boolean preFlag, boolean postFlag, boolean invarFlag) {
-		for (int i = 0; i < PropertiesConfigurator.enabledPropertyKeys.length; i++) {
-			unsetProp(PropertiesConfigurator.enabledPropertyKeys[i]);
+		for (int i = 0; i < PropertiesConfigurator.EnabledPropertyKeys.values().length; i++) {
+			unsetProp(PropertiesConfigurator.EnabledPropertyKeys.values()[i]);
 		}
 		c4j.setEnabled(Contract4J.TestType.Pre,   preFlag);
 		c4j.setEnabled(Contract4J.TestType.Post,  postFlag);
@@ -534,11 +564,11 @@ public class PropertiesConfiguratorTest extends TestCase {
 	
 	private void checkEnabled(int whichEnabledPropertyKey, boolean enabledPropertyValue,
 			boolean preFlag, boolean postFlag, boolean invarFlag) {
-		setProp(PropertiesConfigurator.enabledPropertyKeys[whichEnabledPropertyKey], 
+		setProp(PropertiesConfigurator.EnabledPropertyKeys.values()[whichEnabledPropertyKey], 
 				Boolean.toString(enabledPropertyValue));
 		Configurator c = new PropertiesConfigurator();
 		c.configure();
-		unsetProp(PropertiesConfigurator.enabledPropertyKeys[whichEnabledPropertyKey]);
+		unsetProp(PropertiesConfigurator.EnabledPropertyKeys.values()[whichEnabledPropertyKey]);
 		doTestPrePostInvarValues(preFlag, postFlag, invarFlag);
 	}
 
@@ -548,8 +578,14 @@ public class PropertiesConfiguratorTest extends TestCase {
 		assertEquals(invarFlag, c4j.isEnabled(Contract4J.TestType.Invar));
 	}
 
+	private void setProp(EnabledPropertyKeys enabledPropertyKey, String value) {
+		System.setProperty(PropertiesConfigurator.PROPERTY_PREFIX + enabledPropertyKey, value);
+	}
 	private void setProp(String name, String value) {
 		System.setProperty(PropertiesConfigurator.PROPERTY_PREFIX + name, value);
+	}
+	private void unsetProp(EnabledPropertyKeys enabledPropertyKey) {
+		System.clearProperty(PropertiesConfigurator.PROPERTY_PREFIX + enabledPropertyKey);
 	}
 	private void unsetProp(String name) {
 		System.clearProperty(PropertiesConfigurator.PROPERTY_PREFIX + name);

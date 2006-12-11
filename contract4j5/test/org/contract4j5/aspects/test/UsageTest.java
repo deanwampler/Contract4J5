@@ -32,6 +32,7 @@ public class UsageTest extends TestCase {
 		public void foo(String str) { name = str; }
 		@Invar
 		private String name;
+		public String getName() { return name; }
 		@Post("name != null")
 		public MissingContractAnno (String name) {
 			this.name = name;

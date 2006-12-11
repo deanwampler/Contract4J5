@@ -1,7 +1,9 @@
-package org.contract4j5.configurator;
+package org.contract4j5.configurator.ensurer;
 
+import org.contract4j5.configurator.Configurator;
+import org.contract4j5.configurator.properties.PropertiesConfigurator;
 import org.contract4j5.controller.Contract4J;
-import org.contract4j5.enforcer.ContractEnforcerImpl;
+import org.contract4j5.enforcer.defaultimpl.DefaultContractEnforcer;
 import org.contract4j5.interpreter.jexl.JexlExpressionInterpreter;
 import org.contract4j5.reporter.Reporter;
 import org.contract4j5.reporter.Severity;
@@ -50,7 +52,7 @@ public aspect Contract4JConfigurationEnsurer {
 		}
 		configurator.configure();
 		if (c4j.getContractEnforcer() == null) {
-			c4j.setContractEnforcer(new ContractEnforcerImpl(new JexlExpressionInterpreter(), true));
+			c4j.setContractEnforcer(new DefaultContractEnforcer(new JexlExpressionInterpreter(), true));
 		}
 		Reporter r = c4j.getReporter();
 		if (r == null) {

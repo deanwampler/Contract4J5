@@ -35,7 +35,9 @@ org.contract4j5.GlobalWriterReporterWriter=com.mycompany.MyJavaIOWriterSubclass
 org.contract4j5.GlobalWriterReporterOutputStream=System.err
 
 # The object that tests and enforces the contracts.
-org.contract4j5.ContractEnforcer=org.contract4j5.ContractEnforcerImpl
+org.contract4j5.ContractEnforcer=org.contract4j5.defaultimpl.DefaultContractEnforcer
+org.contract4j5.ContractEnforcerReportErrors=true
+org.contract4j5.ContractEnforcerErrorReportingSeverity=FATAL
 org.contract4j5.ContractEnforcerIncludeStackTrace=false
 
 # The expression interpreter, e.g., the one based on JEXL.

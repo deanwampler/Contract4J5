@@ -1,4 +1,4 @@
-package org.contract4j5.configurator;
+package org.contract4j5.configurator.properties;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,6 +11,7 @@ import org.contract4j5.aspects.InvariantFieldCtorConditions;
 import org.contract4j5.aspects.InvariantMethodConditions;
 import org.contract4j5.aspects.InvariantTypeConditions;
 import org.contract4j5.aspects.MethodBoundaryConditions;
+import org.contract4j5.configurator.AbstractConfigurator;
 import org.contract4j5.controller.Contract4J;
 import org.contract4j5.enforcer.ContractEnforcer;
 import org.contract4j5.interpreter.ExpressionInterpreter;
@@ -26,9 +27,12 @@ import org.contract4j5.testexpression.ParentTestExpressionFinder;
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 public class PropertiesConfigurator extends AbstractConfigurator {
-	public static String PROPERTY_PREFIX = "org.contract4j5.";
-	public static final String[] enabledPropertyKeys = new String[] {
-		"Contract", "Pre", "Post", "Invar",
+	public static final String PROPERTY_PREFIX = "org.contract4j5.";
+	public static enum EnabledPropertyKeys {
+		Contract, 
+		Pre,
+		Post,
+		Invar
 	};
 	public static enum KnownBeanKeys {
 		GlobalReporter,
@@ -36,6 +40,8 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 		GlobalWriterReporterWriter,
 		GlobalWriterReporterOutputStream, 
 		ContractEnforcer,
+		ContractEnforcerReportErrors,
+		ContractEnforcerErrorReportingSeverity,
 		ContractEnforcerIncludeStackTrace,
 		ExpressionInterpreter,
 		ExpressionInterpreterEmptyTestExpressionsValid,
@@ -97,6 +103,10 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 	private java.io.OutputStream globalWriterReporterOutputStream = null;
 	private boolean foundContractDisableProperty = false;
 	private ContractEnforcer ce = null; 
+	private Severity errorReportingSeverity = Severity.FATAL;
+	private boolean errorReportingSeverityWasSet = false;
+	private boolean reportErrors = true;
+	private boolean reportErrorsWasSet = false;
 	private boolean includeStackTrace = false;
 	private boolean includeStackTraceWasSet = false;
 	private ExpressionInterpreter ei = null; 
@@ -130,10 +140,13 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 		}
 	}
 
+	private Contract4J getContract4J() {
+		return Contract4J.getInstance();
+	}
 	protected boolean processEnableTestTypeProperty(String propKey, String propValue) {
-		for (int i = 0; i < enabledPropertyKeys.length; i++) {
+		for (int i = 0; i < EnabledPropertyKeys.values().length; i++) {
 			if (propKey != null && 
-				propKey.equals(PROPERTY_PREFIX+enabledPropertyKeys[i])) {
+				propKey.equals(PROPERTY_PREFIX+EnabledPropertyKeys.values()[i])) {
 				try {
 					boolean value = convertToBoolean(propValue);
 					if (i == 0) {	// The overall "contract" key?
@@ -188,6 +201,16 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 						ce = (ContractEnforcer) propertyToObject(propValue);
 					}
 					break;
+					case ContractEnforcerReportErrors:
+					{
+						reportErrors = convertToBoolean(propValue);
+						reportErrorsWasSet = true;
+					}
+					case ContractEnforcerErrorReportingSeverity:
+					{
+						errorReportingSeverity = convertToSeverity(propValue);
+						errorReportingSeverityWasSet = true;
+					}
 					case ContractEnforcerIncludeStackTrace:
 					{
 						includeStackTrace = convertToBoolean(propValue);
@@ -314,8 +337,8 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 					default:
 						throw new UnsupportedOperationException("Forgot to support bean type \""+beanKey+"\"!");
 					}
-				} catch (Exception ex) {
-					recordBeanPropertyError(beanName, propValue, ex);
+				} catch (Throwable th) {
+					recordBeanPropertyError(beanName, propValue, th);
 				}
 				return true; // found and processed one of these options.
 			}
@@ -362,6 +385,12 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 			getContract4J().setContractEnforcer(ce);
 		}
 		if (ce != null) {
+			if (reportErrorsWasSet) {
+				ce.setReportErrors(reportErrors);
+			}
+			if (errorReportingSeverityWasSet) {
+				ce.setErrorReportingSeverityLevel(errorReportingSeverity);
+			}
 			if (includeStackTraceWasSet) {
 				ce.setIncludeStackTrace(includeStackTrace);
 			}
@@ -426,13 +455,13 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 		errors.append("\" ignored.\n");
 	}
 	
-	private void recordBeanPropertyError(String beanName, Object object, Exception ex) {
+	private void recordBeanPropertyError(String beanName, Object object, Throwable th) {
 		errors.append("Invalid value (type?) \"");
 		errors.append(object);
 		errors.append("\" for property \"");
 		errors.append(beanName);
 		errors.append("\" ignored. (");
-		errors.append(ex.toString());
+		errors.append(th.toString());
 		errors.append(")\n");
 	}
 	
@@ -443,7 +472,7 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 	 * @throws IllegalArgumentException if the input string doesn't match an expected value.
 	 */
 	protected static boolean convertToBoolean (String s) throws IllegalArgumentException {
-		if (s == null && s.length() == 0)
+		if (s == null || s.length() == 0)
 			throw new IllegalArgumentException("Boolean value string actually null or empty.");
 		s = s.trim();
 		char c = s.charAt(0);
@@ -468,4 +497,10 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 		}
 		throw new IllegalArgumentException("Boolean value string unrecognized: \""+s+"\".");
 	}
+
+	private Severity convertToSeverity(String propValue) {
+		return Severity.parse(propValue);
+	}
+	
+
 }

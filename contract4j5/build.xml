@@ -22,7 +22,8 @@
 
 <!-- The conventional targets, "all", "build", etc. work only with the core 
 	 Contract4J5 code rooted in the "src" and "test" directories. To build the 
-	 optional "spring" example, build the "all-spring" target.
+	 optional "spring" example, build the "all.spring" target. 
+   To build the load-time weaving (LTW) test, build "test.loadtime.weaving".
 -->
 
 <project name="Contract4J5" default="all" basedir=".">
@@ -112,9 +113,7 @@
 	</target>
 
 	<!-- Run the tests using load-time weaving (LTW).
-		 WARNING: This is a work in progress; there is an AspectJ bug, #158179, that
-		 prevents Contract4J from being used with load-time weaving. I'll do a "0.6.1"
-		 release with completed LTW support when this bug is fixed.
+		 WARNING: This target requires AspectJ 1.5.3 or later!
 	 -->
 	<target name="test.loadtime.weaving" depends="compile-test, project.unwoven.test.jar">
 		<fileset dir="${test.reldir}" id="test.fileset">
