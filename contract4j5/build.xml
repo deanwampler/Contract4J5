@@ -20,10 +20,11 @@
   @author Dean Wampler  dean@aspectprogramming.com
 -->
 
-<!-- The conventional targets, "all", "build", etc. work only with the core 
-	 Contract4J5 code rooted in the "src" and "test" directories. To build the 
-	 optional "spring" example, build the "all.spring" target. 
+<!-- The conventional targets, "all", "build", etc. work with the core 
+	 Contract4J5 code rooted in the "src" and "test" directories. To build
+   the optional "spring" example, build the "all.spring" target. 
    To build the load-time weaving (LTW) test, build "test.loadtime.weaving".
+   To build all three options, build "all.plus.extras"
 -->
 
 <project name="Contract4J5" default="all" basedir=".">
@@ -44,6 +45,7 @@
 	</target>
 
 	<target name="all" depends="init, clean, build, test, docs" />
+	<target name="all.plus.extras" depends="all, test.loadtime.weaving, all.spring" />
 	
 	<!-- Build an example using Spring configuration. -->
 	<target name="all.spring" depends="init">

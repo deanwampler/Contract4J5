@@ -258,7 +258,7 @@
 		   aspectpath    For the load-time weaving variant, only.
 	-->
 	<target name="junitTemplate" depends="junit.begin, _junitTemplate, junit.end" />
-	<target name="junitTemplate.loadtime.weaving" depends="junit.begin, _junitTemplate.loadtime.weaving, junit.end" />
+	<target name="junitTemplate.load.time.weaving" depends="junit.begin, _junitTemplate.load.time.weaving, junit.end" />
 
 	<target name="junit.begin">
 		<tstamp>
@@ -282,7 +282,7 @@
 		</junit>
 	</target>
 		
-	<target name="_junitTemplate.loadtime.weaving">
+	<target name="_junitTemplate.load.time.weaving">
 		<junit printsummary="yes" haltonfailure="yes" showoutput="true" fork="yes">
 			<formatter type="brief" usefile="true"/>
 			<jvmarg value="-ea"/>
