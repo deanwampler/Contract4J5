@@ -67,7 +67,6 @@ public class ContractEnforcerImpl_invokeTest extends TestCase {
 		rlist.add(1, reporter2);
 		Configurator c = new ConfiguratorForTesting();
 		c.configure();
-//		c4j = c.getContract4J();
 		c4j = Contract4J.getInstance();
 		c4j.setReporter(reporter);
 		contractEnforcer = c4j.getContractEnforcer();

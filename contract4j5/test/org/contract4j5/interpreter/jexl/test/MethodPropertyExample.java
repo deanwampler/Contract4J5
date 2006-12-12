@@ -32,23 +32,28 @@ import org.apache.commons.jexl.ExpressionFactory;
  *
  *  @author <a href="mailto:geirm@apache.org">Geir Magnusson Jr.</a>
  *  @version $Id: MethodPropertyExample.java,v 1.4 2004/02/28 13:45:20 yoavs Exp $
+ *  
+ *  Converted print staements into assertEquals, so it's more of a real test! (Dean Wampler)
  */
 public class MethodPropertyExample extends TestCase {
 	public static class Foo
 	{
+		public static String FOO_STRING = "This is from getFoo()";
 	    public String getFoo()
 	    {
-	        return "This is from getFoo()";
+	        return FOO_STRING;
 	    }
 	
+	    public static String GET_PREFIX = "This is the property ";
 	    public String get(String arg)
 	    {
-	        return "This is the property " + arg;
+	        return GET_PREFIX + arg;
 	    }
 	
+	    public static String LONG_PREFIX = "The value is : ";
 	    public String convert(long i)
 	    {
-	        return "The value is : " + i;
+	        return LONG_PREFIX + i;
 	    }
 	}
 
@@ -71,33 +76,33 @@ public class MethodPropertyExample extends TestCase {
 		     */
 		    Expression e = ExpressionFactory.createExpression("foo.getFoo()");
 		    Object o = e.evaluate(jc);
-		    System.out.println("value returned by the method getFoo() is : " + o);
+		    assertEquals(Foo.FOO_STRING, o);
 		
 		    e = ExpressionFactory.createExpression("foo.foo");
 		    o = e.evaluate(jc);
-		    System.out.println("value returned for the property foo is : " + o);
+		    assertEquals(Foo.FOO_STRING, o);
 		
 		    /*
 		     *  access a method w/ args
 		     */
 		    e = ExpressionFactory.createExpression("foo.convert(1)");
 		    o = e.evaluate(jc);
-		    System.out.println("value returned by the method convert() w/ arg = 1 is : " + o);
+		    assertEquals(Foo.LONG_PREFIX+"1", o);
 		
 		    e = ExpressionFactory.createExpression("foo.convert(1+7)");
 		    o = e.evaluate(jc);
-		    System.out.println("value returned by the method convert() w/ arg = 1+7 is : " + o);
+		    assertEquals(Foo.LONG_PREFIX+"8", o);
 		
 		    e = ExpressionFactory.createExpression("foo.convert(1+number)");
 		    o = e.evaluate(jc);
-		    System.out.println("value returned by the method convert() w/ arg = 1+number is : " + o);
+		    assertEquals(Foo.LONG_PREFIX+"11", o);
 		
 		    /*
 		     * access a property
 		     */
 		    e = ExpressionFactory.createExpression("foo.bar");
 		    o = e.evaluate(jc);
-		    System.out.println("value returned for the property 'bar' is : " + o);
+		    assertEquals(Foo.GET_PREFIX + "bar", o);
     	} catch (Exception e) {
     		System.err.println (e.toString());
     		e.printStackTrace();

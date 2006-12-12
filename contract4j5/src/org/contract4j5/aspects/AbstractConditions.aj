@@ -115,7 +115,4 @@ abstract public aspect AbstractConditions {
 		return ce.getExpressionInterpreter().determineOldValues(testExpression, context);
 	}
 
-	protected Reporter getReporter() {
-		return getContract4J().getReporter();
-	}
 }

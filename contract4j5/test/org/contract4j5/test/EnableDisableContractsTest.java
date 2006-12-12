@@ -40,7 +40,6 @@ public class EnableDisableContractsTest extends TestCase {
 		super.setUp();
 		Configurator c = new ConfiguratorForTesting();
 		c.configure();
-//		c4j = c.getContract4J();
 		c4j = Contract4J.getInstance();
 		c4j.setEnabled(Contract4J.TestType.Pre, false);
 		c4j.setEnabled(Contract4J.TestType.Post, false);

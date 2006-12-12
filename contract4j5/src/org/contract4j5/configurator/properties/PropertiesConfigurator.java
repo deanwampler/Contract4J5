@@ -115,6 +115,7 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 	private Map<String,String> optionalKeywordSubstitutions;
 
 	private StringBuffer errors = new StringBuffer(1024);
+	private Reporter reporter;
 	
 	protected void initSystemProps(Properties properties) {
 		for (Object key: properties.keySet()) {
@@ -132,7 +133,7 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 		configureGlobalReporter();
 		if (errors.length() > 0) {
 			try {
-				getContract4J().getReporter().report (Severity.ERROR, this.getClass(), errors.toString());
+				reporter.report (Severity.ERROR, this.getClass(), errors.toString());
 			} catch (NullPointerException npe) {
 				System.err.println("No \"reporter\" was defined using the System Properties (See PropertiesConfigurator.java)");
 				System.err.print(Severity.ERROR.name() + ": " + errors.toString());

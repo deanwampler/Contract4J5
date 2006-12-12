@@ -545,7 +545,8 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 		super();
 	}
 
+	private Reporter reporter;
 	protected Reporter getReporter() {
-		return Contract4J.getInstance().getReporter();
+		return reporter;
 	}	
 }

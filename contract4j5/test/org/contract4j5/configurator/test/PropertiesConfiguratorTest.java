@@ -92,7 +92,7 @@ public class PropertiesConfiguratorTest extends TestCase {
 				r.getClass());
 	}
 
-	public void testSetReporterFailsBecauseValueEmpty() {
+	public void testSetReporterWhenValueEmptyStillResultsInDefaultReporterBeingUsed() {
 		setProp(PropertiesConfigurator.KnownBeanKeys.GlobalReporter.name(), "");
 		Configurator c = new PropertiesConfigurator();
 		c.configure();

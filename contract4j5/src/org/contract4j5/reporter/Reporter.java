@@ -37,7 +37,7 @@ public interface Reporter {
 	 * @param message to report; if "" or null, an empty message is reported.
 	 * TODO refactor to remove the "clazz", which is inefficient and is error prone.
 	 */
-	void report(Severity level, Class clazz, String message);
+	void report(Severity level, Class<?> clazz, String message);
 
 	/**
 	 * Get the threshold for reporting messages. Only those at or above the

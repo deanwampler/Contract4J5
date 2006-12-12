@@ -99,7 +99,6 @@ public class AbstractConfiguratorTest extends TestCase {
 		super.setUp();
 		configurator = new StubConfigurator();
 		configurator.configure();
-//		c4j = configurator.getContract4J();
 		c4j = Contract4J.getInstance();
 	}
 	@Override

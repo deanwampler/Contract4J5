@@ -354,8 +354,9 @@ public class ParentTestExpressionFinderImpl implements
 		return s == null || s.length() == 0;
 	}
 
+	private Reporter reporter;
 	protected Reporter getReporter() {
-		return Contract4J.getInstance().getReporter();
+		return reporter;
 	}
 	
 }

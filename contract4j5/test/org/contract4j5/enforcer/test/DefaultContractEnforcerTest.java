@@ -52,7 +52,6 @@ public class DefaultContractEnforcerTest extends TestCase {
 		reporter = new WriterReporter(Severity.WARN, new StringWriter(1024));
 		Configurator c = new ConfiguratorForTesting();
 		c.configure();
-//		c4j = c.getContract4J();
 		c4j = Contract4J.getInstance();
 		c4j.setReporter(reporter);
 		contractEnforcer = c4j.getContractEnforcer();

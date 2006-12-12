@@ -129,7 +129,6 @@ public class PrimitiveFieldInvarTest extends TestCase {
 		super.setUp();
 		Configurator c = new ConfiguratorForTesting();
 		c.configure();
-//		c4j = c.getContract4J();
 		c4j = Contract4J.getInstance();
 		initEnv (true, true);
 		// Construct the array of "default" objects.

@@ -68,7 +68,6 @@ public class ConstructorBoundaryTest extends TestCase {
 		super.setUp();
 		Configurator c = new ConfiguratorForTesting();
 		c.configure();
-//		c4j = c.getContract4J();
 		c4j = Contract4J.getInstance();
 		c4j.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(false);
 	}

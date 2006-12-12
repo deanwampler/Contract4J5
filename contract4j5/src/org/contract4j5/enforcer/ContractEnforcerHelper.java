@@ -65,10 +65,11 @@ public abstract class ContractEnforcerHelper implements ContractEnforcer {
 	public void    setIncludeStackTrace(boolean onOff) { includeStackTrace = onOff; }
 	public boolean getIncludeStackTrace()              { return includeStackTrace; }
 	
-	private boolean warnedOnce = false;
+	private boolean  warnedOnce = false;
+	private Reporter reporter;
 	
 	protected Reporter getReporter() {
-		return Contract4J.getInstance().getReporter();
+		return reporter;
 	}
 	
 	public void invokeTest (
