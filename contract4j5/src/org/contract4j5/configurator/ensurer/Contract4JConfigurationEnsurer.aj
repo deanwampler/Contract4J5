@@ -1,10 +1,11 @@
 package org.contract4j5.configurator.ensurer;
 
+import org.apache.bsf.BSFException;
 import org.contract4j5.configurator.Configurator;
 import org.contract4j5.configurator.properties.PropertiesConfigurator;
 import org.contract4j5.controller.Contract4J;
 import org.contract4j5.enforcer.defaultimpl.DefaultContractEnforcer;
-import org.contract4j5.interpreter.jexl.JexlExpressionInterpreter;
+import org.contract4j5.interpreter.bsf.jexl.JexlBSFExpressionInterpreter;
 import org.contract4j5.reporter.Reporter;
 import org.contract4j5.reporter.Severity;
 import org.contract4j5.reporter.WriterReporter;
@@ -41,7 +42,7 @@ public aspect Contract4JConfigurationEnsurer {
 	/**
 	 * Last resort configuration; use a {@link PropertiesConfigurator}, then
 	 * if not initialized, use a {@link ContractEnforcerImpl}, with a {@link
-	 * JexlExpressionInterpreter} and a {@link WriterReporter}. 
+	 * JexlBSFExpressionInterpreter} and a {@link WriterReporter}. 
 	 * @note Lots of ugly violations of the Law of Demeter here!
 	 */
 	protected void doDefaultConfiguration(Contract4J c4j) {
@@ -52,7 +53,11 @@ public aspect Contract4JConfigurationEnsurer {
 		}
 		configurator.configure();
 		if (c4j.getContractEnforcer() == null) {
-			c4j.setContractEnforcer(new DefaultContractEnforcer(new JexlExpressionInterpreter(), true));
+			try {
+				c4j.setContractEnforcer(new DefaultContractEnforcer(new JexlBSFExpressionInterpreter(), true));
+			} catch (BSFException e) {
+				throw new Configurator.ConfigurationFailedException("Could not create a Jexl BSF interpreter.", e);
+			}
 		}
 		Reporter r = c4j.getReporter();
 		if (r == null) {

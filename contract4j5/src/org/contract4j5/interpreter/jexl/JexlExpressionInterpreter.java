@@ -34,6 +34,7 @@ import org.contract4j5.interpreter.TestResult;
 /**
  * Wrapper around the Jexl interpreter.
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
+ * @deprecated
  */
 public class JexlExpressionInterpreter extends ExpressionInterpreterHelper {
 
@@ -43,20 +44,18 @@ public class JexlExpressionInterpreter extends ExpressionInterpreterHelper {
 	 * @see org.contract4j5.interpreter.ExpressionInterpreterHelper#doDetermineOldValue(java.lang.String, org.contract4j5.TestContext)
 	 */
 	@Override
-	protected Object doDetermineOldValue (String exprStr, TestContext context) {
+	protected Object doDetermineOldValue (String exprStr, TestContext context2) {
 		Expression expr;
 		try {
 			expr = ExpressionFactory.createExpression (exprStr);
 		} catch (Throwable th) {
-			String msg = "Failed to create the Jexl expression for \""+exprStr+"\".";
-			return new TestResult (false, msg, new TestSpecificationError(msg, th));
+			throw new TestSpecificationError("Failed to create the Jexl expression for \""+exprStr+"\".", th);
 		}
 		try {
 			Object o = expr.evaluate(jexlContext);
 			return o;
 		} catch (Throwable th2) {
-			String msg = "Failed to evaluate the Jexl expression for \""+exprStr+"\".";
-			return new TestResult (false, msg, new TestSpecificationError(msg, th2));
+			throw new TestSpecificationError("Failed to evaluate the Jexl expression for \""+exprStr+"\".", th2);
 		}
 	}
 	
@@ -80,7 +79,7 @@ public class JexlExpressionInterpreter extends ExpressionInterpreterHelper {
 			Object o = expr.evaluate(jexlContext);
 			if (!(o instanceof Boolean)) {
 				String ostr = o != null ? o.getClass().getName() : "null object";
-				return new TestResult (false, "Test returned \""+ostr+"\", instead of boolean.");
+				return new TestResult (false, "Test returned \""+ostr+"\", instead of boolean for test expression \""+testExpression+"\".");
 			}
 			return new TestResult ((Boolean) o);
 		} catch (Exception e) {
@@ -92,6 +91,7 @@ public class JexlExpressionInterpreter extends ExpressionInterpreterHelper {
 	 * Save the change by adding the new symbol name and object to the {@link #jexlContext} map.
 	 * @see org.contract4j5.interpreter.ExpressionInterpreterHelper#recordContextChange(java.lang.String, java.lang.Object)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	protected void doRecordContextChange(String newSymbolName, Object newObject) {
 		Map<String, Object> map = jexlContext.getVars();
@@ -100,12 +100,13 @@ public class JexlExpressionInterpreter extends ExpressionInterpreterHelper {
 	
 	/**
 	 * Remove the change by removing the symbol name and object from the {@link #jexlContext} map.
-	 * @see org.contract4j5.interpreter.ExpressionInterpreterHelper#removeContextChange(java.lang.String, java.lang.Object)
+	 * @see org.contract4j5.interpreter.ExpressionInterpreterHelper#removeContextChange(java.lang.String)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
-	protected void doRemoveContextChange(String newSymbolName, Object newObject) {
+	protected void doRemoveContextChange(String oldSymbolName) {
 		Map<String, Object> map = jexlContext.getVars();
-		map.remove(newSymbolName);
+		map.remove(oldSymbolName);
 	}
 	
 	public JexlExpressionInterpreter() {

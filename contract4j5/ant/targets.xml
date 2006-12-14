@@ -77,12 +77,12 @@
 		</fileset>
 	</path>
 	
-	<path id="jexl.classpath">
-		<fileset dir="${jexl.home}">
-			<include name="**/commons-jexl*.jar"/>
+	<path id="lib.classpath">
+		<fileset dir="${contract4j5.lib}">
+			<include name="**/*.jar"/>
 		</fileset>
 	</path>
-	
+
 	<path id="ant.classpath">
 		<fileset dir="${ant.home}/lib">
 			<include name="**/*.jar"/>
@@ -98,7 +98,7 @@
 	<path id="project.classpath">
 		<path refid="aspectj.classpath" />
 		<path refid="junit.classpath" />
-		<path refid="jexl.classpath" />
+		<path refid="lib.classpath" />
 		<path refid="extra.classpath" />
 	</path>
 	
@@ -269,8 +269,8 @@
 
 	<target name="_junitTemplate">
 		<junit printsummary="yes" haltonfailure="yes" showoutput="true" fork="yes">
-			<jvmarg value="-ea"/>
 			<formatter type="brief" usefile="true"/>
+			<jvmarg value="-ea"/>
 			<classpath>
 				<pathelement location="${test.jar}"/>
 				<pathelement location="${project.jar}"/>
@@ -282,8 +282,11 @@
 		</junit>
 	</target>
 		
+  <!-- To debug problems, change printsummary="yes" and showoutput="true".
+       Also, edit test/META-INF/aop.xml and change weaver options.
+   -->
 	<target name="_junitTemplate.load.time.weaving">
-		<junit printsummary="yes" haltonfailure="yes" showoutput="true" fork="yes">
+		<junit haltonfailure="yes" printsummary="yes" showoutput="true" fork="yes">
 			<formatter type="brief" usefile="true"/>
 			<jvmarg value="-ea"/>
 			<jvmarg value="-javaagent:${aspectj.home}/lib/aspectjweaver.jar"/>

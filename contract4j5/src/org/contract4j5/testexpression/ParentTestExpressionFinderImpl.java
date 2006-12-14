@@ -29,7 +29,6 @@ import org.contract4j5.context.TestContext;
 import org.contract4j5.contract.Invar;
 import org.contract4j5.contract.Post;
 import org.contract4j5.contract.Pre;
-import org.contract4j5.controller.Contract4J;
 import org.contract4j5.interpreter.ExpressionInterpreter;
 import org.contract4j5.interpreter.TestResult;
 import org.contract4j5.reporter.Reporter;

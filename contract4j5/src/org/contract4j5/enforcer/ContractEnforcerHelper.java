@@ -20,14 +20,14 @@
 
 package org.contract4j5.enforcer;
 
+import org.apache.bsf.BSFException;
 import org.contract4j5.context.TestContext;
-import org.contract4j5.controller.Contract4J;
 import org.contract4j5.errors.ContractError;
 import org.contract4j5.errors.TestSpecificationError;
 import org.contract4j5.instance.Instance;
 import org.contract4j5.interpreter.ExpressionInterpreter;
 import org.contract4j5.interpreter.TestResult;
-import org.contract4j5.interpreter.jexl.JexlExpressionInterpreter;
+import org.contract4j5.interpreter.bsf.jexl.JexlBSFExpressionInterpreter;
 import org.contract4j5.reporter.Reporter;
 import org.contract4j5.reporter.Severity;
 
@@ -42,8 +42,13 @@ public abstract class ContractEnforcerHelper implements ContractEnforcer {
 	private ExpressionInterpreter expressionInterpreter = null;
 	
 	public ExpressionInterpreter getExpressionInterpreter() {
-		if (expressionInterpreter == null)
-			expressionInterpreter = new JexlExpressionInterpreter();
+		if (expressionInterpreter == null) {
+			try {
+				expressionInterpreter = new JexlBSFExpressionInterpreter();
+			} catch (BSFException e) {
+				throw new NullPointerException(e.toString());
+			}
+		}
 		return expressionInterpreter;
 	}
 	public void setExpressionInterpreter(ExpressionInterpreter expressionInterpreter) {

@@ -1,4 +1,4 @@
-package org.contract4j5.util.reporter.test;
+package org.contract4j5.util.reporter;
 
 import org.contract4j5.reporter.Severity;
 

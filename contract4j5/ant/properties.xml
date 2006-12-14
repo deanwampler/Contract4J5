@@ -34,10 +34,11 @@
 	<property name="ant.home"         value="${environ.ANT_HOME}"/>
 	<property name="aspectj.home"     value="${environ.ASPECTJ_HOME}"/>
 	<property name="contract4j5.home" value="${environ.CONTRACT4J5_HOME}"/>
+	<property name="contract4j5.lib"  value="${environ.CONTRACT4J5_LIB}"/>
 	<property name="java.home"        value="${environ.JAVA_HOME}"/>
 	<property name="junit.home"       value="${environ.JUNIT_HOME}"/>
-	<property name="jexl.home"        value="${environ.JEXL_HOME}"/>
 	<property name="spring.home"      value="${environ.SPRING_HOME}"/>
+<!--	<property name="jexl.home"        value="${environ.JEXL_HOME}"/> -->
 	
 	<!-- Directories -->
 	<property name="src.reldir"      value="src"/>

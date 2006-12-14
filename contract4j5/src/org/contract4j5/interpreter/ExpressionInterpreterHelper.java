@@ -27,7 +27,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.contract4j5.context.TestContext;
-import org.contract4j5.controller.Contract4J;
 import org.contract4j5.errors.TestSpecificationError;
 import org.contract4j5.instance.Instance;
 import org.contract4j5.instance.InstanceUtils;
@@ -111,8 +110,8 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 		recordContextChange ("c4jOldThis",   obj);
 		recordContextChange ("c4jOldTarget", field);
 		Object result = doDetermineOldValue (newExprStr, context);
-		removeContextChange ("c4jOldThis",   obj);
-		removeContextChange ("c4jOldTarget", field);
+		removeContextChange ("c4jOldThis");
+		removeContextChange ("c4jOldTarget");
 		return result;
 	}
 	
@@ -495,25 +494,21 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 	/**
 	 * A hook that is called when a previous context change should be "forgotten", so it
 	 * doesn't potentially cause confusion later on.
-	 * @param newSymbolName
-	 * @param newObject
+	 * @param oldSymbolName
 	 */
-	protected void removeContextChange (
-			String newSymbolName, 
-			Object newObject) {
-		rememberedContextChanges.remove(newSymbolName);
-		doRemoveContextChange(newSymbolName, newObject);
+	void removeContextChange (
+			String oldSymbolName) {
+		rememberedContextChanges.remove(oldSymbolName);
+		doRemoveContextChange(oldSymbolName);
 	}
 
 	/**
 	 * A hook that is called when a previous context change should be "forgotten", so it
 	 * doesn't potentially cause confusion later on.
-	 * @param newSymbolName
-	 * @param newObject
+	 * @param oldSymbolName
 	 */
 	abstract protected void doRemoveContextChange (
-			String newSymbolName, 
-			Object newObject);
+			String oldSymbolName);
 
 	/**
 	 * After running a test, remove the context changes so they don't potentially cause problems
@@ -521,7 +516,7 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 	 */
 	protected void cleanupContext() {
 		for (Map.Entry<String, Object> entry: rememberedContextChanges.entrySet()) {
-			doRemoveContextChange(entry.getKey(), entry.getValue());
+			doRemoveContextChange(entry.getKey());
 		}
 		rememberedContextChanges.clear();
 	}

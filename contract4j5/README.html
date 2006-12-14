@@ -1420,8 +1420,19 @@ without embedding the ad hoc Reporter objects.</li>
 <h5>v0.7.0 December 31, 2006</h5>
 <h6>Support Groovy, JRuby, and Other Refinements</h6>
 <p>
-This release adds built-in support using Groovy or JRuby instead of Jexl as
-the scripting engine. </p>
+This release adds built-in support for using Groovy or JRuby as an alternative
+to Jexl as the scripting engine. In fact, because of Jexl limitations, it is
+now deprecated; Groovy is the default scripting language at startup. (This is
+easily configurable, as discussed previously.) In our experiments, most
+Jexl-compatible expressions work just fine with Groovy. Using JRuby will
+require porting existing expressions.
+</p>
+
+<p>
+All scripting engine calls now go through the Jakarta
+<a href=""http://jakarta.apache.org/bsf/">Bean Scripting Framework</a> (BSF),
+including Jexl, to make it easier to plug and play almost any scripting engine.
+</p>
 
 <p>It is now easier to configure the behavior for what happens when a contract
 failure occurs. The interface <code>ContractEnforcer</code> exposes more
@@ -1436,8 +1447,18 @@ that does your desired handling. One option is to override the
 <code>makeContractError()</code> method and have it return your own subclass
 of <code>ContractError</code>, then catch that error in your code.</p>
 
-<p>A planned enhancement is to support user-defined annotations and associated
-behaviors.</p>
+<p>This change is in anticipation of a planned generalization of Contract4J to
+support user-defined annotations and associated behaviors, so that the 
+infrastructure can be used for a variety of applications beyond Design by
+Contract.</p>
+
+<p>This release of Contract4J was tested using the final release of Java SE
+1.6.0. While it doesn't use any Java 6 features (such as the JSR-220 support
+for scripting), it does offer performance improvements. The JUnit suite runs
+approximately 18% faster than under Java 5 and when the load-time weaving (LTW)
+test target is run, the improvement is a significant 36%!</p>
+
+<p>Support for JSR-220 is under consideration.</p>
 
 <p>The distribution now includes convenience scripts for evaluating the 
 structure of Contract4J5 using

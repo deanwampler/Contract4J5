@@ -9,7 +9,6 @@ import org.contract4j5.enforcer.ContractEnforcer;
 import org.contract4j5.interpreter.ExpressionInterpreter;
 import org.contract4j5.testexpression.ParentTestExpressionFinder;
 import org.contract4j5.testexpression.ParentTestExpressionFinderImpl;
-import org.contract4j5.reporter.Reporter;
 
 /**
  * An abstract aspect that supports Design by Contract tests by advising classes,
