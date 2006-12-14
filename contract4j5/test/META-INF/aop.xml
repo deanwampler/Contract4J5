@@ -20,20 +20,21 @@ for more details.
 		<aspect name="org.contract4j5.policies.ReportIllegalAccessExceptions"/>
 		<aspect name="org.contract4j5.debug.ReportThrows"/>
 	</aspects>
-  <weaver options="-verbose"> 
-    <!-- Weave types that are within the test contract4j5 packages -->
+  <weaver options="-verbose">
+    <!-- Weave types that are tests or within the "test" packages (support classes) -->
+    <include within="org.contract4j5..*Test"/>
     <include within="org.contract4j5..test..*"/>
     
     <!-- Dump all types within the "org.contract4j5.." package
          to the "./_ajdump" folder on disk (for diagnostic purposes) 
-    <dump within="org.contract4j5..*"/>
     -->
+    <dump within="org.contract4j5..*"/>
 
     <!-- Dump all types within the "org.contract4j5.." package and sub-packages,
          both before are after they are woven,which can be used for byte-code 
          generated at runtime
-      <dump within="org.contract4j5..*" beforeandafter="true"/> 
     -->
+    <dump within="org.contract4j5..*" beforeandafter="true"/> 
    </weaver>
 </aspectj>
 
