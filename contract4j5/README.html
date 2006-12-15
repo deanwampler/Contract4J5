@@ -90,9 +90,10 @@ action, go to <a href='#showme'>Show Me the Code!</a>.
 <a name="copyright"></a>
 <h3>Copyright</h3>
 <p>
-This is open source software covered by the Eclipse Public License - v 1.0. A 
-complete copy of the license can be found in the LICENSE file in the top-level
-directory of the distribution.
+<span class="keyword">Contract4J</span> is open source software covered by
+the Eclipse Public License - v 1.0. A complete copy of the license is shown
+below and it can be found in the <code>LICENSE-ECLIPSE.txt</code> file in
+the top-level directory of the distribution.
 </p>
 <pre>
 ===========================================================
@@ -113,6 +114,8 @@ Copyright 2005,2006 Dean Wampler
    governing permissions and limitations under the License.
 ==========================================================
 </pre>
+<p>In addition, several third-party components are used by Contract4J5. Their
+licenses are described by the <code>LICENSE.txt</code> file.</p>
 
 <a name='wheretogetc4j'></a>
 <h3>Where to Get Contract4J5</h3>
@@ -1432,7 +1435,40 @@ require porting existing expressions.
 All scripting engine calls now go through the Jakarta
 <a href=""http://jakarta.apache.org/bsf/">Bean Scripting Framework</a> (BSF),
 including Jexl, to make it easier to plug and play almost any scripting engine.
+These changes introduce the following new library dependencies:
 </p>
+<table border="1">
+<tr><th>Scripting Engine</th><th>Required Libraries</th></tr>
+<tr><td><i>All</i></td><td><code>bsf-2.4.X.jar</code>, <code>commons-logging.jar-1.0.X.jar</code></td></tr>
+<tr><td>Jexl</td><td><i>All</i> plus <code>commons-jexl-1.0.X.jar</code></td></tr>
+<tr><td>Groovy</td><td><i>All</i> plus <code>groovy-1.0.jar</code> (RC 1 or newer), <code>asm-2.2.jar</code>, and <code>antlr-2.7.5.jar</code></td></tr>
+<tr><td>JRuby</td><td><i>All</i> plus <code>jruby-0.9.jar</code> or later</td></tr>
+</table>
+
+<p>All these jars are included with the distribution. Remove the ones you 
+don't need from your deployment.</p>
+
+<p>More robust handling of quoted strings; no more variable substitution internally!</p>
+
+<p>We have kept the scripting language mostly compatible between Jexl and Groovy,
+since they are "Java-like". JRuby has a different syntax, of course.  The following
+is the partial list of differences between scripts written with Jexl and Groovy.
+Some of these differences may reflect idiosyncrasies of how they are used in
+the implementation, rather than real language differences. Also, in general, 
+Groovy is a more full-featured language, so it provides facilities that
+Jexl doesn't, such as closures.</p>
+
+<ol>
+	<li>Groovy scripts can reference fields in a class without requiring the class
+	to provide an accessor method. Jexl requires the accessor.</li>
+	<li>Jexl may swallow <code>ArrayIndexOutOfBoundsExceptions</code> (?) while Groovy does not.</li>
+  <li>Jexl does seem to be able to locate package protected and protected fields
+	where Groovy can.</li>
+  <li>The Groovy interpreter provides more descriptive error messages when a test fails
+	because the expression is bad, <i>e.g.,</i> because it references a non-existent field
+	on an object. As a result, while such tests fail whether using Jexl or Groovy, debugging
+	the issue will often be easier with Groovy.</li>
+</ol>
 
 <p>It is now easier to configure the behavior for what happens when a contract
 failure occurs. The interface <code>ContractEnforcer</code> exposes more
@@ -1469,6 +1505,9 @@ circular dependencies and other problems.
 See the <code>jdepend.sh</code> and <code>findbugs.txt</code> files in the
 <code>contract4j5</code> directory for more information. 
 </p>
+
+<p>More clean-ups of package dependencies and generics-related warnings were
+also done.</p>
 
 <h5>v0.6.0 September 21, 2006</h5>
 <h6>Restructuring</h6>
