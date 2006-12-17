@@ -1268,11 +1268,14 @@ some of the substitutions that are made.</li>
 Most of the heavy lifting of expression evaluation BEFORE sending it to 
 the scripting engine is done in 
 <code>org.contract4j5.interpreter.ExpressionInterpreterHelper.java</code>
-The wrapper for Jexl, Groovy, and JRuby themselves are
-<code>org.contract4j5.interpreter.jexl.JexlExpressionInterpreter.java</code>,
-<code>org.contract4j5.interpreter.groovy.GroovyExpressionInterpreter.java</code>, and
-<code>org.contract4j5.interpreter.jruby.JRubyExpressionInterpreter.java</code>,
-respectively.</li>
+The BSF wrapper is
+<code>org.contract4j5.interpreter.bsf.BSFExpressionInterpreterAdapter</code>.
+A subclass that invokes Jexl is
+<code>org.contract4j5.interpreter.jsf.jexl.JexlBSFExpressionInterpreter</code>.
+No sublass is implemented for Groovy and JRuby as none is really necessary.
+See 
+<code>org.contract4j5.interpreter.jsf.jexl.JexlBSFExpressionInterpreter</code>
+for why it is needed.</li>
 	<li>If you are using the properties configurator and you want to specify a language other
 than Jexl (or the default Groovy), you have to create your own subclass of 
 <code>BSFExpressionInterpreterAdapter</code> that specifies the language to use. 
@@ -1322,7 +1325,7 @@ builds when you don't want any test overhead.</p>
 <p>
 There are several key components in Contract4J5 that are configurable:</p>
 <table border="1">
-	<tr><td>ExpressionInterpreter</td><td>Wraps Jexl, Groovy, or JRuby (could also wrap otheralternatives)</td></tr>
+	<tr><td>ExpressionInterpreter</td><td>Wraps Jexl, Groovy, or JRuby (could also wrap others)</td></tr>
   <tr><td>ContractEnforcer</td><td>Handles test invocation and failure handling</td></tr>
   <tr><td>Reporter</td><td>Simple output/logging wrapper.</td></tr>
 </table>
@@ -1343,12 +1346,10 @@ classes:
  The expression interpreter interface.</td></tr>
  <tr><td><code>org.contract4j5.interpreter.ExpressionInterpreterHelper:</code><br/>
   An abstract helper class that provides a partial implementation. Subclass this class to support the actual interpreters.</td></tr>
-  <tr><td><code>org.contract4j5.interpreter.jexl.JexlExpressionInterpreter:</code><br/>
-The Jexl implementation of the interpreter.</td></tr>
-  <tr><td><code>org.contract4j5.interpreter.groovy.GroovyExpressionInterpreter:</code><br/>
-The Groovy implementation of the interpreter.</td></tr>
-  <tr><td><code>org.contract4j5.interpreter.jruby.JRubyExpressionInterpreter:</code><br/>
-The JRuby implementation of the interpreter.</td></tr>
+ <tr><td><code>org.contract4j5.interpreter.bsf.BSFExpressionInterpreterAdapter:</code><br/>
+  Adapts the Bean Scripting Framework (BSF) for use by Contract4J5.</td></tr>
+ <tr><td><code>org.contract4j5.interpreter.bsf.jexl.BSFJexlExpressionInterpreter:</code><br/>
+The Jexl wrapper of the BSF adapter.</td></tr>
   <tr><td><code>org.contract4j5.util.reporter.Reporter:</code><br/>
   The "reporter" interface that is a thin veneer for a logging abstraction.</td></tr>
   <tr><td><code>org.contract4j5.util.reporter.Severity:</code><br/>
@@ -1482,6 +1483,8 @@ Jexl doesn't, such as closures.</p>
 	on an object. As a result, while such tests fail whether using Jexl or Groovy, debugging
 	the issue will often be easier with Groovy.</li>
 </ol>
+<p>Search the class <code>BSFExpressionInterpreterAdapterExpressionEvalTest</code> for the field
+<code>isJexl</code> to see examples of tests where Jexl and Groovy behave differently.</p>
 
 <p>It is now easier to configure the behavior for what happens when a contract
 failure occurs. The interface <code>ContractEnforcer</code> exposes more

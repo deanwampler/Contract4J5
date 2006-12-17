@@ -23,7 +23,7 @@
 <!-- The conventional targets, "all", "build", etc. work with the core 
 	 Contract4J5 code rooted in the "src" and "test" directories. To build
    the optional "spring" example, build the "all.spring" target. 
-   To build the load-time weaving (LTW) test, build "test.load.time.weaving".
+   To build the load-time weaving (LTW) test, build "test.ltw" (load time weaving).
    To build all three options, build "all.plus.extras"
 -->
 
@@ -45,7 +45,7 @@
 	</target>
 
 	<target name="all" depends="init, clean, build, test, docs" />
-	<target name="all.plus.extras" depends="all, test.load.time.weaving, all.spring" />
+	<target name="all.plus.extras" depends="all, test.ltw, all.spring" />
 	
 	<!-- Build an example using Spring configuration. -->
 	<target name="all.spring" depends="init">
@@ -104,25 +104,61 @@
 		</antcall>
 	</target>
 	
-	<target name="test" depends="test-setup">
-		<fileset dir="${test.reldir}" id="test.fileset">
-		    <include name="org/contract4j5/**/test/*Test.java" />
-		</fileset>
+	<target name="test" depends="test.groovy, test.jruby, test.jexl" />
+
+	<target name="test.groovy" depends="test.setup">
 		<antcall target="junitTemplate">
-			<param name="test.jar"    value="${project.test.jar}" />
+			<param name="test.jar"         value="${project.test.jar}" />
+			<param name="interpreter.lang" value="groovy" />
 		</antcall>
 	</target>
+
+	<target name="test.jruby" depends="test.setup">
+<!--
+		<antcall target="junitTemplate">
+			<param name="test.jar"         value="${project.test.jar}" />
+			<param name="interpreter.lang" value="jruby" />
+		</antcall>
+-->
+	</target>
+
+	<target name="test.jexl" depends="test.setup">
+		<antcall target="junitTemplate">
+			<param name="test.jar"         value="${project.test.jar}" />
+			<param name="interpreter.lang" value="jexl" />
+		</antcall>
+	</target>
+
 
 	<!-- Run the tests using load-time weaving (LTW).
 		 WARNING: This target requires AspectJ 1.5.3 or later!
 	 -->
-	<target name="test.load.time.weaving" depends="compile-test, project.unwoven.test.jar">
-		<fileset dir="${test.reldir}" id="test.fileset">
-		    <include name="org/contract4j5/**/test/*Test.java" />
-		</fileset>
-		<antcall target="junitTemplate.load.time.weaving">
+	<target name="test.load.time.weaving" depends="test.ltw" /> <!-- old name -->
+  <target name="test.ltw" depends="test.ltw.groovy, test.ltw.jruby, test.ltw.jexl" />
+
+	<target name="test.ltw.groovy" depends="compile-test, test.setup, project.unwoven.test.jar">
+		<antcall target="junitTemplate.ltw">
 			<param name="test.jar"    value="unwoven-${project.test.jar}" />
 			<param name="aspectpath"  value="${project.jar}" />
+			<param name="interpreter.lang" value="groovy" />
+		</antcall>
+	</target>
+	
+	<target name="test.ltw.jruby" depends="compile-test, test.setup, project.unwoven.test.jar">
+<!--
+		<antcall target="junitTemplate.ltw">
+			<param name="test.jar"    value="unwoven-${project.test.jar}" />
+			<param name="aspectpath"  value="${project.jar}" />
+			<param name="interpreter.lang" value="jruby" />
+		</antcall>
+-->
+	</target>
+	
+	<target name="test.ltw.jexl" depends="compile-test, test.setup, project.unwoven.test.jar">
+		<antcall target="junitTemplate.ltw">
+			<param name="test.jar"    value="unwoven-${project.test.jar}" />
+			<param name="aspectpath"  value="${project.jar}" />
+			<param name="interpreter.lang" value="jexl" />
 		</antcall>
 	</target>
 	
@@ -138,7 +174,10 @@
 
 	
 	<!-- Do any required test setup. -->
-	<target name="test-setup" depends="init">
+	<target name="test.setup" depends="init">
+		<fileset dir="${test.reldir}" id="test.fileset">
+		    <include name="org/contract4j5/**/test/*Test.java" />
+		</fileset>
 	</target>
 
      <!-- TODO: Use or add AJDoc. See notes in ant/targets.xml for target "ajdocsTemplate". -->

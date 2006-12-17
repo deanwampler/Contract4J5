@@ -258,19 +258,22 @@
 		   aspectpath    For the load-time weaving variant, only.
 	-->
 	<target name="junitTemplate" depends="junit.begin, _junitTemplate, junit.end" />
-	<target name="junitTemplate.load.time.weaving" depends="junit.begin, _junitTemplate.load.time.weaving, junit.end" />
+	<target name="junitTemplate.ltw" depends="junit.begin, _junitTemplate.ltw, junit.end" />
 
 	<target name="junit.begin">
 		<tstamp>
 			<format property="start" pattern="MM/dd/yyyy hh:mm:ss.SS" />
 		</tstamp>
-		<echo>  Test start time: ${start}</echo>
+		<echo></echo>
+		<echo>  Test start time:      ${start}</echo>
+		<echo>  Interpreter Language: ${interpreter.lang}</echo>
 	</target>
 
 	<target name="_junitTemplate">
 		<junit printsummary="yes" haltonfailure="yes" showoutput="true" fork="yes">
 			<formatter type="brief" usefile="true"/>
 			<jvmarg value="-ea"/>
+			<jvmarg value="-Dinterpreter=${interpreter.lang}"/>
 			<classpath>
 				<pathelement location="${test.jar}"/>
 				<pathelement location="${project.jar}"/>
@@ -285,11 +288,12 @@
   <!-- To debug problems, change printsummary="yes" and showoutput="true".
        Also, edit test/META-INF/aop.xml and change weaver options.
    -->
-	<target name="_junitTemplate.load.time.weaving">
+	<target name="_junitTemplate.ltw">
 		<junit haltonfailure="yes" printsummary="yes" showoutput="true" fork="yes">
 			<formatter type="brief" usefile="true"/>
 			<jvmarg value="-Xms500m"/>
 			<jvmarg value="-Xmx1000m"/>
+			<jvmarg value="-Dinterpreter=${interpreter.lang}"/>
 			<jvmarg value="-ea"/>
 			<jvmarg value="-javaagent:${aspectj.home}/lib/aspectjweaver.jar"/>
 			<classpath>
