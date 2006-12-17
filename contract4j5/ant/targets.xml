@@ -288,6 +288,8 @@
 	<target name="_junitTemplate.load.time.weaving">
 		<junit haltonfailure="yes" printsummary="yes" showoutput="true" fork="yes">
 			<formatter type="brief" usefile="true"/>
+			<jvmarg value="-Xms500m"/>
+			<jvmarg value="-Xmx1000m"/>
 			<jvmarg value="-ea"/>
 			<jvmarg value="-javaagent:${aspectj.home}/lib/aspectjweaver.jar"/>
 			<classpath>

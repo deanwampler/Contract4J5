@@ -22,7 +22,6 @@ package org.contract4j5.interpreter;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -76,8 +75,11 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 		Map<String, Object> map = new HashMap<String, Object>();
 		// Find "$old()", "$old($this)", "$old($this.foo)", "$old($this.doFoo(bar,baz))", etc.
 		// See Javadocs for parent class declaration.
-		Pattern p = Pattern.compile("\\$old\\s*\\([^\\(\\)]*(\\([^\\)]*\\))?[^\\(\\)]*\\)"); 
-		Matcher m = p.matcher(testExpression);
+		// Also handle quoted strings: remove them!
+		String regex = "\\$old\\s*\\([^\\(\\)]*(\\([^\\)]*\\))?[^\\(\\)]*\\)";
+		String expr2 = removeQuotedStrings(testExpression);
+		Pattern p = Pattern.compile(regex); 
+		Matcher m = p.matcher(expr2);
 		while (m.find()) {
 			String s1 = m.group();
 			String expr = s1.substring(s1.indexOf('(')+1, s1.length()-1); // grab everything between '(' and ')'
@@ -87,6 +89,7 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 		return map;
 	}
 	
+
 	/**
 	 * From the context, return an "old" object specified by the input expression string.
 	 * @param exprStr that specifies at most one object. Do not wrap in "$old(..)".
@@ -105,8 +108,8 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 		}
 		Instance obji   = context.getInstance();
 		Instance fieldi = context.getField();
-		Object   obj    = obji   != null ? obji.getValue()   : null;
-		Object   field  = fieldi != null ? fieldi.getValue() : null;
+		Object   obj    =  obji   != null ? obji.getValue()   : null;
+		Object   field  =  fieldi != null ? fieldi.getValue() : null;
 		recordContextChange ("c4jOldThis",   obj);
 		recordContextChange ("c4jOldTarget", field);
 		Object result = doDetermineOldValue (newExprStr, context);
@@ -175,22 +178,22 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 		
 		if (testExpression.contains("$this")) {
 			Instance i = context.getInstance();
-			if (i == null || i.getValue() == null) {
-				warnStr += InvalidTestExpression.THIS_KEYWORD_WITH_NO_INSTANCE.toString();
+			if (i == null) {
+				errStr += InvalidTestExpression.THIS_KEYWORD_WITH_NO_INSTANCE.toString();
 			}
 		}
 		if (testExpression.contains("$target")) {
 			Instance i = context.getField();
-			if (i == null || i.getValue() == null) {
-				warnStr += InvalidTestExpression.TARGET_KEYWORD_WITH_NO_TARGET.toString();
+			if (i == null) {
+				errStr += InvalidTestExpression.TARGET_KEYWORD_WITH_NO_TARGET.toString();
 			}
 		}
 		if (testExpression.contains("$return") && context.getMethodResult() == null) {
-			warnStr += InvalidTestExpression.RETURN_KEYWORD_WITH_NO_RETURN.toString();
+			errStr += InvalidTestExpression.RETURN_KEYWORD_WITH_NO_RETURN.toString();
 		}
 		Object[] args = context.getMethodArgs();
 		if (testExpression.contains("$args") && (args == null || args.length == 0)) {
-			warnStr += InvalidTestExpression.ARGS_KEYWORD_WITH_NO_ARGS.toString();
+			errStr += InvalidTestExpression.ARGS_KEYWORD_WITH_NO_ARGS.toString();
 		}
 		if (testExpression.contains("$old")) {
 			if (testExpression.matches("\\$old\\s*[^\\(]+")) {  // "$old ..." w/out "(..)"
@@ -278,7 +281,8 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 	
 	/**
 	 * Expands all keywords, using the user-supplied optional mappings, if defined, followed
-	 * by the substitution of the "dollar" keywords.
+	 * by the substitution of the "dollar" keywords. Does <em>not</em> expand keywords within
+	 * quoted strings.
 	 * @param testExpression
 	 * @param context
 	 * @return TestResult with {@link TestResult#isPassed()} equals true and the new test 
@@ -295,16 +299,17 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 			return new TestResult (false, testExpression);
 		}
 		testExpression = testExpression.trim();
-		Map<String, String> exprs = getOptionalKeywordSubstitutions();
-		if (exprs != null) {
-			for (Map.Entry<String,String> entry: exprs.entrySet()) {
-				testExpression = testExpression.replaceAll(entry.getKey(), entry.getValue());
-			}
-		}
-		return expandDollarKeywords(testExpression, context);
+		Map<String, String> keyWordSubs = getOptionalKeywordSubstitutions();
+		if (keyWordSubs == null || keyWordSubs.size() == 0)
+			return expandDollarKeywords(testExpression, context);
+
+		String newExpression = testExpression;
+		for (Map.Entry<String,String> entry: keyWordSubs.entrySet()) 
+			newExpression = substituteInTestExpression(newExpression, entry.getKey(), entry.getValue());
+		
+		return expandDollarKeywords(newExpression, context);
 	}
 
-	
 	/**
 	 * After making the user-specified substitutions, substitute the <code>$this</code>,
 	 * <code>$target</code>, <code>$args[n]</code>, <code>$return</code>, and 
@@ -312,7 +317,7 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 	 * with final expressions appropriate for most interpreters. Note that any other <code>$...</code>
 	 * words would be errors (e.g., mispellings), but they should have already been caught by
 	 * {@link #validateTestExpression(String, TestContext)}, so this method doesn't need to
-	 * worry about them!
+	 * worry about them! Note that no substitutions are made within quoted strings.
 	 * <br/>On the assumption that some interpreters may not be able to handle <code>$foo</code>
 	 * keywords, we make the following substitutions:
 	 * <table>
@@ -368,7 +373,8 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 				String key = Pattern.quote (entry.getKey());  // escape regex characters!!
 				String magicSymbol = Matcher.quoteReplacement("c4jExprVar"+magicSymbolCounter);
 				magicSymbolCounter++;
-				testExpression = testExpression.replaceAll("\\$old\\s*\\(\\s*"+key+"\\s*\\)", magicSymbol);
+				testExpression = 
+					substituteInTestExpression(testExpression, "\\$old\\s*\\(\\s*"+key+"\\s*\\)", magicSymbol);
 				recordContextChange (magicSymbol, obj);
 			}
 		}
@@ -380,15 +386,15 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 					testExpression +
 					"\" after previous substitutions of known values." +
 					" Test results may be inaccurate!");
-			testExpression = testExpression.replaceAll ("\\$old\\s*\\(\\s*\\$this([^\\(\\)]*(\\([^\\)]*\\))?[^\\(\\)]*)\\)",   "c4jThis$1");
-			testExpression = testExpression.replaceAll ("\\$old\\s*\\(\\s*\\$target([^\\(\\)]*(\\([^\\)]*\\))?[^\\(\\)]*)\\)", "c4jTarget$1");
+			testExpression = substituteInTestExpression(testExpression, "\\$old\\s*\\(\\s*\\$this([^\\(\\)]*(\\([^\\)]*\\))?[^\\(\\)]*)\\)",   "c4jThis$1");
+			testExpression = substituteInTestExpression(testExpression, "\\$old\\s*\\(\\s*\\$target([^\\(\\)]*(\\([^\\)]*\\))?[^\\(\\)]*)\\)", "c4jTarget$1");
 			// If $old(..) and ".." doesn't start with $target or $this, then assume "$this." prefix.
-			testExpression = testExpression.replaceAll ("\\$old\\s*\\(\\s*([^\\(\\)]*(\\([^\\)]*\\))?[^\\(\\)]*)\\)", "c4jThis.$1");
+			testExpression = substituteInTestExpression(testExpression, "\\$old\\s*\\(\\s*([^\\(\\)]*(\\([^\\)]*\\))?[^\\(\\)]*)\\)", "c4jThis.$1");
 		}
-		testExpression = testExpression.replaceAll ("\\$this",   "c4jThis");
-		testExpression = testExpression.replaceAll ("\\$target", "c4jTarget");
-		testExpression = testExpression.replaceAll ("\\$return", "c4jReturn");
-		testExpression = testExpression.replaceAll ("\\$args",   "c4jArgs"  );
+		testExpression = substituteInTestExpression(testExpression, "\\$this",   "c4jThis");
+		testExpression = substituteInTestExpression(testExpression, "\\$target", "c4jTarget");
+		testExpression = substituteInTestExpression(testExpression, "\\$return", "c4jReturn");
+		testExpression = substituteInTestExpression(testExpression, "\\$args",   "c4jArgs"  );
 		Instance i = context.getInstance();
 		Instance f = context.getField();
 		recordContextChange ("c4jThis",   i != null ? i.getValue() : null);
@@ -396,70 +402,61 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 		if (context.getMethodResult() != null) {
 			recordContextChange ("c4jReturn", context.getMethodResult().getValue());
 		}
-		recordContextChange ("c4jArgs",   InstanceUtils.getInstanceValues(context.getMethodArgs()));
+		recordContextChange ("c4jArgs", InstanceUtils.getInstanceValues(context.getMethodArgs()));
 
 		testExpression = substituteArguments (testExpression, context);
 
 		// Look for "bare" items, matching "itemName", but without $this or $target; prepend $this.
 		String itemName = context.getItemName();
 	    if (itemName != null && itemName.length() != 0) {
-	        testExpression = testExpression.replaceAll ("(?<!(c4jThis|c4jTarget)\\.)\\b"+itemName+"\\b", "c4jThis."+itemName);
+	        testExpression = substituteInTestExpression(testExpression, "(?<!(c4jThis|c4jTarget)\\.)\\b"+itemName+"\\b", "c4jThis."+itemName);
 	    }
 		return new TestResult (true, testExpression);
 	}
 
 	/**
-	 * Replace words that are method parameters with c4jArgs expressions.
-	 * We have to handle quoted strings that might contain the same words. A complication
-	 * is the possibility of escaped double quotes. We do this by tokenizing the expression
-	 * on '"'. Ignoring "\"", every odd-numbered token in the resulting array of tokens
-	 * would be the contents of a string. We detect "\"", by looking for '\' characters at
-	 * the end of tokens, then we put those strings back together.
+	 * Replace words that are method parameters with c4jArgs expressions, 
+	 * without making the substitutions in quoted strings.
 	 * @param testExpression
 	 * @param context
 	 * @return the new test expression
-	 * @note This method is public so we can test it!
 	 */
 	public String substituteArguments (String testExpression, TestContext context) {
 		Instance[] args = context.getMethodArgs();
 		if (args == null || args.length == 0) {
 			return testExpression;
 		}
-		StringTokenizer st     = new StringTokenizer(testExpression, "\"");
-		String[]        tokens = new String[st.countTokens()];  // maximum # we might have.
-		int count = 0;
-		loop:
-		while (st.hasMoreTokens()) {
-			String token = st.nextToken();
-			while (token.charAt(token.length()-1) == '\\') {
-				tokens[count] += token;  // concat to previous string
-				tokens[count] += '"';    // don't forget to put the '"' back on!
-				if (!st.hasMoreTokens()) {
-					break loop;
-				}
-				token = st.nextToken();
-			}
-			tokens[count] = token;
-			count++;
-	    }
-		StringBuffer newExpr = new StringBuffer();
-		for (int it = 0; it < count; it++) {
-			String token = tokens[it];
-			// The odd-numbered tokens are quoted strings. Don't do
-			// the arg substitution, but do resurround with the quotes!
-			if (it % 2 == 1) {
-				newExpr.append('"');
-				newExpr.append(token);
-				newExpr.append('"');
-			} else {
-				for (int ia = 0; ia < args.length; ia++) {
-					String argName = args[ia].getItemName();
-			        token = token.replaceAll ("(?<!(c4jThis|c4jTarget)\\.)\\b"+argName+"\\b", "c4jArgs["+ia+"]");			
-				}
-				newExpr.append(token);
-			}
+		for (int ia = 0; ia < args.length; ia++) {
+			String argName = args[ia].getItemName();
+			testExpression = substituteInTestExpression(testExpression, 
+					"(?<!(c4jThis|c4jTarget)\\.)\\b"+argName+"\\b", "c4jArgs["+ia+"]");			
 		}
-		return newExpr.toString();
+		return testExpression;
+	}
+
+	public String substituteInTestExpression(String expression, String key,	String value) {
+		StringBuffer buff = new StringBuffer();
+		int count = 0;
+		for (String subExpression: expression.split("(?<!\\\\)\"")) {
+			// Only the even ones, starting at zero are NOT quoted strings
+			if (count++ % 2 == 0)  
+				subExpression = subExpression.replaceAll(key, value);
+			else
+				subExpression = "\"" + subExpression + "\"";
+			buff.append(subExpression);
+		}
+		return buff.toString();
+	}
+
+	public String removeQuotedStrings(String expression) {
+		StringBuffer buff = new StringBuffer();
+		int count = 0;
+		for (String subExpression: expression.split("(?<!\\\\)\"")) {
+			// Remove only the odd ones, starting at zero, which are the quoted strings
+			if (count++ % 2 == 0)  
+				buff.append(subExpression);
+		}
+		return buff.toString();
 	}
 
 	private Map<String, Object> rememberedContextChanges = new HashMap<String, Object>();
@@ -538,6 +535,14 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 	
 	public ExpressionInterpreterHelper() {
 		super();
+	}
+
+	public ExpressionInterpreterHelper(
+			boolean treatEmptyTestExpressionAsValid, 
+			Map<String, String> optionalKeywordSubstitutions) {
+		super();
+		this.treatEmptyTestExpressionAsValidTest = treatEmptyTestExpressionAsValid;
+		this.optionalKeywordSubstitutions = optionalKeywordSubstitutions;
 	}
 
 	private Reporter reporter;

@@ -149,23 +149,17 @@ probably happen in early 2007.</p>
 <a name="manifest"></a>
 <h3>Distribution Manifest</h3>
 <p>
-There are now two distributions of Contract4J5:
-<ol>
-	<li><code>contrat4j5_XYZ_with_dependendies</code></li>
-	<li><code>contrat4j5_XYZ_without_dependendies</code></li>
-</ol>
-Both come in <code>*.zip</code> and <code>*.tar.gz</code> formats.
-</p>
-<p>The <code>with_dependencies</code> version includes the Jexl, Groovy, and 
-JRuby libraries, while the <code>with_dependencies</code> version does not, in
-which case you will have to supply one or more of these packages.</p>
+Contract4J5 comes in <code>*.zip</code> and <code>*.tar.gz</code> formats.
+For convience, each archive includes the required Jexl, Groovy, JRuby and
+dependent libraries. If you are using only one of the languages, a table below
+lists which of the jars is required for each language choice. (The Spring
+framework is not included.)</p>
 <p>
 After expanding the archive you will have the following directory structure:</p>
 <table border='1'>
   <tr><th>File or Directory</th><th>Description</th></tr>
   <tr><td><code>contract4j5_XYZ.jar</code></td><td>Pre-built Contract4J5 jar.</td></tr>
-  <tr><td><code>lib</code></td><td>Location of Jexl, Groovy, and JRuby libraries (the
-    <code>with_dependencies</code> distribution only).</td></tr>
+  <tr><td><code>lib</code></td><td>Location of Jexl, Groovy, JRuby and dependent libraries.</td></tr>
 	<tr><td><code>contract4j5</code></td><td>Directory with the main distribution files</td></tr>
 	<tr><td valign="top"><code>contract4j5WithSpring</code></td><td>Directory with an example of configuring Contract4J5 using Spring 1.2.X or Spring 2.0. The example works with either release (it uses the 1.2.X API, which is supported by 2.0). We recommend using Spring for customizations. However, without any configuration, Contract4J5 works with suitable defaults. There is also a property configuration option, demonstrated in the JUnit tests and discussed in more detail below.</td></tr>
 </table>
@@ -449,12 +443,10 @@ On Windows systems, Unzip the zip file to an appropriate location.</p>
 <p>
 You will need to have Java 5 and AspectJ 5 installed to use Contract4J5. You
 will need to select which scripting language you prefer for the annotation
-scripts used to define contracts. The <code>with_dependencies</code> 
-distribution includes all the currently-supported options; Jakarta Commons Jexl
+scripts used to define contracts. The distribution includes all the
+currently-supported options; Jakarta Commons Jexl
 1.0, Groovy 1.0 RC1 (or later), and JRuby 0.9 (or later). (Commons Logging
-is also included; it is required by Jexl). If you only care about one of these
-options, use the <code>without_dependencies</code> archive and supply the
-scripting engine of your choice.</p>
+is also included; it is required by Jexl).</p>
 <p>If you build Contract4J5 yourself, you will also need JUnit 3.8.1.</p>
 <p>
 <b>Note:</b> You must use AspectJ v1.5.3 or later if you want to use load-time weaving
@@ -622,12 +614,12 @@ The comments in this class should be self explanatory. More specific details on 
 <br/>
 <b>BaseTestClass.java:</b>
 <pre>
-package org.Contract4J5.test;
+package org.contract4j5.test;
 
-import org.Contract4J5.Contract;
-import org.Contract4J5.Invar;
-import org.Contract4J5.Post;
-import org.Contract4J5.Pre;
+import org.contract4j5.Contract;
+import org.contract4j5.Invar;
+import org.contract4j5.Post;
+import org.contract4j5.Pre;
 /**
  * A (contrived) example Java class that demonstrates how 
  * to define DbC tests. The "@Contract" annotation is 
@@ -745,7 +737,7 @@ public class BaseTestClass {
    * is called, but it is still useful for documenting the 
    * interface. Note that the @Pre test does not
    * define a test expression. In this case, C4J5 uses a 
-   * {@link org.Contract4J5.testexpression.DefaultTestExpressionMaker}
+   * {@link org.contract4j5.testexpression.DefaultTestExpressionMaker}
    * to generate a default test expression. There are 
    * separate "makers" for different types of tests and 
    * contexts and they are user configurable. For 
@@ -1043,6 +1035,12 @@ The "Bar" class shows that tests can also be defined for constructors.
 (Invariant tests are also allowed, but seldom useful, since contract tests
 mostly focus on object state, which won't exist before construction!)</p>
 <p>
+Note the idiom for the "@Pre" and "@Post" test expressions for the "Bar"
+constructor. The "@Pre" expression references the "factor" <i>parameter</i>, 
+while the "@Post" expression references the factor <i>field</i>, using the
+"$this." prefix. <i>A common mistake is to omit the "$this." causing the test
+to be executed with the parameter value instead.</i>
+<p>
 <b>NOTE:</b> Jexl appears to choke if floats have a trailing "f". As shown in the 
 example, they should be omitted.</p>
 
@@ -1243,6 +1241,8 @@ the test, as long as you declare an appropriate accessor method for it.</p>
   <li>Remember that when using Jexl, if any test accesses an instance field, the field 
 <b>must</b> have a corresponding JavaBeans getter method. Otherwise, Jexl will
 fail to resolve the field and the test will fail.</li>
+  <li>Fields in expressions must be prefixed with <code>$this.</code>, except in
+field <code>@Invar</code> test expressions. Jexl is more forgiving if you omit the prefix.</li>
 	<li>Avoid expressions with side effects. Since tests will usually be turned 
 off in production, test expressions with side effects, e.g., assignments, will
 not be evaluated, thereby changing the logical behavior of the application.</li>
@@ -1273,6 +1273,13 @@ The wrapper for Jexl, Groovy, and JRuby themselves are
 <code>org.contract4j5.interpreter.groovy.GroovyExpressionInterpreter.java</code>, and
 <code>org.contract4j5.interpreter.jruby.JRubyExpressionInterpreter.java</code>,
 respectively.</li>
+	<li>If you are using the properties configurator and you want to specify a language other
+than Jexl (or the default Groovy), you have to create your own subclass of 
+<code>BSFExpressionInterpreterAdapter</code> that specifies the language to use. 
+See the example <code>JexlBSFExpressionInterpreter</code> that does this for Jexl.
+This is because the properties configurator does not currently support specifying
+<code>BSFExpressionInterpreterAdapter</code> as the interpreter class with a 
+language property field.</li>
 </ul>
 
 <a name="config"></a>
@@ -1290,7 +1297,7 @@ We recommend using a standard mechanism like Spring's Dependency
 Injection (DI) for nontrivial configuration. (See the Spring example that is
 part of this release.) However, for simple property configuration, property 
 files are fine; see the unit test <code>PropertiesConfiguratorTest.java</code>
-in the <code>org.Contract4J5.configurator.test</code> package for examples.</p>
+in the <code>org.contract4j5.configurator.test</code> package for examples.</p>
 <p>
 Note that Contract4J5 will use reasonable defaults if you don't do any 
 configuration.</p>
@@ -1299,7 +1306,7 @@ Here are some API examples. Note that the internal restructuring done in the
 v0.6.0 release changed the wiring API significantly compared to previous 
 releases. 
 <pre>
-  import org.Contract4J5.aspects.Contract4J5;
+  import org.contract4j5.aspects.Contract4J5;
   ...
   Contract4J5.getInstance().setEnabled(Contract4J5.TestType.Pre,   true);
   Contract4J5.getInstance().setEnabled(Contract4J5.TestType.Post,  true);
@@ -1327,26 +1334,26 @@ Reporter objects will default to stdout/stderr if undefined.</p>
 Here are more details about these component interfaces and implementing
 classes:
 <table border="1">
-  <tr><td><code>org.Contract4J5.enforcer.ContractEnforcer:</code><br/>
+  <tr><td><code>org.contract4j5.enforcer.ContractEnforcer:</code><br/>
   The "enforcer" interface</td></tr>
-  <tr><td><code>org.Contract4J5.enforcer.ContractEnforcerImpl:</code><br/>
+  <tr><td><code>org.contract4j5.enforcer.ContractEnforcerImpl:</code><br/>
   The one implementation used here. It runs the tests and on failure, logs
   a detailed error message and terminates program execution.</td></tr>
-  <tr><td><code>org.Contract4J5.interpreter.ExpressionInterpreter:</code><br/>
+  <tr><td><code>org.contract4j5.interpreter.ExpressionInterpreter:</code><br/>
  The expression interpreter interface.</td></tr>
- <tr><td><code>org.Contract4J5.interpreter.ExpressionInterpreterHelper:</code><br/>
+ <tr><td><code>org.contract4j5.interpreter.ExpressionInterpreterHelper:</code><br/>
   An abstract helper class that provides a partial implementation. Subclass this class to support the actual interpreters.</td></tr>
-  <tr><td><code>org.Contract4J5.interpreter.jexl.JexlExpressionInterpreter:</code><br/>
+  <tr><td><code>org.contract4j5.interpreter.jexl.JexlExpressionInterpreter:</code><br/>
 The Jexl implementation of the interpreter.</td></tr>
-  <tr><td><code>org.Contract4J5.interpreter.groovy.GroovyExpressionInterpreter:</code><br/>
+  <tr><td><code>org.contract4j5.interpreter.groovy.GroovyExpressionInterpreter:</code><br/>
 The Groovy implementation of the interpreter.</td></tr>
-  <tr><td><code>org.Contract4J5.interpreter.jruby.JRubyExpressionInterpreter:</code><br/>
+  <tr><td><code>org.contract4j5.interpreter.jruby.JRubyExpressionInterpreter:</code><br/>
 The JRuby implementation of the interpreter.</td></tr>
-  <tr><td><code>org.Contract4J5.util.reporter.Reporter:</code><br/>
+  <tr><td><code>org.contract4j5.util.reporter.Reporter:</code><br/>
   The "reporter" interface that is a thin veneer for a logging abstraction.</td></tr>
-  <tr><td><code>org.Contract4J5.util.reporter.Severity:</code><br/>
+  <tr><td><code>org.contract4j5.util.reporter.Severity:</code><br/>
     Defines logging levels of severity, like INFO, WARN, ERROR, etc.</td></tr>
-  <tr><td><code>org.Contract4J5.util.reporter.WriterReporter:</code><br/>
+  <tr><td><code>org.contract4j5.util.reporter.WriterReporter:</code><br/>
     "Logs" to stdout and stderr by default, but also supports file output. 
     It would be very easy to implement a "log4j reporter", for example.</td></tr>
 </table>
@@ -1462,6 +1469,12 @@ Jexl doesn't, such as closures.</p>
 	<li>Groovy scripts can reference fields in a class without requiring the class
 	to provide an accessor method. Jexl requires the accessor.</li>
 	<li>Jexl may swallow <code>ArrayIndexOutOfBoundsExceptions</code> (?) while Groovy does not.</li>
+  <li>When writing tests while using Groovy, fields must be prefixed with 
+	<code>$this.</code>, except in field <code>&amp;Invar</code> expressions.
+	(Jexl parsing is more forgiving.) If you get a test-failure message that
+	reports a <code>groovy.lang.MissingPropertyException</code> as the cause,
+	make sure the test expression doesn't have a bare field reference!</li>
+
   <li>Jexl does seem to be able to locate package protected and protected fields
 	where Groovy can.</li>
   <li>The Groovy interpreter provides more descriptive error messages when a test fails
@@ -1489,12 +1502,12 @@ infrastructure can be used for a variety of applications beyond Design by
 Contract.</p>
 
 <p>This release of Contract4J was tested using the final release of Java SE
-1.6.0. While it doesn't use any Java 6 features (such as the JSR-220 support
+1.6.0. While it doesn't use any Java 6 features (such as the JSR-223 support
 for scripting), it does offer performance improvements. The JUnit suite runs
 approximately 18% faster than under Java 5 and when the load-time weaving (LTW)
-test target is run, the improvement is a significant 36%!</p>
+test target is run, the improvement is a nice 36%!</p>
 
-<p>Support for JSR-220 is under consideration.</p>
+<p>Support for JSR-223 (Java 6) is under consideration.</p>
 
 <p>The distribution now includes convenience scripts for evaluating the 
 structure of Contract4J5 using
@@ -1530,7 +1543,7 @@ Contract4J5 with Spring v2.0 has not been tested.</p>
 <h6>Improved Configuration Options</h6>
 <p>The restructuring greatly improved the options for using properties files 
 to "wire" Contract4J5, as an alternative to using Spring. See the tests in 
-<code>org.Contract4J5.configurator.test</code> for examples.</p>
+<code>org.contract4j5.configurator.test</code> for examples.</p>
 <h6>New Error Thrown to Indicate Bad Test Specifications</h6> 
 <p>If a test fails because the expression is empty or can't be evaluated by 
 Jexl, a new subclass of <code>ContractError</code>, 
@@ -1621,7 +1634,7 @@ somewhere and point the "env.sh" or "env.bat" script to it. It won't actually be
 Eliminated the precompilation step, replacing it with runtime teste expression
 evaluation using the Jakarta Commons Jexl expression parser.</p>
 <p>
-The package structure has been changed from <code>com.aspectprogramming.*</code> to <code>org.Contract4J5.*</code>.</p>
+The package structure has been changed from <code>com.aspectprogramming.*</code> to <code>org.contract4j5.*</code>.</p>
 <p>
 Deprecated several features; they aren't supported in this milestone release.</p>
 <h6>Ad Hoc Configuration API</h6>
@@ -1633,10 +1646,10 @@ the Spring Framework. This release does all you to globally enable or disable
 all tests or just all precondition, postcondition, or invariant tests. To use,
 define one or more of the following System properties (true or false):
 <table>
-	<tr><td><code>org.Contract4J5.Contract</code></td><td>Enable/disable all tests</td></tr>
-	<tr><td><code>org.Contract4J5.Pre</code></td><td>Enable/disable all precondition tests</td></tr>
-	<tr><td><code>org.Contract4J5.Post</code></td><td>Enable/disable all postcondition tests</td></tr>
-	<tr><td><code>org.Contract4J5.Invar</code></td><td>Enable/disable all invariant tests</td></tr>
+	<tr><td><code>org.contract4j5.Contract</code></td><td>Enable/disable all tests</td></tr>
+	<tr><td><code>org.contract4j5.Pre</code></td><td>Enable/disable all precondition tests</td></tr>
+	<tr><td><code>org.contract4j5.Post</code></td><td>Enable/disable all postcondition tests</td></tr>
+	<tr><td><code>org.contract4j5.Invar</code></td><td>Enable/disable all invariant tests</td></tr>
 </table>
 
 <h6>The "alwaysActive" property of the V0.1 annotations</h6>

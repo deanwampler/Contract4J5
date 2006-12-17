@@ -53,11 +53,11 @@ public class ConstructorBoundaryTest extends TestCase {
 		public int getI() { return i; }
 		
 		//@Pre ("$args[0] != null && $args[1] > 0")
-		@Pre ("name != null && i > 0")
+		@Pre ("name2 != null && i2 > 0")
 		@Post ("$this.name.length() > 0 && $this.i > 1")
-		public ConstructorBoundaryWithDefinedExpr (String name, int i) {
-			this.name = name;
-			this.i = i;
+		public ConstructorBoundaryWithDefinedExpr (String name2, int i2) {
+			this.name = name2;
+			this.i = i2;
 		}
 	}
 
@@ -121,7 +121,7 @@ public class ConstructorBoundaryTest extends TestCase {
 			new ConstructorBoundaryWithDefinedExpr(null, 2);
 			fail();  
 		} catch (TestSpecificationError tse) {
-			fail();
+			fail(tse.getMessage());
 		} catch (ContractError ce) {
 		}
 	}
@@ -130,7 +130,7 @@ public class ConstructorBoundaryTest extends TestCase {
 			new ConstructorBoundaryWithDefinedExpr("foo", 0);
 			fail();  
 		} catch (TestSpecificationError tse) {
-			fail();
+			fail(tse.getMessage());
 		} catch (ContractError ce) {
 		}
 	}

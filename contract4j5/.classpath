@@ -4,9 +4,12 @@
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.ajdt.core.ASPECTJRT_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/commons-jexl-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/junit.jar"/>
+	<classpathentry kind="lib" path="lib/commons-jexl-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/commons-logging.jar"/>
-	<classpathentry kind="lib" path="/home/deanwampler/work/projects/java/contract4j5/trunk/contract4j5/lib/bsf-2.4.0.jar"/>
+	<classpathentry kind="lib" path="lib/antlr-2.7.5.jar"/>
+	<classpathentry kind="lib" path="lib/asm-2.2.jar"/>
+	<classpathentry kind="lib" path="lib/bsf-2.4.0.jar" sourcepath="/opt/tools/java/bsf-2.4.0/src"/>
+	<classpathentry kind="lib" path="lib/groovy-1.0-RC-01.jar" sourcepath="/opt/tools/java/groovy-1.0-RC-01/src/src/main"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

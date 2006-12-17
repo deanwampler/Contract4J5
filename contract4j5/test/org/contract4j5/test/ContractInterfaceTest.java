@@ -23,7 +23,7 @@ import org.contract4j5.errors.TestSpecificationError;
  */
 public class ContractInterfaceTest extends TestCase {
 
-	public static class ContractInterfaceImplWithNoAnnos implements ContractInterface {
+	public static class ExampleContractInterfaceImplWithNoAnnos implements ExampleContractInterface {
 		private String name = null;
 		public void setName (String s) { name = s; }
 		public String getName () { return name; }
@@ -32,10 +32,10 @@ public class ContractInterfaceTest extends TestCase {
 		public int getFlag() { return 0; }
 	}
 		
-	private ContractInterfaceImplWithNoAnnos implWithNoAnnos = null;
+	private ExampleContractInterfaceImplWithNoAnnos implWithNoAnnos = null;
 	
 	@Contract
-	public static class ContractInterfaceImplWithAnnos implements ContractInterface {
+	public static class ExampleContractInterfaceImplWithAnnos implements ExampleContractInterface {
 		private String name = null;
 		@Pre   public void setName (String s) { name = s; }
 		@Post  public String getName () { return name; }
@@ -44,14 +44,14 @@ public class ContractInterfaceTest extends TestCase {
 		public int getFlag() { return 0; }
 	}
 		
-	private ContractInterfaceImplWithAnnos implWithAnnos = null;
+	private ExampleContractInterfaceImplWithAnnos implWithAnnos = null;
 	
 	protected void setUp() throws Exception {
 		super.setUp();
 		Configurator c = new ConfiguratorForTesting();
 		c.configure();
-		implWithNoAnnos = new ContractInterfaceImplWithNoAnnos();
-		implWithAnnos   = new ContractInterfaceImplWithAnnos();
+		implWithNoAnnos = new ExampleContractInterfaceImplWithNoAnnos();
+		implWithAnnos   = new ExampleContractInterfaceImplWithAnnos();
 	}
 
 	/*

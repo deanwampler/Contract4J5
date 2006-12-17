@@ -45,7 +45,7 @@ public class OverriddenContractBase {
 	}
 	
 	String field3 = null;
-	@Post("$this.field.equals(\"foo\") || $this.field.equals(\"bar\")")
+	@Post("$this.field3.equals(\"foo\") || $this.field3.equals(\"bar\")")
 	public String getField3() {
 		return field3;
 	}

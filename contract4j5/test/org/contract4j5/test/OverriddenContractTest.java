@@ -87,7 +87,7 @@ public class OverriddenContractTest extends TestCase {
 				bases[i].setField2(null);
 				fail("i="+i);
 			} catch (TestSpecificationError tse) {
-				fail();
+				fail("i="+i+", "+tse.getMessage());
 			} catch (ContractError ce) {
 			}
 			try {
@@ -104,7 +104,7 @@ public class OverriddenContractTest extends TestCase {
 				bases[i].setField3(null); // fail pre
 				fail("i="+i);
 			} catch (TestSpecificationError tse) {
-				fail();
+				fail(tse.getMessage());
 			} catch (ContractError ce) {
 			}
 			try {
@@ -117,7 +117,7 @@ public class OverriddenContractTest extends TestCase {
 				bases[i].getField3();
 				fail("i="+i);
 			} catch (TestSpecificationError tse) {
-				fail();
+				fail(tse.getMessage());
 			} catch (ContractError ce) {
 			}
 			try {

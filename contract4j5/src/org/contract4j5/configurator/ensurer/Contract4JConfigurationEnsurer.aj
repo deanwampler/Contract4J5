@@ -5,7 +5,7 @@ import org.contract4j5.configurator.Configurator;
 import org.contract4j5.configurator.properties.PropertiesConfigurator;
 import org.contract4j5.controller.Contract4J;
 import org.contract4j5.enforcer.defaultimpl.DefaultContractEnforcer;
-import org.contract4j5.interpreter.bsf.jexl.JexlBSFExpressionInterpreter;
+import org.contract4j5.interpreter.bsf.BSFExpressionInterpreterAdapter;
 import org.contract4j5.reporter.Reporter;
 import org.contract4j5.reporter.Severity;
 import org.contract4j5.reporter.WriterReporter;
@@ -54,9 +54,9 @@ public aspect Contract4JConfigurationEnsurer {
 		configurator.configure();
 		if (c4j.getContractEnforcer() == null) {
 			try {
-				c4j.setContractEnforcer(new DefaultContractEnforcer(new JexlBSFExpressionInterpreter(), true));
+				c4j.setContractEnforcer(new DefaultContractEnforcer(new BSFExpressionInterpreterAdapter("groovy"), true));
 			} catch (BSFException e) {
-				throw new Configurator.ConfigurationFailedException("Could not create a Jexl BSF interpreter.", e);
+				throw new Configurator.ConfigurationFailedException("Could not create a Groovy BSF interpreter.", e);
 			}
 		}
 		Reporter r = c4j.getReporter();

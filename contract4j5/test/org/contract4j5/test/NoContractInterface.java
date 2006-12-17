@@ -29,7 +29,7 @@ import org.contract4j5.contract.Pre;
  * "@Contract" annotation. Expect warnings to be generated.
  */
 @Invar ("$this.getFlag() > 0")
-public interface NoContractInterface extends BaseInterface {
+public interface NoContractInterface extends ExampleBaseInterface {
 	@Pre   void setName (String s);
 	@Post  String getName ();
 	@Invar("$this.getName().length() > 0") 

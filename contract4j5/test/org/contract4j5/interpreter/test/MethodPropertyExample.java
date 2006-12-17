@@ -61,7 +61,8 @@ public class MethodPropertyExample extends TestCase {
     	super.setUp();
     }
     
-    public void test() {
+    @SuppressWarnings("unchecked")
+	public void test() {
     	try {
 		    /*
 		     *  First make a jexlContext and put stuff in it

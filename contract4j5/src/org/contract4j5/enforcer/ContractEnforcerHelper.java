@@ -27,7 +27,7 @@ import org.contract4j5.errors.TestSpecificationError;
 import org.contract4j5.instance.Instance;
 import org.contract4j5.interpreter.ExpressionInterpreter;
 import org.contract4j5.interpreter.TestResult;
-import org.contract4j5.interpreter.bsf.jexl.JexlBSFExpressionInterpreter;
+import org.contract4j5.interpreter.bsf.BSFExpressionInterpreterAdapter;
 import org.contract4j5.reporter.Reporter;
 import org.contract4j5.reporter.Severity;
 
@@ -44,7 +44,7 @@ public abstract class ContractEnforcerHelper implements ContractEnforcer {
 	public ExpressionInterpreter getExpressionInterpreter() {
 		if (expressionInterpreter == null) {
 			try {
-				expressionInterpreter = new JexlBSFExpressionInterpreter();
+				expressionInterpreter = new BSFExpressionInterpreterAdapter("groovy");
 			} catch (BSFException e) {
 				throw new NullPointerException(e.toString());
 			}
@@ -171,8 +171,11 @@ public abstract class ContractEnforcerHelper implements ContractEnforcer {
 	 * @return newly constructed ContractError.
 	 */
 	protected ContractError makeContractError(String message, Throwable throwable) {
-		if (throwable instanceof TestSpecificationError)
+		if (throwable instanceof TestSpecificationError) {
+			// Hack. We'd like to prepend message to throwable.getMessage(), but
+			// there is no way to change it!
 			return new TestSpecificationError(message, throwable);
+		}
 		return new ContractError(message, throwable);
 	}
 

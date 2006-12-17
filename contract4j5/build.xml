@@ -138,7 +138,7 @@
 
 	
 	<!-- Do any required test setup. -->
-	<target name="test-setup">
+	<target name="test-setup" depends="init">
 	</target>
 
      <!-- TODO: Use or add AJDoc. See notes in ant/targets.xml for target "ajdocsTemplate". -->

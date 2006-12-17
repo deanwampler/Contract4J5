@@ -13,6 +13,8 @@ import org.contract4j5.controller.Contract4J;
 import org.contract4j5.enforcer.ContractEnforcer;
 import org.contract4j5.enforcer.defaultimpl.DefaultContractEnforcer;
 import org.contract4j5.interpreter.ExpressionInterpreter;
+import org.contract4j5.interpreter.bsf.BSFExpressionInterpreterAdapter;
+import org.contract4j5.interpreter.bsf.jexl.JexlBSFEngine;
 import org.contract4j5.interpreter.bsf.jexl.JexlBSFExpressionInterpreter;
 import org.contract4j5.reporter.Reporter;
 import org.contract4j5.reporter.WriterReporter;
@@ -20,6 +22,8 @@ import org.contract4j5.testexpression.ParentTestExpressionFinder;
 import org.contract4j5.testexpression.ParentTestExpressionFinderImpl;
 
 public class ConfiguratorForTesting extends AbstractConfigurator {
+	public BSFExpressionInterpreterAdapter expressionInterpreter;
+
 	@Override
 	protected void doConfigure() {
 		Contract4J c4j = new Contract4J();  // Start with fresh singleton
@@ -32,13 +36,17 @@ public class ConfiguratorForTesting extends AbstractConfigurator {
 		c4j.setReporter(reporter);
 		ContractEnforcer ce = new DefaultContractEnforcer(); 
 		c4j.setContractEnforcer(ce);
-		ExpressionInterpreter ei;
 		try {
-			ei = new JexlBSFExpressionInterpreter();
+			String whichInterpreter = System.getProperty("interpreter");
+			if (whichInterpreter == null) 
+				whichInterpreter = "groovy";
+			expressionInterpreter = whichInterpreter.equals("jexl") ?
+				new JexlBSFExpressionInterpreter() :
+				new BSFExpressionInterpreterAdapter(whichInterpreter);
 		} catch (BSFException e) {
 			throw new ConfigurationFailedException("Could not configure with the Jexl BSF expression interpreter", e);
 		}
-		ce.setExpressionInterpreter(ei);
+		ce.setExpressionInterpreter(expressionInterpreter);
 
 		ParentTestExpressionFinder ptef = new ParentTestExpressionFinderImpl(); 
 		ConstructorBoundaryConditions.aspectOf().setParentTestExpressionFinder(ptef);

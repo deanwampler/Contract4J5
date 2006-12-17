@@ -30,7 +30,7 @@ import org.contract4j5.context.TestContextImpl;
 import org.contract4j5.interpreter.TestResult;
 import org.contract4j5.interpreter.bsf.BSFExpressionInterpreterAdapter;
 
-public class BSFExpressionInterpreterAdapterTest extends TestCase {
+public class BSFExpressionInterpreterAdapterSimpleTest extends TestCase {
 	BSFExpressionInterpreterAdapter interpreter;
 	private StubBSFEngine bsfEngine;
 	

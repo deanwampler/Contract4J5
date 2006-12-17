@@ -31,7 +31,7 @@ import org.contract4j5.contract.Pre;
  */
 @Contract
 @Invar ("$this.getFlag() > 0")
-public interface ContractInterface extends BaseInterface {
+public interface ExampleContractInterface extends ExampleBaseInterface {
 	@Pre   void setName (String s);
 	@Post  String getName ();
 	@Invar("$this.name != null && $this.name.length() > 0") void m (String s);

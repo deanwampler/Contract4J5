@@ -34,6 +34,7 @@ import org.contract4j5.enforcer.defaultimpl.DefaultContractEnforcer;
 import org.contract4j5.errors.ContractError;
 import org.contract4j5.errors.TestSpecificationError;
 import org.contract4j5.interpreter.ExpressionInterpreter;
+import org.contract4j5.interpreter.bsf.BSFExpressionInterpreterAdapter;
 import org.contract4j5.interpreter.bsf.jexl.JexlBSFExpressionInterpreter;
 import org.contract4j5.reporter.Reporter;
 import org.contract4j5.reporter.Severity;
@@ -71,7 +72,7 @@ public class DefaultContractEnforcerTest extends TestCase {
 	public void testConstructor2() {
 		ContractEnforcer ce = new DefaultContractEnforcer();
 		assertFalse(ce.getIncludeStackTrace());
-		assertTrue(JexlBSFExpressionInterpreter.class == ce.getExpressionInterpreter().getClass());
+		assertTrue(BSFExpressionInterpreterAdapter.class == ce.getExpressionInterpreter().getClass());
 	}
 
 	public void testSetGetExpressionInterpreter() throws BSFException {

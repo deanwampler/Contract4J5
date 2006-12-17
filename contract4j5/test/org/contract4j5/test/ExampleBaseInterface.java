@@ -23,7 +23,7 @@ package org.contract4j5.test;
 /**
  * Declares the methods for the test interfaces and classes used in some tests.
  */
-public interface BaseInterface {
+public interface ExampleBaseInterface {
 	void    setName(String s);
 	String  getName();
 	boolean getB();

@@ -123,12 +123,14 @@ public class PrimitiveFieldInvarTest extends TestCase {
 	
 	FieldInvarWithDefaultExpr[] fdefault;
 	Contract4J c4j;
+	String expressionInterpreterName;
 	
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		Configurator c = new ConfiguratorForTesting();
+		ConfiguratorForTesting c = new ConfiguratorForTesting();
 		c.configure();
+		expressionInterpreterName = c.expressionInterpreter.getScriptingEngineName();
 		c4j = Contract4J.getInstance();
 		initEnv (true, true);
 		// Construct the array of "default" objects.
@@ -296,55 +298,92 @@ public class PrimitiveFieldInvarTest extends TestCase {
 		}
 	}
 
-	// For next four tests, all tests will fail, even when a valid value is 
-	// used (0), because JEXL requires a getter method to find the attribute!
+	// For next several tests, all tests will fail if Jexl is the interpreter, 
+	// even when a valid value is used (0), because JEXL requires a getter 
+	// method to find the attribute! Not true for Groovy!
 	
-	public void testDefaultFieldsWithoutAccessors () {
-		for (int i=0; i<2; i++) {
-			try {
-				new DefaultFieldWithoutAccessor(i); 
-				fail("i="+i);
-			} catch (TestSpecificationError tse) {
+	public void testDefaultFieldsWithValidValueWithoutAccessorsFailsOnlyForJexl () {
+		try {
+			new DefaultFieldWithoutAccessor(0); 
+			if (expressionInterpreterName.equals("jexl"))
 				fail();
-			} catch (ContractError ce) {
-				// Expected
-			}
+		} catch (TestSpecificationError tse) {
+			fail();
+		} catch (ContractError ce) {
+			if ( !expressionInterpreterName.equals("jexl"))
+				fail();
 		}
 	}
-	public void testPrivateFieldsWithoutAccessors () {
-		for (int i=0; i<2; i++) {
-			try {
-				new PrivateFieldWithoutAccessor(i); 
-				fail("i="+i);
-			} catch (TestSpecificationError tse) {
-				fail();
-			} catch (ContractError ce) {
-				// Expected
-			}
+	public void testDefaultFieldsWithInvalidValueWithoutAccessorsFails () {
+		try {
+			new DefaultFieldWithoutAccessor(1); 
+			fail();
+		} catch (TestSpecificationError tse) {
+			fail();
+		} catch (ContractError ce) {
 		}
 	}
-	public void testProtectedFieldsWithoutAccessors () {
-		for (int i=0; i<2; i++) {
-			try {
-				new ProtectedFieldWithoutAccessor(i); 
-				fail("i="+i);
-			} catch (TestSpecificationError tse) {
-				fail();
-			} catch (ContractError ce) {
-				// Expected
-			}
+
+	public void testPrivateFieldsWithValidValueWithoutAccessorsFails () {
+		try {
+			new PrivateFieldWithoutAccessor(1); 
+			fail();
+		} catch (TestSpecificationError tse) {
+			fail();
+		} catch (ContractError ce) {
 		}
 	}
-	public void testPublicFieldsWithoutAccessors () {
-		for (int i=0; i<2; i++) {
-			try {
-				new PublicFieldWithoutAccessor(i); 
-				fail("i="+i);
-			} catch (TestSpecificationError tse) {
+	public void testPrivateFieldsWithInvalidValueWithoutAccessorsFails () {
+		try {
+			new PrivateFieldWithoutAccessor(1); 
+			fail();
+		} catch (TestSpecificationError tse) {
+			fail();
+		} catch (ContractError ce) {
+		}
+	}
+
+	public void testProtectedFieldWithValidValueWithoutAccessorsFailsOnlyForJexl () {
+		try {
+			new ProtectedFieldWithoutAccessor(0); 
+			if (expressionInterpreterName.equals("jexl"))
 				fail();
-			} catch (ContractError ce) {
-				// Expected
-			}
+		} catch (TestSpecificationError tse) {
+			fail();
+		} catch (ContractError ce) {
+			if ( !expressionInterpreterName.equals("jexl"))
+				fail();
+		}
+	}
+	public void testProtectedFieldWithInvalidValueWithoutAccessorsFails() {
+		try {
+			new ProtectedFieldWithoutAccessor(1); 
+			fail();
+		} catch (TestSpecificationError tse) {
+			fail();
+		} catch (ContractError ce) {
+		}
+	}
+
+	public void testPublicFieldsWithValidValueWithoutAccessorsFailsOnlyForJexl () {
+		try {
+			new PublicFieldWithoutAccessor(0); 
+			if (expressionInterpreterName.equals("jexl"))
+				fail();
+		} catch (TestSpecificationError tse) {
+			fail();
+		} catch (ContractError ce) {
+			if ( !expressionInterpreterName.equals("jexl"))
+				fail();
+		}
+	}
+	public void testPublicFieldsWithInvalidValueWithoutAccessorsFails () {
+		try {
+			new PublicFieldWithoutAccessor(1); 
+			fail();
+		} catch (TestSpecificationError tse) {
+			fail();
+		} catch (ContractError ce) {
 		}
 	}
 }

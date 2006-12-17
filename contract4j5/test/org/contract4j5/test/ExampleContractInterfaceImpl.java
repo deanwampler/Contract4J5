@@ -33,7 +33,7 @@ import org.contract4j5.contract.Pre;
  */
 @Contract
 @Invar
-public class ContractInterfaceImpl implements ContractInterface {
+public class ExampleContractInterfaceImpl implements ExampleContractInterface {
 	private String name = null;
 	@Pre
 	public void setName(String name) {
@@ -64,8 +64,8 @@ public class ContractInterfaceImpl implements ContractInterface {
 	// C'tor that obeys all the contract tests.
 	// Note that preconditions must use $args[i], not field names.
 	@Pre("$args[0] != 100")
-	@Post("!name.equals(\"bad\")")
-	public ContractInterfaceImpl (int flag) { 
+	@Post("!$this.name.equals(\"bad\")")
+	public ExampleContractInterfaceImpl (int flag) { 
 		this.flag = flag; 
 		setName("ContractInterfaceImpl obj2");
 		b = true;
@@ -75,8 +75,8 @@ public class ContractInterfaceImpl implements ContractInterface {
 	// or none of them if the value is 0. Note that the post condition allows a
 	// null value so getName() conditions can be tested.
 	@Pre("$args[0] != 100")
-	@Post("name == null || !name.equals(\"bad\")")
-	public ContractInterfaceImpl (int flag, int whichFailure) { 
+	@Post("$this.name == null || !$this.name.equals(\"bad\")")
+	public ExampleContractInterfaceImpl (int flag, int whichFailure) { 
 		this.flag = flag; 
 		setName("ContractInterfaceImpl obj2");
 		this.b = true;

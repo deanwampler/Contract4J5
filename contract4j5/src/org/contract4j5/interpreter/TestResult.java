@@ -116,14 +116,15 @@ public class TestResult {
 	
 	public String toString() {
 		StringBuffer sb = new StringBuffer(256);
-		sb.append("TestResult: passed = ").append(isPassed());
-		sb.append(", message = \"").append(getMessage()).append("\"");
-		sb.append(getFailureCauseMessage());
+		sb.append("TestResult = {passed = ").append(isPassed());
+		sb.append(", message = \"").append(getMessage()).append("\", ");
+		sb.append(getFailureCauseMessage()).append("\"");
 		if (failureCause !=  null) {
 			sb.append(", failure cause = ").append(getFailureCause());
-			sb.append(getFailureCauseStackTrace());
-			sb.append("\n");
+			sb.append(", stack trace = {").append(getFailureCauseStackTrace());
+			sb.append("}");
 		}
+		sb.append("}");
 		return sb.toString();
 	}
 	

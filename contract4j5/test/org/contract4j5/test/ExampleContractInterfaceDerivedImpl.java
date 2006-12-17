@@ -24,7 +24,7 @@ import org.contract4j5.contract.Contract;
 import org.contract4j5.contract.Invar;
 
 /**
- * Class subclassing {@link ContractInterfaceImpl}, which 
+ * Class subclassing {@link ExampleContractInterfaceImpl}, which 
  * implements the interface w/ the "@Contract" annotation. 
  * This class does not change the annotations.
  * Note that the setName and getName methods below are commented out.
@@ -36,7 +36,7 @@ import org.contract4j5.contract.Invar;
  */
 @Contract
 @Invar
-public class ContractInterfaceDerivedImpl extends ContractInterfaceImpl {
+public class ExampleContractInterfaceDerivedImpl extends ExampleContractInterfaceImpl {
 //	public void setName(String name) {
 //		super.setName(name);
 //	}
@@ -53,12 +53,12 @@ public class ContractInterfaceDerivedImpl extends ContractInterfaceImpl {
 		super.m(s);
 	}
 	
-	public ContractInterfaceDerivedImpl (int flag) { 
+	public ExampleContractInterfaceDerivedImpl (int flag) { 
 		super(flag); 
 		setName("ContractInterfaceDerivedImpl obj2");
 	}
 	
-	public ContractInterfaceDerivedImpl (int flag, int whichFailure) { 
+	public ExampleContractInterfaceDerivedImpl (int flag, int whichFailure) { 
 		super(flag, whichFailure); 
 	}
 }

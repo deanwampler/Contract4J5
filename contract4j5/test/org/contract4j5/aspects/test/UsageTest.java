@@ -26,7 +26,6 @@ import org.contract4j5.contract.Post;
 import org.contract4j5.contract.Pre;
 
 public class UsageTest extends TestCase {
-	@SuppressWarnings("The @Pre, @Post, and @Invar Contract4J annotations require the class annotation @Contract")
 	public static class MissingContractAnno {
 		@Pre ("str != null")
 		public void foo(String str) { name = str; }

@@ -67,10 +67,10 @@ public class ExpressionInterpreterHelperTest extends TestCase {
 	 */
 	public void testValidateTestExpression() {
 		doTestValidateTestExpression (false, " ", ExpressionInterpreter.InvalidTestExpression.EMPTY_EXPRESSION_ERROR); 
-		doTestValidateTestExpression (true,  " $this ", ExpressionInterpreter.InvalidTestExpression.THIS_KEYWORD_WITH_NO_INSTANCE);
-		doTestValidateTestExpression (true,  " $target ", ExpressionInterpreter.InvalidTestExpression.TARGET_KEYWORD_WITH_NO_TARGET);
-		doTestValidateTestExpression (true,  " $return ", ExpressionInterpreter.InvalidTestExpression.RETURN_KEYWORD_WITH_NO_RETURN);
-		doTestValidateTestExpression (true,  " $args ", ExpressionInterpreter.InvalidTestExpression.ARGS_KEYWORD_WITH_NO_ARGS);
+		doTestValidateTestExpression (false, " $this ", ExpressionInterpreter.InvalidTestExpression.THIS_KEYWORD_WITH_NO_INSTANCE);
+		doTestValidateTestExpression (false, " $target ", ExpressionInterpreter.InvalidTestExpression.TARGET_KEYWORD_WITH_NO_TARGET);
+		doTestValidateTestExpression (false, " $return ", ExpressionInterpreter.InvalidTestExpression.RETURN_KEYWORD_WITH_NO_RETURN);
+		doTestValidateTestExpression (false, " $args ", ExpressionInterpreter.InvalidTestExpression.ARGS_KEYWORD_WITH_NO_ARGS);
 		doTestValidateTestExpression (false, " $ this ", ExpressionInterpreter.InvalidTestExpression.INVALID_WHITESPACE_IN_KEYWORD);
 		doTestValidateTestExpression (false, " $ target ", ExpressionInterpreter.InvalidTestExpression.INVALID_WHITESPACE_IN_KEYWORD);
 		doTestValidateTestExpression (false, " $ return ", ExpressionInterpreter.InvalidTestExpression.INVALID_WHITESPACE_IN_KEYWORD);
@@ -144,6 +144,37 @@ public class ExpressionInterpreterHelperTest extends TestCase {
 		doTestExpandKeywords ("c4jExprVar1.compareTo(c4jExprVar2) < 0", "$old($this).compareTo($old($target)) < 0", true, makeContext());
 		doTestExpandKeywords ("c4jThis.itemName", "itemName",     true,  makeContext());
 	}
+	
+	public void testSubstituteInTestExpression() {
+		assertEquals ("X\"def\"X\"jk\\\"l\"X", 
+				interpreter.substituteInTestExpression("abc\"def\"ghi\"jk\\\"l\"mno", "[a-z]+", "X"));
+		assertEquals ("\"def\"X\"jk\\\"l\"", 
+				interpreter.substituteInTestExpression("\"def\"ghi\"jk\\\"l\"", "[a-z]+", "X"));
+	}
+	
+	public void test() {
+		assertEquals ("abcghimno", 
+				interpreter.removeQuotedStrings("abc\"def\"ghi\"jk\\\"l\"mno"));
+		assertEquals ("ghi", 
+				interpreter.removeQuotedStrings("\"def\"ghi\"jk\\\"l\""));
+	}
+	
+	// Experiment to confirm our handling of quoted strings w/ embedded escaped quotes.
+	public void testJavaRegex() {
+		String s = "\"abc\"def\"gh\\\"i\"";
+//		System.out.println("start: "+s);
+		String[] ss = s.split("(?<!\\\\)\"");
+		assertEquals("", ss[0]);
+		assertEquals("abc", ss[1]);
+		assertEquals("def", ss[2]);
+		assertEquals("gh\\\"i", ss[3]);
+	}
+	public void testExpandKeywordsDoesNotExpandContentsOfQuotedStrings() {
+		doTestExpandKeywords ("c4jThis.equals(\"$old($this)\")",  "$this.equals(\"$old($this)\")", true,  makeContext());
+		doTestExpandKeywords ("c4jThis.equals(\"$this\")",        "$this.equals(\"$this\")", true,  makeContext());
+		doTestExpandKeywords ("\"$this\" c4jArgs[0] \"$target\"", "\"$this\" $args[0] \"$target\"", true,  makeContext());
+	}
+
 
 	private TestContext makeContext() {
 		Instance[] args = new Instance[] {

@@ -67,9 +67,10 @@
 			value="${org.contract4j5.ContractEnforcerIncludeStackTrace}" />
 	</bean>
 	<bean id="expressionInterpreter"
-		class="org.contract4j5.interpreter.bsf.jexl.JexlBSFExpressionInterpreter">
-		<property name="treatEmptyTestExpressionAsValidTest" value="false" />
-		<property name="optionalKeywordSubstitutions"> <!-- fake example shown here! -->
+		class="org.contract4j5.interpreter.bsf.BSFExpressionInterpreterAdapter">
+		<constructor-arg type="java.lang.String"><value>groovy</value></constructor-arg>
+		<constructor-arg type="boolean"><value>false</value></constructor-arg> <!-- treatEmptyTestExpressionAsValidTest" -->
+		<constructor-arg type="java.util.Map">
 			<map>
 				<entry>
 					<key><value>FOO</value></key>
@@ -80,8 +81,15 @@
 					<value>bar</value>
 				</entry>
 			</map>
-		</property>
+		</constructor-arg>
 	</bean>
+		
+	<!-- Use Jexl interpreter instead
+	<bean id="expressionInterpreter"
+		class="org.contract4j5.interpreter.bsf.jexl.JexlBSFExpressionInterpreter">
+		<constructor-arg type="boolean"><value>false</value></constructor-arg> 
+	</bean>
+	-->
 	<bean id="globalReporter" class="org.contract4j5.reporter.WriterReporter">
 		<property name="thresholdUsingString" value="${org.contract4j5.GlobalReporterThreshold}" />
 	</bean>

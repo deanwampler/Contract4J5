@@ -24,12 +24,12 @@ import org.contract4j5.errors.ContractError;
 import org.contract4j5.errors.TestSpecificationError;
 
 public class ContractInterfaceDerivedImplTest extends ContractInterfaceImplTest {
-	private ContractInterfaceImpl obj2 = null;
+	private ExampleContractInterfaceImpl obj2 = null;
 	
 	protected void setUp() throws Exception {
 		super.setUp();
 		// Override the parent test's object.
-		obj2 = new ContractInterfaceDerivedImpl(1);
+		obj2 = new ExampleContractInterfaceDerivedImpl(1);
 		setObj(obj2);
 	}
 
@@ -38,7 +38,7 @@ public class ContractInterfaceDerivedImplTest extends ContractInterfaceImplTest 
 	 */
 	public void testClassImplContractInterface1() {
 		try {
-			obj2 = new ContractInterfaceDerivedImpl(0);  // Fail class invariant
+			obj2 = new ExampleContractInterfaceDerivedImpl(0);  // Fail class invariant
 			fail();
 		} catch (TestSpecificationError tse) {
 			fail();
@@ -49,7 +49,7 @@ public class ContractInterfaceDerivedImplTest extends ContractInterfaceImplTest 
 
 	public void testClassImplContractInterface2() {
 		try {
-			obj2 = new ContractInterfaceDerivedImpl(100);  // Fail the c'tor precondition.
+			obj2 = new ExampleContractInterfaceDerivedImpl(100);  // Fail the c'tor precondition.
 			fail();
 		} catch (TestSpecificationError tse) {
 			fail();
@@ -60,7 +60,7 @@ public class ContractInterfaceDerivedImplTest extends ContractInterfaceImplTest 
 	
 	public void testClassImplContractInterface3() {
 		try {
-			obj2 = new ContractInterfaceDerivedImpl(1, 2); // Fail the c'tor postcondition
+			obj2 = new ExampleContractInterfaceDerivedImpl(1, 2); // Fail the c'tor postcondition
 			fail();
 		} catch (TestSpecificationError tse) {
 			fail();
@@ -71,7 +71,7 @@ public class ContractInterfaceDerivedImplTest extends ContractInterfaceImplTest 
 	
 	public void testClassImplContractInterface4() {
 		try {
-			obj2 = new ContractInterfaceDerivedImpl(1, 4); // Fail the getName postcondition
+			obj2 = new ExampleContractInterfaceDerivedImpl(1, 4); // Fail the getName postcondition
 		} catch (ContractError ce) {
 			fail();		// shouldn't have failed yet!!
 		}
@@ -87,7 +87,7 @@ public class ContractInterfaceDerivedImplTest extends ContractInterfaceImplTest 
 	
 	public void testClassImplContractInterface5() {
 		try {
-			obj2 = new ContractInterfaceDerivedImpl(1, 5);  // Fail the "b" field invariant
+			obj2 = new ExampleContractInterfaceDerivedImpl(1, 5);  // Fail the "b" field invariant
 			fail();
 		} catch (TestSpecificationError tse) {
 			fail();

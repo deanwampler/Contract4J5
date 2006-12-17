@@ -79,7 +79,7 @@ public class ContractEnforcerImpl_invokeTest extends TestCase {
 			contractEnforcer.setExpressionInterpreter(null);
 			Instance dum = new Instance("name", Dummy.class, dummy);
 			contractEnforcer.invokeTest(
-					"foo == bar",	// bogus test 
+					"$this.name != null",	
 					"Invar", 
 					"this.name invar. test", 
 					new TestContextImpl("name", dum, null, null, null));
@@ -91,55 +91,55 @@ public class ContractEnforcerImpl_invokeTest extends TestCase {
 		}
 	}
 
-	public void testNoThisDefinedIsAWarning() {
+	public void testNoThisDefinedIsAnErrorIfThisUsedInTest() {
 		try {
 			contractEnforcer.invokeTest(
 					"$this == bar",	// invalid test 
 					"Invar", 
 					"this.name invar. test", 
 					new TestContextImpl("name", null, null, null, null, null));
-			assertMessage (Severity.WARN, ExpressionInterpreter.InvalidTestExpression.THIS_KEYWORD_WITH_NO_INSTANCE);
-		} catch (ContractError ce) {
-			fail(ce.toString());
+			fail();
+		} catch (TestSpecificationError tse) {
+			assertMessage (Severity.ERROR, ExpressionInterpreter.InvalidTestExpression.THIS_KEYWORD_WITH_NO_INSTANCE);
 		}
 	}
 
-	public void testNoTargetDefinedIsAWarning() {
+	public void testNoTargetDefinedIsAnErrorIfThisUsedInTest() {
 		try {
 			contractEnforcer.invokeTest(
 					"$target == bar",	// invalid test 
 					"Invar", 
 					"this.name invar. test", 
 					new TestContextImpl("name", null, null, null, null, null));
-			assertMessage (Severity.WARN, ExpressionInterpreter.InvalidTestExpression.TARGET_KEYWORD_WITH_NO_TARGET);
-		} catch (ContractError ce) {
-			fail(ce.toString());
+			fail();
+		} catch (TestSpecificationError tse) {
+			assertMessage (Severity.ERROR, ExpressionInterpreter.InvalidTestExpression.TARGET_KEYWORD_WITH_NO_TARGET);
 		}
 	}
 
-	public void testNoReturnDefinedIsAWarning() {
+	public void testNoReturnDefinedIsAnErrorIfThisUsedInTest() {
 		try {
 			contractEnforcer.invokeTest(
 					"$return == bar",	// invalid test 
 					"Invar", 
 					"this.name invar. test", 
 					new TestContextImpl("name", null, null, null, null, null));
-			assertMessage (Severity.WARN, ExpressionInterpreter.InvalidTestExpression.RETURN_KEYWORD_WITH_NO_RETURN);
-		} catch (ContractError ce) {
-			fail(ce.toString());
+			fail();
+		} catch (TestSpecificationError tse) {
+			assertMessage (Severity.ERROR, ExpressionInterpreter.InvalidTestExpression.RETURN_KEYWORD_WITH_NO_RETURN);
 		}
 	}
 
-	public void testNoArgsDefinedIsAWarning() {
+	public void testNoArgsDefinedIsAnErrorIfThisUsedInTest() {
 		try {
 			contractEnforcer.invokeTest(
 					"$args[0] == bar",	// invalid test 
 					"Invar", 
 					"this.name invar. test", 
 					new TestContextImpl("name", null, null, null, null, null));
-			assertMessage (Severity.WARN, ExpressionInterpreter.InvalidTestExpression.ARGS_KEYWORD_WITH_NO_ARGS);
-		} catch (ContractError ce) {
-			fail(ce.toString());
+			fail();
+		} catch (TestSpecificationError tse) {
+			assertMessage (Severity.ERROR, ExpressionInterpreter.InvalidTestExpression.ARGS_KEYWORD_WITH_NO_ARGS);
 		}
 	}
 

@@ -28,11 +28,11 @@ import org.contract4j5.errors.ContractError;
 import org.contract4j5.errors.TestSpecificationError;
 
 public class ContractInterfaceImplTest extends TestCase {
-	private ContractInterfaceImpl obj = null;
-	public ContractInterfaceImpl getObj() {
+	private ExampleContractInterfaceImpl obj = null;
+	public ExampleContractInterfaceImpl getObj() {
 		return obj;
 	}
-	public void setObj(ContractInterfaceImpl obj) {
+	public void setObj(ExampleContractInterfaceImpl obj) {
 		this.obj = obj;
 	}
 
@@ -40,7 +40,7 @@ public class ContractInterfaceImplTest extends TestCase {
 		super.setUp();
 		Configurator c = new ConfiguratorForTesting();
 		c.configure();
-		obj = new ContractInterfaceImpl(1);
+		obj = new ExampleContractInterfaceImpl(1);
 	}
 
 	/*
@@ -55,10 +55,12 @@ public class ContractInterfaceImplTest extends TestCase {
 		} catch (ContractError ce) {
 			fail();
 		}		
+	}
+	public void testGetNameShouldThrowContractErrorWithInvalidArguments() {
 		// Trigger failure of getName()...
-		obj = new ContractInterfaceImpl(1, 4);  
+		ExampleContractInterfaceImpl ci = new ExampleContractInterfaceImpl(1, 4);  
 		try {
-			obj.getName();
+			ci.getName();
 			fail();
 		} catch (TestSpecificationError tse) {
 			fail();
@@ -94,7 +96,7 @@ public class ContractInterfaceImplTest extends TestCase {
 		}		
 		// Trigger failure of class invariant for getFlag()...
 		try {
-			obj = new ContractInterfaceImpl(0, 2);  
+			obj = new ExampleContractInterfaceImpl(0, 2);  
 			fail();
 		} catch (TestSpecificationError tse) {
 			fail();
@@ -123,7 +125,7 @@ public class ContractInterfaceImplTest extends TestCase {
 		}		
 		// Trigger failure of m invariant...
 		try {
-			obj = new ContractInterfaceImpl(0, 4);
+			obj = new ExampleContractInterfaceImpl(0, 4);
 			obj.m("bad");
 			fail();
 		} catch (TestSpecificationError tse) {
@@ -138,7 +140,7 @@ public class ContractInterfaceImplTest extends TestCase {
 	 */
 	public void testClassImplContractInterface1() {
 		try {
-			obj = new ContractInterfaceImpl(0);  // Fail class invariant
+			obj = new ExampleContractInterfaceImpl(0);  // Fail class invariant
 			fail();
 		} catch (TestSpecificationError tse) {
 			fail();
@@ -149,7 +151,7 @@ public class ContractInterfaceImplTest extends TestCase {
 
 	public void testClassImplContractInterface2() {
 		try {
-			obj = new ContractInterfaceImpl(100);  // Fail the c'tor precondition.
+			obj = new ExampleContractInterfaceImpl(100);  // Fail the c'tor precondition.
 			fail();
 		} catch (TestSpecificationError tse) {
 			fail();
@@ -160,7 +162,7 @@ public class ContractInterfaceImplTest extends TestCase {
 	
 	public void testClassImplContractInterface3() {
 		try {
-			obj = new ContractInterfaceImpl(1, 2); // Fail the c'tor postcondition
+			obj = new ExampleContractInterfaceImpl(1, 2); // Fail the c'tor postcondition
 			fail();
 		} catch (TestSpecificationError tse) {
 			fail();
@@ -171,7 +173,7 @@ public class ContractInterfaceImplTest extends TestCase {
 	
 	public void testClassImplContractInterface4() {
 		try {
-			obj = new ContractInterfaceImpl(1, 4); // Fail the getName postcondition
+			obj = new ExampleContractInterfaceImpl(1, 4); // Fail the getName postcondition
 		} catch (ContractError ce) {
 			fail();		// shouldn't have failed yet!!
 		}
@@ -187,7 +189,7 @@ public class ContractInterfaceImplTest extends TestCase {
 	
 	public void testClassImplContractInterface5() {
 		try {
-			obj = new ContractInterfaceImpl(1, 5);  // Fail the "b" field invariant
+			obj = new ExampleContractInterfaceImpl(1, 5);  // Fail the "b" field invariant
 			fail();
 		} catch (TestSpecificationError tse) {
 			fail();

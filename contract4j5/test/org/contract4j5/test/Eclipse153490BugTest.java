@@ -16,7 +16,7 @@ public class Eclipse153490BugTest extends TestCase {
 
 		private String fooField = null;
 
-		@Pre("nr != null")
+		@Pre("f != null")
 		public void setFooField(String f) {
 			fooField = f; 
 		}
@@ -42,7 +42,7 @@ public class Eclipse153490BugTest extends TestCase {
 			foo.setFooField(null);
 			fail();
 		} catch (TestSpecificationError tse) {
-			fail();
+			fail(tse.getMessage());
 		} catch (ContractError ce) {
 			// expected
 		}
