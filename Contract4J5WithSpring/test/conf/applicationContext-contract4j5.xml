@@ -67,8 +67,7 @@
 			value="${org.contract4j5.ContractEnforcerIncludeStackTrace}" />
 	</bean>
 	<bean id="expressionInterpreter"
-		class="org.contract4j5.interpreter.bsf.BSFExpressionInterpreterAdapter">
-		<constructor-arg type="java.lang.String"><value>groovy</value></constructor-arg>
+		class="org.contract4j5.interpreter.bsf.groovy.GroovyBSFExpressionInterpreter">
 		<constructor-arg type="boolean"><value>false</value></constructor-arg> <!-- treatEmptyTestExpressionAsValidTest" -->
 		<constructor-arg type="java.util.Map">
 			<map>

@@ -38,12 +38,12 @@
           <h3>History</h3>
 <table>
 	<tr><th colspan='2' align="left">Contract4J5 (Annotation Form)</th></tr>
-	<tr><td>v0.7.0.0</td><td>December 31, 2006</td></tr>
-	<tr><td>v0.6.0.0</td><td>September 21, 2006</td></tr>
-	<tr><td>v0.5.0.0</td><td>February 7, 2006</td></tr>
-	<tr><td>v0.1.1.0</td><td>October 4, 2005</td></tr>
-	<tr><td>v0.1.0.2</td><td>April 24, 2005</td></tr>
-	<tr><td>v0.1.0.1</td><td>February 6, 2005</td></tr>
+	<tr><td><a href="#v0700">v0.7.0.0</a></td><td>December 31, 2006</td></tr>
+	<tr><td><a href="#v0600">v0.6.0.0</a></td><td>September 21, 2006</td></tr>
+	<tr><td><a href="#v0500">v0.5.0.0</a></td><td>February 7, 2006</td></tr>
+	<tr><td><a href="#v0110">v0.1.1.0</a></td><td>October 4, 2005</td></tr>
+	<tr><td><a href="#v0102">v0.1.0.2</a></td><td>April 24, 2005</td></tr>
+	<tr><td><a href="#v0101">v0.1.0.1</a></td><td>February 6, 2005</td></tr>
 	<tr><td>v0.1.0.0</td><td>January 31, 2005</td></tr>
 	<tr><td colspan='2'/></tr>
 	<tr><th colspan='2' align="left">Contract4JBeans (Experimental)</th></tr>
@@ -101,7 +101,7 @@ Copyright 2005,2006 Dean Wampler
 
    Licensed under the Eclipse Public License - v 1.0; you
    may not use this software except in compliance with the 
-   License. You may obtain a copy of the License at
+   License. You may obtain a copy of the License a
 
        http://www.eclipse.org/legal/epl-v10.html
 
@@ -143,8 +143,8 @@ available through subversion).</p>
 <p>The newest release of <i>Contract4J5</i> described in these notes is
 version 0.7.0.
 It is "pre-1.0" while planned features are implemented, which may force 
-API changes that break backwards-compatibility. A stable "1.0" release will
-probably happen in early 2007.</p>
+API changes that break backwards-compatibility. However, at this point, we anticipate
+no such problems going forward. A stable "1.0" release is planned for Spring 2007.</p>
 
 <a name="manifest"></a>
 <h3>Distribution Manifest</h3>
@@ -349,22 +349,52 @@ annotations. However, there are quirks and limitations of Jexl (discussed
 throughout this README; search for "Jexl"...). Hence, starting with V0.7, 
 Contract4J5 now supports Jexl, Groovy, and JRuby as scripting engine 
 alternatives. The tests exercise all three options. We recommend either Groovy
-or JRuby, depending on which one best suits your needs. By default, Groovy is
-used.
+or JRuby, depending on which language best suits your needs. However, Jexl
+offers the best runtime performance. By default, Groovy is used.
 </p>
-<p>
-V0.1 of Contract4J5 used a preprocessing approach. Using a plugin
-for Sun's Annotation Processor Tool (APT), it generated AspectJ code that
-hard-coded the test expressions. The generated code and the original code were
-then compiled. </p>
-<p>
-V0.5 eliminated this preprocessor step, thereby simplifying adoption. All you
-have to do is add a final AspectJ weaving step to your build, write your tests
-in familiar annotations, and you are done. No custom AspectJ code is required.</p>
-<p>
-V0.6 refined the internal structure of Contract4J5 to provide better 
-configuration options and to support binary weaving and load-time weaving (LTW)
-as build/deployment options. (There are build targets that exercise these options.)</p>
+<p>Here are some performance numbers, from running the unit test suit, which
+compare the performance using the three languages. The numbers compare the 
+performance of load-time
+weaving (LTW) vs. binary weaving and also the performance of the JVMs in JDK 5 <i>vs.</i> JDK 6.</p>
+<table border="1">
+	<tr><th colspan="6">JDK 5 (sec.)</th><th colspan="6">JDK 6 (sec.)</th></tr>
+	<tr><th colspan="2">Jexl</th><th colspan="2">Goovy</th><th colspan="2">JRuby</th><th colspan="2">Jexl</th><th colspan="2">Goovy</th><th colspan="2">JRuby</th></tr>
+	<tr><th>Binary</th><th>LTW</th><th>Binary</th><th>LTW</th><th>Binary</th><th>LTW</th><th>Binary</th><th>LTW</th><th>Binary</th><th>LTW</th><th>Binary</th><th>LTW</th></tr>
+	<tr><td>21.7</td><td>98.6</td><td>54.9</td><td>324.4</td><td>79.6</td><td>189.4</td><td>17.7</td><td>62.9</td><td>44.8</td><td>133.5</td><td>63.2</td><td>108.4</td></tr>
+</table>
+<p>These times are rough "user times", averaged over a few runs, measured on a ThinkPad T42 running Ubuntu Linux.
+There are slightly different build activities and I/O overhead involved in the LTW numbers,
+adding a few percentage points to the numbers. The tests do some different manipulations depending on which interpreter is used. Hence, the results are rough, at best. Most likely, the numbers reflect the relative amounts of overhead to load the interpreters and to set up the "environments" for evaluating the scripts. Since the scripts are always very small, evaluation is probably not a large percentage of the execution time. (However, this is speculation!) Your mileage may vary...</p>
+<p>Note that the JDK 6 performance is significantly better. The code was compiled
+with the JDK 5 <code>javac</code> and executed using the JDK 6 JVM. Ironically, we saw
+slightly slower performance when we compiled with JDK 6 (not reflected in the numbers). </p>
+<p>The Jexl test
+runs are roughly twice as fast as the Groovy and JRuby runs, probably because Jexl is a 
+more "minimalist" environment, incurring less startup and execution overhead. </p>
+<p>While not shown, we observed that the memory 
+requirements for Groovy and JRuby are also higher.
+In fact, we had to increase the maximum
+heap size for the LTW JUnit run. We also increased the heap size for the binary JUnit
+runs in Eclipse, when using JRuby.</p>
+<p>The LTW test runs take significantly longer, but the results are somewhat hard to interpret. Under JDK 5, the Jexl and Groovy runs are five to six times longer, while the JRuby runs are only about 2.5 times longer. Under JDK 6, the Jexl and Groovy runs are a little more than three times longer, while the JRuby run is under twice as long. It is not clear while JRuby and LTW performs so much better under both JDKs.</p> 
+<p>In general, the longer LTW times occur because a weaving step happens
+at the beginning of each TestCase, as the class is loaded. The JDK 6 speed-up is a
+good argument for running this VM, at least for your tests!</p>
+<p>LTW is the most convenient
+way to adopt Contract4J5 (as well as other aspects, in general), but if the startup time is too
+long for your needs, then binary weaving of compiled code provides better performance with
+only a modest change in the build process.</p>
+<p>You can select which interpreter to use at runtime by passing one of the following flags to the JVM:
+<ul> 
+  <li><code>-Dinterpreter=jexl</code></li>
+  <li><code>-Dinterpreter=groovy</code> (the default)</li>
+  <li><code>-Dinterpreter=jruby</code></li>
+</ul>
+If you use the <code>PropertiesConfigurator</code>, you can use the following property:<br/>
+<code>org.contract4j5.ExpressionInterpreter=org.contract4j5.interpreter.jexl.JexlExpressionInterpreter</code><br/>
+(Jexl example shown). For Spring, the example test's <code>applicationContext-contract4j5.xml</code> demonstrates setting Groovy as the interpreter (see below).
+</p>
+<p>For more information on the differences between the different scripting languages, see the <a href="#v0700">V0.7.0</a> release notes.</p>
 
 <a name="inherit"></a>
 <h5>Inheritance Behavior of Contracts</h5>
@@ -421,11 +451,13 @@ However, since the parent test is always valid for the derived method override,
 if you don't need to modify the test, then you can simply use the @Pre or @Post
 annotation without a test expression and C4J5 will find the parent expression.</p>
 
+<p>We are considering ways to support the correct inheritance behavior before the 1.0 release of Contract4J5.</p>
+
 <a name="usage"/></a>
 <h4>How Do I Use Contract4J5?</h4>
 <p>
 The distribution contains ant files and examples of how to use Contract4J5. 
-The examples are actually part of the unit/acceptance test suite. If your are 
+The examples are actually part of the unit/acceptance test suite. If you are 
 using Eclipse, the project configuration files are also in the source 
 distribution. You may or may not want to remove them.</p>
 <p>
@@ -441,7 +473,7 @@ For Linux/Unix systems, sue these commands:
 </pre>
 On Windows systems, Unzip the zip file to an appropriate location.</p>
 <p>
-You will need to have Java 5 and AspectJ 5 installed to use Contract4J5. You
+You will need to have Java 5 or Java 6 and AspectJ 5 installed to use Contract4J5. You
 will need to select which scripting language you prefer for the annotation
 scripts used to define contracts. The distribution includes all the
 currently-supported options; Jakarta Commons Jexl
@@ -464,7 +496,7 @@ All three approaches are demonstrated by Contract4J5's <b>ant</b> build
 process, as described below. However, because load-time weaving (LTW) is the easiest 
 and the least intrusive approach, we recommend it and describe it here. Follow these steps.</p>
 <ol>
-	<li>Install <a href="http://www.aspectj.org">AspectJ</a> v1.5.2a or later (the "a" release is required!).</li>
+	<li>Install <a href="http://www.aspectj.org">AspectJ</a> v1.5.3 or later.</li>
 	<li>Make sure the <code>ASPECTJ_HOME</code> environment variable is defined.</li>
 	<li>Add the <code>contract4j5.jar</code> to your <code>CLASSPATH</code> <i>and</i> your <code>ASPECTPATH</code>, if using Eclipse or ajc (<i>i.e.,</i> 
 <code>-aspectpath ...</code>).
@@ -474,7 +506,7 @@ and the least intrusive approach, we recommend it and describe it here. Follow t
 <p>
 Now the Contract4J5 aspects will be applied as your application's classes as they are loaded. For production deployments, simply use <code>java</code> to invoke your application, as before. </p>
 <p>
-<b>Note:</b> To see how to invoke JUnit tests from ant with load-time weaving (LTW), see the "_junitTemplate.loadtime.weaving" build target in <code>ant/targets.xml</code>. This example also provides more details on how to use LTW with Contract4J5.</p>
+<b>Note:</b> To see how to invoke JUnit tests from ant with load-time weaving (LTW), see the "_junitTemplate.ltw" build target in <code>ant/targets.xml</code>. This example also provides more details on how to use LTW with Contract4J5.</p>
 
 <p>
 If you are already using the AspectJ <b>ajc</b> compiler to compile your 
@@ -533,13 +565,13 @@ or
 </pre>
 <p>
 The jar files "contract4j5.jar" and "contract4j5-test.jar" in the current
-directory will be built and the unit/acceptance tests will be executed. The
-tests generate a LOT of output, but they should all pass. Also, there will 
+directory will be built and the unit/acceptance tests will be executed for all
+three supported languages. 
+The tests generate a LOT of output, but they should all pass. Also, there will 
 some warnings which fall into several categories:
 <ol>
 	<li>Warnings in some unit tests when test annotations are used without the
 required @Contract annotation. This is deliberate for those tests.</li>
-	<li>Unavoidable unchecked casts involving generics.</li>
 	<li>The javadocs target also results in many warnings for references to aspects from Java files, which javadoc doesn't know how to resolve. To be clear, the following missing "classes" are actually aspects:
 		<ul>
   		<li>AbstractConditions</li>
@@ -952,7 +984,7 @@ if a JavaBeans "getter" method is defined for it, as shown in the example!</p>
 <p>
 In the future, "$target" may be used more generally for objects that correspond
 to AspectJ's "target()" pointcut expression, but currently "$target" is only 
-used in field invariant tests to refer to the field.)</p>
+used in field invariant tests to refer to the field.</p>
 
 <h5>Define Method and Constructor Preconditions, Postconditions, and Invariants</h5>
 <p>
@@ -1083,7 +1115,7 @@ objects like strings.</p>
 <p>
 This section outlines the right way to write test expressions, reflecting the
 limitations of Contract4J5 and the different supported scripting engines. For detailed examples, see the code in 
-the test suite.</p>
+the test suite (<i>e.g.,</i> <code>BSFExpressionInterpreterAdapterExpressionEvalTest.java</code>).</p>
 
 <h6>Default Test Expressions</h6>
 <p>
@@ -1111,7 +1143,7 @@ you don't put the annotations on derived class overrides, if they call the
 parent methods, the parent methods will be tested, but not anything the
 override does (including constructors).</p>
 <p>
-API calls exist in the org.contract4j5.aspects.*.aj aspects to specify
+API calls exist in the <code>org.contract4j5.aspects.*.aj</code> aspects to specify
 customized objects for calculating a default expression at runtime. These 
 objects must implement
 <pre>
@@ -1190,7 +1222,7 @@ Here are the allowed expressions.
 
 <h6>References to Instance Fields</h6>
 <p>
-For fields, Jexl will automatically convert a "bare" field reference to its
+For fields, Jexl, Groovy, and JRuby will automatically convert a "bare" field reference to its
 accessor, even if the field is private. Hence, an expression like
 <pre>
   $this.foo.bar.baz.doIt(1)
@@ -1199,7 +1231,7 @@ is allowed and will be translated to
 <pre>
   $this.getFoo().getBar().getBaz().doIt(1)
 </pre>
-<b>Note:</b> In fact, the corresponding getter methods are <b>required</b> or Jexl will not
+<b>Note:</b> In fact, for Jexl the corresponding getter methods are <b>required</b> or Jexl will not
 be able to resolve the field references.</p>
 <p>
 Normally, you should prepend "$this." before a "bare" field reference as the
@@ -1246,6 +1278,7 @@ field <code>@Invar</code> test expressions. Jexl is more forgiving if you omit t
 	<li>Avoid expressions with side effects. Since tests will usually be turned 
 off in production, test expressions with side effects, e.g., assignments, will
 not be evaluated, thereby changing the logical behavior of the application.</li>
+	<li>When using load-time weaving (LTW), if it appears that the tests aren't being evaluated, make sure you have an <code>aop.xml</code> file in your class path. Adapt the example file used for the LTW tests.</li>
 	<li>Because runtime expression evaluation is very slow compared to compiled
 code, consider embedding non-trivial tests in "validation" methods and calling
 them from the test expression. (Prepend instance tests with "$this.")</li>
@@ -1270,19 +1303,13 @@ the scripting engine is done in
 <code>org.contract4j5.interpreter.ExpressionInterpreterHelper.java</code>
 The BSF wrapper is
 <code>org.contract4j5.interpreter.bsf.BSFExpressionInterpreterAdapter</code>.
-A subclass that invokes Jexl is
-<code>org.contract4j5.interpreter.jsf.jexl.JexlBSFExpressionInterpreter</code>.
-No sublass is implemented for Groovy and JRuby as none is really necessary.
-See 
-<code>org.contract4j5.interpreter.jsf.jexl.JexlBSFExpressionInterpreter</code>
-for why it is needed.</li>
-	<li>If you are using the properties configurator and you want to specify a language other
-than Jexl (or the default Groovy), you have to create your own subclass of 
+Subclasses that invoke Groovy, Jexl, and JRuby, respectively, are
+<code>org.contract4j5.interpreter.jsf.groovy.GroovyBSFExpressionInterpreter</code>,
+<code>org.contract4j5.interpreter.jsf.jexl.JexlBSFExpressionInterpreter</code>, and
+<code>org.contract4j5.interpreter.jsf.jruby.JRubyBSFExpressionInterpreter</code>.</li>
+	<li>If you want to use a different language, you have to create your own subclass of 
 <code>BSFExpressionInterpreterAdapter</code> that specifies the language to use. 
-See the example <code>JexlBSFExpressionInterpreter</code> that does this for Jexl.
-This is because the properties configurator does not currently support specifying
-<code>BSFExpressionInterpreterAdapter</code> as the interpreter class with a 
-language property field.</li>
+See the example <code>JexlBSFExpressionInterpreter</code> that does this for Jexl.</li>
 </ul>
 
 <a name="config"></a>
@@ -1348,8 +1375,12 @@ classes:
   An abstract helper class that provides a partial implementation. Subclass this class to support the actual interpreters.</td></tr>
  <tr><td><code>org.contract4j5.interpreter.bsf.BSFExpressionInterpreterAdapter:</code><br/>
   Adapts the Bean Scripting Framework (BSF) for use by Contract4J5.</td></tr>
- <tr><td><code>org.contract4j5.interpreter.bsf.jexl.BSFJexlExpressionInterpreter:</code><br/>
+ <tr><td><code>org.contract4j5.interpreter.bsf.groovy.GroovyBSFExpressionInterpreter:</code><br/>
+The Groovy wrapper of the BSF adapter.</td></tr>
+ <tr><td><code>org.contract4j5.interpreter.bsf.jexl.JexlBSFExpressionInterpreter:</code><br/>
 The Jexl wrapper of the BSF adapter.</td></tr>
+ <tr><td><code>org.contract4j5.interpreter.bsf.jruby.JRubyBSFExpressionInterpreter:</code><br/>
+The JRuby wrapper of the BSF adapter.</td></tr>
   <tr><td><code>org.contract4j5.util.reporter.Reporter:</code><br/>
   The "reporter" interface that is a thin veneer for a logging abstraction.</td></tr>
   <tr><td><code>org.contract4j5.util.reporter.Severity:</code><br/>
@@ -1383,7 +1414,9 @@ scripts:
 	<li>Java 5 (<code>JAVA_HOME</code>)</li>
 	<li>AspectJ 1.5 (<code>ASPECTJ_HOME</code>) The 1.5.2a or later release is recommended (required if you do load-time weaving).</li>
 	<li>Ant 1.6.2+ (<code>ANT_HOME</code>)</li>
-	<li>Jexl 1.0 (<code>Jexl_HOME</code>)</li>
+	<li>Jexl 1.0 (included in <code>lib</code> directory)</li>
+	<li>JRuby 0.9+ (included in <code>lib</code> directory)</li>
+	<li>Groovy 1.0RC1+ (included in <code>lib</code> directory)</li>
 	<li>Commons Logging (<code>COMMONS_LOGGING_HOME</code>)</li>
 </ol>
 Also define <code>Contract4J5_HOME</code> to be the <code>.../contract4j5_060/contract4j5</code>
@@ -1391,58 +1424,60 @@ directory where you installed it.</p>
 <p>
 For your convenience, you can use the build driver script "build.sh" or "build.bat". Edit the values of the environment variables in the corresponding scripts "env.sh" or "env.bat" for your environment.</p>
 <p>
-Only Java, AspectJ, and Jexl are required if you simply use the binary 
-</code>contract4j5.jar</code> in the distribution. Make sure your build process either 
-compiles with AspectJ or weaves your precompiled jars or class files with 
-</code>contract4j5.jar</code>.</p>
+Only Java, AspectJ, and the libraries for one of the scripting engines are required if you simply use the binary 
+</code>contract4j5.jar</code> in the distribution. (All the scripting engines jars are in the <code>lib</code> directory.) Make sure your build process 
+compiles with AspectJ, weaves your precompiled jars or class files with 
+</code>contract4j5.jar</code>, or uses load-time weaving, as demonstrated in the "LTW" tests.</p>
 
 <a name="todo"></a>
 <h4>TODO Items</h4>
 <p>
-Here is a brief list of some of the more important "TODO" items, roughly in 
-order of importance. 
+Here is a brief list of the most important "TODO" items that we want to complete 
+before V1.0, roughly in order of importance. 
 <ol>
 	<li>Automatically enforce proper usage of method and constructor annotations in
 subclasses when they aren't annotated.</li>
 	<li>Implement correct contravariant behavior of inherited precondition tests and covariant behavior of inherited postcondition tests.</li>
-	<li>Support other scripting languages, especially Groovy and JRuby in Java 5.</li>
-	<li>Support other scripting languages, especially Groovy and JRuby, using the native scripting support in Java 6.</li>
-	<li>Support end-user extension with custom annotations and failure handlers.</li>
+	<li>Support end-user extensions with custom annotations and "behavior" handlers.</li>
 	<li>Support tests on static methods.</li>
 	<li>Extend <code>@Pre</code> and <code>@Post</code> to support class-level annotations that will apply to all protected and public instance and static methods. For example, <code>@Contract @Pre @Post public class Foo {...}</code> would require all such methods to take non-null arguments and return non-null values, consistent with the way <code>@Pre</code> and <code>@Post</code> work by default today on methods. Add optional configuration properties to each annotation to set the protection level for which the annotation applies (<i>e.g.</i>, also do private methods.) and whether or not to exclude static methods.</li>
-	<li>Find a more elegant, aspectj-specific way to handle logging of information
-	without embedding the ad hoc Reporter objects.</li>
-	<li>Refine test handling. For example, field invariants are evaluated for reads,
-but this probably only makes sense for the very first read, in case it is 
-uninitialized. The rest of the time, evaluating just field writes makes sense.</li>
+</ol>
+Here is a list of other possible enhancements.
+<ol>
+	<li>Support scripting languages using the native scripting support in Java 6.</li>
 	<li>Eliminate the requirement to annotate the class with @Contract?
 	<li>For the keywords:
 		<ul>
 			<li>Allow "this" without the '$'? </li>
 			<li>Provide a "$field" alias for "$target", since the latter isn't used for anything other than fields. Keep "$target" for backwards compatibility.</li>
 		</ul></li>
-	<li>Find a more elegant, aspectj-specific way to handle logging of information
-without embedding the ad hoc Reporter objects.</li>
 </ol>
 
 <a name="notes"></a>
-<h4>Notes for Each Release</h4>
-
-<h5>v0.7.0 December 31, 2006</h5>
-<h6>Support Groovy, JRuby, and Other Refinements</h6>
+<h3>Notes for Each Release</h3>
+<a name="v0700"></a>
+<h4>v0.7.0 December 31, 2006</h4>
+<h5>Support for Groovy, JRuby, and Other Refinements</h5>
 <p>
 This release adds built-in support for using Groovy or JRuby as an alternative
-to Jexl as the scripting engine. In fact, because of Jexl limitations, it is
-now deprecated; Groovy is the default scripting language at startup. (This is
+to Jexl as the scripting engine. In fact, because of Jexl limitations, Groovy is now the default scripting language at startup. (This is
 easily configurable, as discussed previously.) In our experiments, most
-Jexl-compatible expressions work just fine with Groovy. Using JRuby will
-require porting existing expressions.
+Jexl-compatible expressions work just fine with Groovy.</p>
+<p>Using JRuby 
+requires porting some existing expressions. However, to facilitate using common Java
+idioms in Ruby without translation, Contract4J5 makes a few simple substitutions automatically
+in test expressions:
+<ol>
+	<li><code>null</code> is changed to <code>nil</code></li>
+	<li><code>equals(...)</code> is changed to <code>eql?(...)</code></li>
+	<li><code>compareTo(...)</code> is changed to <code><=>(...)</code></li>
+</ol>
 </p>
 
 <p>
 All scripting engine calls now go through the Jakarta
-<a href=""http://jakarta.apache.org/bsf/">Bean Scripting Framework</a> (BSF),
-including Jexl, to make it easier to plug and play almost any scripting engine.
+<a href=""http://jakarta.apache.org/bsf/">Bean Scripting Framework</a> (BSF)
+to make it easier to plug and play almost any scripting engine.
 These changes introduce the following new library dependencies:
 </p>
 <table border="1">
@@ -1453,39 +1488,43 @@ These changes introduce the following new library dependencies:
 <tr><td>JRuby</td><td><i>All</i> plus <code>jruby-0.9.jar</code> or later</td></tr>
 </table>
 
-<p>All these jars are included with the distribution. Remove the ones you 
+<p>All these jars are included with the distribution (in the <code>lib</code> directory). Remove the ones you 
 don't need from your deployment.</p>
 
-<p>More robust handling of quoted strings; no more variable substitution internally!</p>
-
-<p>We have kept the scripting language mostly compatible between Jexl and Groovy,
-since they are "Java-like". JRuby has a different syntax, of course.  The following
-is the partial list of differences between scripts written with Jexl and Groovy.
+<p>The following
+is the partial list of differences between scripts written with Jexl, Groovy, or JRuby.
 Some of these differences may reflect idiosyncrasies of how they are used in
 the implementation, rather than real language differences. Also, in general, 
-Groovy is a more full-featured language, so it provides facilities that
+Groovy and JRuby are more full-featured environments, so they provide facilities that
 Jexl doesn't, such as closures.</p>
 
 <ol>
-	<li>Groovy scripts can reference fields in a class without requiring the class
-	to provide an accessor method. Jexl requires the accessor.</li>
-	<li>Jexl may swallow <code>ArrayIndexOutOfBoundsExceptions</code> (?) while Groovy does not.</li>
-  <li>When writing tests while using Groovy, fields must be prefixed with 
-	<code>$this.</code>, except in field <code>&amp;Invar</code> expressions.
+	<li>Groovy and JRuby scripts can reference fields in a class without requiring the class
+	to provide an accessor method. Jexl always requires accessors (as emphasized previously).</li>
+	<li>Groovy can reference accessor methods that aren't public, while JRuby and Jexl only accesses public accessors.</li>
+	<li>JRuby will translate some idiomatic-Ruby expressions to corresponding idiomatic-Java expressions. For example, 
+<code>field</code> to <code>getField()</code>, 
+<code>field=</code> to <code>setField()</code>, and 
+<code>method_with_words</code> to <code>methodWithWords</code>.</li> 
+	<li>Jexl appears to swallow <code>ArrayIndexOutOfBoundsExceptions</code> while Groovy and JRuby do not.</li>
+  <li>When writing tests while using Groovy or JRuby, fields must be prefixed with 
+	<code>$this.</code>, except in field <code>@Invar</code> expressions.
 	(Jexl parsing is more forgiving.) If you get a test-failure message that
-	reports a <code>groovy.lang.MissingPropertyException</code> as the cause,
+	reports a <code>groovy.lang.MissingPropertyException</code>, for Groovy, or 
+	"undefined local variable or method", for JRuby,
 	make sure the test expression doesn't have a bare field reference!</li>
 
-  <li>Jexl does seem to be able to locate package protected and protected fields
-	where Groovy can.</li>
+  <li>Jexl can access package protected and protected fields
+	while Groovy and JRuby cannot.</li>
   <li>The Groovy interpreter provides more descriptive error messages when a test fails
 	because the expression is bad, <i>e.g.,</i> because it references a non-existent field
 	on an object. As a result, while such tests fail whether using Jexl or Groovy, debugging
-	the issue will often be easier with Groovy.</li>
+	the issue will often be easier with Groovy. JRuby messages are descriptive as well.</li>
 </ol>
-<p>Search the class <code>BSFExpressionInterpreterAdapterExpressionEvalTest</code> for the field
-<code>isJexl</code> to see examples of tests where Jexl and Groovy behave differently.</p>
+<p>Search the class <code>BSFExpressionInterpreterAdapterExpressionEvalTest</code> for the variables
+<code>isJexl</code>, <code>isJRuby</code>, and <code>isGroovy</code> to see examples of tests where Jexl, JRuby, and Groovy behave differently.</p>
 
+<h5>Configuration of Failure Handling</h5>
 <p>It is now easier to configure the behavior for what happens when a contract
 failure occurs. The interface <code>ContractEnforcer</code> exposes more
 configuration options, which are exercised by the unit tests, example property
@@ -1504,14 +1543,28 @@ support user-defined annotations and associated behaviors, so that the
 infrastructure can be used for a variety of applications beyond Design by
 Contract.</p>
 
+<h5>More Robust Hanlding of String Literals With Test Expressions</h5>
+<p>Previously, if a
+variable (field, parameter, <i>etc.</i>) name appeared within a string literal, it was
+sometimes replaced with an internal representation of the variable. This would break test expressions like <code>param1.equals("param1")</code>, where <code>param1</code> is a
+method parameter. The result was a test failure even if <code>param1</code> really had
+the value <code>"param1"</code>! Now, string literals are unmodified.</p>
+
+<h5>Better Diagnostic Information</h5>
+<p>More descriptive information from nested exceptions is provided in the output. Furthermore, by default, BSF logs exceptions that are thrown. This should make debugging problems
+easier. (To disable BSF logging, configure Apache's Commons Logging as desired.)
+</p>
+
+<h5>Java JDK 1.6 Compatability</h5>
 <p>This release of Contract4J was tested using the final release of Java SE
 1.6.0. While it doesn't use any Java 6 features (such as the JSR-223 support
 for scripting), it does offer performance improvements. The JUnit suite runs
 approximately 18% faster than under Java 5 and when the load-time weaving (LTW)
-test target is run, the improvement is a nice 36%!</p>
+test target is run, the improvement exceeds 30%!</p>
 
 <p>Support for JSR-223 (Java 6) is under consideration.</p>
 
+<h5>JDepend and FindBugs Support</h5>
 <p>The distribution now includes convenience scripts for evaluating the 
 structure of Contract4J5 using
 <a href="http://clarkware.com/software/JDepend.html">jdepend</a> and
@@ -1519,14 +1572,17 @@ structure of Contract4J5 using
 These tools were used to restructure Contract4J5 to eliminate a number of 
 circular dependencies and other problems.
 See the <code>jdepend.sh</code> and <code>findbugs.txt</code> files in the
-<code>contract4j5</code> directory for more information. 
+<code>contract4j5</code> directory for more information, such as how to install
+the required tools. A graph of jdepend output for Contract4J5 is <code>jdepend_report.png</code>.
 </p>
 
+<h5>General Clean-ups</h5>
 <p>More clean-ups of package dependencies and generics-related warnings were
 also done.</p>
 
-<h5>v0.6.0 September 21, 2006</h5>
-<h6>Restructuring</h6>
+<a name="v0600"></a>
+<h4>v0.6.0 September 21, 2006</h4>
+<h5>Restructuring</h5>
 <p>
 This release is a major restructuring to reduce the component complexity, to
 reduce over-reliance on singletons, and to improve the "wiring" options. 
@@ -1632,7 +1688,9 @@ previously set on <code>Contract4J5</code> are <b>not</b> now accessed using
 somewhere and point the "env.sh" or "env.bat" script to it. It won't actually be used unless you explicitly invoke one of the demonstration <code>*.spring</code> ant targets.</li>
 </ol>
 
-<h5>v0.5.0 February 7, 2006</h5>
+<a name="v0500"></a>
+<h4>v0.5.0 February 7, 2006</h4>
+<h5>Major Rewrite</h5>
 <p>
 Eliminated the precompilation step, replacing it with runtime teste expression
 evaluation using the Jakarta Commons Jexl expression parser.</p>
@@ -1668,11 +1726,13 @@ individual messages in the test annotations themselves.
 AspectJ5 has the limitation that it doesn't support annotations on method parameters. They were supported in Contract4J5 v0.1, because it didn't rely on AspectJ's support. The workaround is to put all parameter tests in a method 
 precondition test.
 
-<h5>v0.1.1.0 October 4, 2005</h5>
+<a name="v0110"></a>
+<h4>v0.1.1.0 October 4, 2005</h4>
 
 Support for Ant builds and numerous small bug fixes in the V1 branch.
 
-<h5>v0.1.0.2 April 24, 2005</h5>
+<a name="v0102"></a>
+<h4>v0.1.0.2 April 24, 2005</h4>
 
 Fixed a bug that prevented use of precondition annotations on individual method 
 parameters if the method contains more than one parameter. (The generated 
@@ -1683,12 +1743,13 @@ for the other parameters.)</p>
 <p>
 Numerous minor enhancements.</p>
 
-<h5>v1.0.1 February 6, 2005</h5>
+<a name="v0101"></a>
+<h4>v1.0.1 February 6, 2005</h4>
 
 Minor bug fixes.
 
 <a name="furtherinfo"></a>
-<h4>For Further Information...</h4>
+<h3>For Further Information...</h3>
 <p>
 <a href="http://www.contract4j.org/">http://www.contract4j.org/</a> is the home page for Contract4J5 and Contract4JBeans.
 It is developed by <a href="http://www.aspectresearchassociates.com/">Aspect Research Associates</a> (ARA), a consulting company specializing
@@ -1733,12 +1794,12 @@ Another project is the <a href="http://www.cs.iastate.edu/~leavens/JML/">Java Mo
 	<tr>
 	  <td align="right" valign="top"> &nbsp; </td>
 	  <td align="left"> <font class="Footer">Copyright &copy;
-		2003-2005 Aspect Research Associates. All Rights Reserved.</font> </td>
+		2003-2007 Aspect Research Associates. All Rights Reserved.</font> </td>
 	</tr>
   </tbody>
 </table>
 					<div id="copyright">
-						Copyright ©2003-2006 
+						Copyright ©2003-2007 
 						Aspect Research Associates. 
 							All Rights Reserved.
 					</div>
