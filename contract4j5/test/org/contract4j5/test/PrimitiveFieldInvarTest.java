@@ -24,7 +24,6 @@ import junit.framework.TestCase;
 
 import org.contract4j5.aspects.InvariantFieldConditions;
 import org.contract4j5.aspects.InvariantFieldCtorConditions;
-import org.contract4j5.configurator.Configurator;
 import org.contract4j5.configurator.test.ConfiguratorForTesting;
 import org.contract4j5.contract.Contract;
 import org.contract4j5.contract.Invar;
@@ -301,6 +300,7 @@ public class PrimitiveFieldInvarTest extends TestCase {
 	// For next several tests, all tests will fail if Jexl is the interpreter, 
 	// even when a valid value is used (0), because JEXL requires a getter 
 	// method to find the attribute! Not true for Groovy!
+	// Some of the tests also fail for JRuby, as noted
 	
 	public void testDefaultFieldsWithValidValueWithoutAccessorsFailsOnlyForJexl () {
 		try {
@@ -310,8 +310,10 @@ public class PrimitiveFieldInvarTest extends TestCase {
 		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
-			if ( !expressionInterpreterName.equals("jexl"))
-				fail();
+			// Fails for JRuby and Jexl. For JRuby, it misinterprets ".defaultField" as a method call.
+			// You would have to use "@defaultField"...
+			if (expressionInterpreterName.equals("groovy"))
+				fail(ce.getMessage());
 		}
 	}
 	public void testDefaultFieldsWithInvalidValueWithoutAccessorsFails () {
@@ -351,8 +353,10 @@ public class PrimitiveFieldInvarTest extends TestCase {
 		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
-			if ( !expressionInterpreterName.equals("jexl"))
-				fail();
+			// Fails for JRuby and Jexl. For JRuby, it misinterprets ".defaultField" as a method call.
+			// You would have to use "@defaultField"...
+			if (expressionInterpreterName.equals("groovy"))
+				fail(ce.getMessage());
 		}
 	}
 	public void testProtectedFieldWithInvalidValueWithoutAccessorsFails() {

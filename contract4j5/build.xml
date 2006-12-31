@@ -114,12 +114,10 @@
 	</target>
 
 	<target name="test.jruby" depends="test.setup">
-<!--
 		<antcall target="junitTemplate">
 			<param name="test.jar"         value="${project.test.jar}" />
 			<param name="interpreter.lang" value="jruby" />
 		</antcall>
--->
 	</target>
 
 	<target name="test.jexl" depends="test.setup">
@@ -145,13 +143,11 @@
 	</target>
 	
 	<target name="test.ltw.jruby" depends="compile-test, test.setup, project.unwoven.test.jar">
-<!--
 		<antcall target="junitTemplate.ltw">
 			<param name="test.jar"    value="unwoven-${project.test.jar}" />
 			<param name="aspectpath"  value="${project.jar}" />
 			<param name="interpreter.lang" value="jruby" />
 		</antcall>
--->
 	</target>
 	
 	<target name="test.ltw.jexl" depends="compile-test, test.setup, project.unwoven.test.jar">

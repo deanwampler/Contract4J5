@@ -1,3 +1,22 @@
+/*
+ * Copyright 2005, 2006 Dean Wampler. All rights reserved.
+ * http://www.contract4j.org
+ *
+ * Licensed under the Eclipse Public License - v 1.0; you may not use this
+ * software except in compliance with the License. You may obtain a copy of the 
+ * License at
+ *
+ *     http://www.eclipse.org/legal/epl-v10.html
+ *
+ * A copy is also included with this distribution. See the "LICENSE" file.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @author Dean Wampler <mailto:dean@aspectprogramming.com>
+ */
 package org.contract4j5.configurator.test;
 
 import org.apache.bsf.BSFException;
@@ -12,10 +31,10 @@ import org.contract4j5.configurator.AbstractConfigurator;
 import org.contract4j5.controller.Contract4J;
 import org.contract4j5.enforcer.ContractEnforcer;
 import org.contract4j5.enforcer.defaultimpl.DefaultContractEnforcer;
-import org.contract4j5.interpreter.ExpressionInterpreter;
 import org.contract4j5.interpreter.bsf.BSFExpressionInterpreterAdapter;
-import org.contract4j5.interpreter.bsf.jexl.JexlBSFEngine;
+import org.contract4j5.interpreter.bsf.groovy.GroovyBSFExpressionInterpreter;
 import org.contract4j5.interpreter.bsf.jexl.JexlBSFExpressionInterpreter;
+import org.contract4j5.interpreter.bsf.jruby.JRubyBSFExpressionInterpreter;
 import org.contract4j5.reporter.Reporter;
 import org.contract4j5.reporter.WriterReporter;
 import org.contract4j5.testexpression.ParentTestExpressionFinder;
@@ -38,11 +57,15 @@ public class ConfiguratorForTesting extends AbstractConfigurator {
 		c4j.setContractEnforcer(ce);
 		try {
 			String whichInterpreter = System.getProperty("interpreter");
-			if (whichInterpreter == null) 
-				whichInterpreter = "groovy";
-			expressionInterpreter = whichInterpreter.equals("jexl") ?
-				new JexlBSFExpressionInterpreter() :
-				new BSFExpressionInterpreterAdapter(whichInterpreter);
+			if (whichInterpreter == null || whichInterpreter.length() == 0 ||
+				whichInterpreter.equalsIgnoreCase("groovy")) 
+				expressionInterpreter = new GroovyBSFExpressionInterpreter();
+			else if (whichInterpreter.equalsIgnoreCase("jexl"))
+				expressionInterpreter = new JexlBSFExpressionInterpreter();
+			else if (whichInterpreter.equalsIgnoreCase("jruby"))
+				expressionInterpreter = new JRubyBSFExpressionInterpreter();	
+			else
+				throw new BSFException("Unrecognized interpreter name: \""+whichInterpreter+"\".");
 		} catch (BSFException e) {
 			throw new ConfigurationFailedException("Could not configure with the Jexl BSF expression interpreter", e);
 		}

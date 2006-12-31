@@ -17,7 +17,7 @@
  *
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
-package org.contract4j5.interpreter.bsf.jexl;
+package org.contract4j5.interpreter.bsf.groovy;
 
 import java.util.Map;
 
@@ -25,29 +25,28 @@ import org.apache.bsf.BSFException;
 import org.contract4j5.interpreter.bsf.BSFExpressionInterpreterAdapter;
 
 /**
- * A Jexl subclass of {@link BSFExpressionInterpreterAdapter} is useful since we
- * need to register the engine with the bean scripting framework, which we do with
- * a static initializer. This isn't necessary for other languages, such as Groovy. 
+ * A convenience subclass of {@link BSFExpressionInterpreterAdapter} that specifies
+ * Groovy as the scripting language. This class isn't strictly necessary, as you 
+ * could just instantiate the parent class with "groovy" as the first argument to the
+ * constructor, but this wrapper is very convenient for Spring-based configurations and 
+ * Property file configurations, etc. 
+ * @note Unlike the Jexl and JRuby wrappers, we don't need to register the engine with BSF.
  */
-public class JexlBSFExpressionInterpreter extends BSFExpressionInterpreterAdapter {
+public class GroovyBSFExpressionInterpreter extends BSFExpressionInterpreterAdapter {
 
-	static {
-		JexlBSFEngine.registerWithBSF();
+	public GroovyBSFExpressionInterpreter() throws BSFException {
+		super("groovy");
 	}
 	
-	public JexlBSFExpressionInterpreter() throws BSFException {
-		super("jexl");
-	}
-	
-	public JexlBSFExpressionInterpreter(
+	public GroovyBSFExpressionInterpreter(
 			boolean treatEmptyTestExpressionAsValid) throws BSFException {
-		super("jexl", treatEmptyTestExpressionAsValid);
+		super("groovy", treatEmptyTestExpressionAsValid);
 	}
 	
-	public JexlBSFExpressionInterpreter(
+	public GroovyBSFExpressionInterpreter(
 			boolean treatEmptyTestExpressionAsValid, 
 			Map<String, String> optionalKeywordSubstitutions) throws BSFException {
-		super("jexl", treatEmptyTestExpressionAsValid, optionalKeywordSubstitutions);
+		super("groovy", treatEmptyTestExpressionAsValid, optionalKeywordSubstitutions);
 	}
 	
 }

@@ -150,38 +150,50 @@ public class TypeInvarTest extends TestCase {
 		}
 	}
 	
-	public void testDefined() {
-		TypeInvarWithDefinedExpr t = null;
+	public void testInvarWithDefinedNullExprAndFlag1() {
 		try {
-			t = new TypeInvarWithDefinedExpr(null, 1);
+			new TypeInvarWithDefinedExpr(null, 1);
 			fail();
 		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 		}
+	}
+	
+	public void testInvarWithDefinedNonemptyExprAndFlag0() {
 		try {
-			t = new TypeInvarWithDefinedExpr("foo", 0);
+			new TypeInvarWithDefinedExpr("foo", 0);
 			fail();
 		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 		}
+	}
+	
+	public void testInvarWithDefinedNullExprAndFlag0() {
 		try {
-			t = new TypeInvarWithDefinedExpr(null, 0);
+			new TypeInvarWithDefinedExpr(null, 0);
 			fail();
 		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 		}
-		t = new TypeInvarWithDefinedExpr("foo", 1);
+	}
+	
+	public void testSetICallWithInvarWithDefinedNonemptyExprAndFlag1() {
 		try {
+			TypeInvarWithDefinedExpr t = new TypeInvarWithDefinedExpr("foo", 1);
 			t.setI(0);
 			fail();
 		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 		}
+	}
+	
+	public void testSetNameCallWithInvarWithDefinedNonemptyExprAndFlag1() {
 		try {
+			TypeInvarWithDefinedExpr t = new TypeInvarWithDefinedExpr("foo", 1);
 			t.setName(null);
 			fail();
 		} catch (TestSpecificationError tse) {

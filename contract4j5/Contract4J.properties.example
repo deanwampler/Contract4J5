@@ -16,6 +16,10 @@
 # then read the specified properties, which are optional.
 #
 # As an alternative, see the related Spring configuration example.
+#
+# Copyright 2006 Dean Wampler. All rights reserved.
+# This is free software. Use at your discretion.
+# http://www.aspectprogramming.com
 
 # Globally enable/disable all tests, or all pre, post, and invariant tests
 org.contract4j5.Contract=true

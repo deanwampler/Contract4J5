@@ -5,3 +5,8 @@
 [Aux classpath entries]
 /home/deanwampler/work/projects/java/contract4j5/trunk/contract4j5/lib/commons-jexl-1.0.jar
 /home/deanwampler/work/projects/java/contract4j5/trunk/contract4j5/lib/commons-logging.jar
+/home/deanwampler/work/projects/java/contract4j5/trunk/contract4j5/lib/antlr-2.7.5.jar
+/home/deanwampler/work/projects/java/contract4j5/trunk/contract4j5/lib/asm-2.2.jar
+/home/deanwampler/work/projects/java/contract4j5/trunk/contract4j5/lib/bsf-2.4.0.jar
+/home/deanwampler/work/projects/java/contract4j5/trunk/contract4j5/lib/groovy-1.0-RC-01.jar
+/home/deanwampler/work/projects/java/contract4j5/trunk/contract4j5/lib/jruby.jar
