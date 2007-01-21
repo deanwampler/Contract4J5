@@ -38,6 +38,7 @@
           <h3>History</h3>
 <table>
 	<tr><th colspan='2' align="left">Contract4J5 (Annotation Form)</th></tr>
+  <tr><td><a href="#v0710">v0.7.1.0</a></td><td>January 21, 2007</td></tr>                                    
 	<tr><td><a href="#v0700">v0.7.0.0</a></td><td>December 31, 2006</td></tr>
 	<tr><td><a href="#v0600">v0.6.0.0</a></td><td>September 21, 2006</td></tr>
 	<tr><td><a href="#v0500">v0.5.0.0</a></td><td>February 7, 2006</td></tr>
@@ -648,10 +649,7 @@ The comments in this class should be self explanatory. More specific details on 
 <pre>
 package org.contract4j5.test;
 
-import org.contract4j5.Contract;
-import org.contract4j5.Invar;
-import org.contract4j5.Post;
-import org.contract4j5.Pre;
+import org.contract4j5.contract.*;
 /**
  * A (contrived) example Java class that demonstrates how 
  * to define DbC tests. The "@Contract" annotation is 
@@ -1086,7 +1084,7 @@ description of the keywords and their proper use.
 	<tr><td><code>$this</code></td><td>The "this" object under test.</td></tr>
 <tr><td><code>$target</code></td><td>A field in an invariant test. There
 	<b>must</b> be a corresponding JavaBeans "getter" method or Jexl won't be able to resolve the field.</td></tr>
-<tr><td><code>$result</code></td><td>The return result of a method; only valid in postconditions.</td></tr>
+<tr><td><code>$return</code></td><td>The return result of a method; only valid in postconditions.</td></tr>
 <tr><td><code>$args[n]</code></td><td>The "nth" argument in a parameter list.</td></tr>
 <tr><td valign="top"><code>$old(..)</code></td><td>The "old" value (before a method is actually executed) of the 
   contents of the expression, which can be one of the following:
@@ -1336,14 +1334,15 @@ Here are some API examples. Note that the internal restructuring done in the
 v0.6.0 release changed the wiring API significantly compared to previous 
 releases. 
 <pre>
-  import org.contract4j5.aspects.Contract4J5;
+  import org.contract4j5.controller.Contract4J;
   ...
-  Contract4J5.getInstance().setEnabled(Contract4J5.TestType.Pre,   true);
-  Contract4J5.getInstance().setEnabled(Contract4J5.TestType.Post,  true);
-  Contract4J5.getInstance().setEnabled(Contract4J5.TestType.Invar, true);
+  Contract4J.getInstance().setEnabled(Contract4J.TestType.Pre,   true);
+  Contract4J.getInstance().setEnabled(Contract4J.TestType.Post,  true);
+  Contract4J.getInstance().setEnabled(Contract4J.TestType.Invar, true);
 </pre>
 <p>
-This example turns on all three test types. Note that in v0.5 and earlier releases, the <code>getInstance()</code> call would not have been used. The
+This example turns on all three test types. Note that in v0.5 and earlier releases,
+the <code>getInstance()</code> call would not have been used. The
 <code>Contract5J</code> object was an aspect and it is now a class with a singleton instance.</p>
 <p>
 <b>NOTE:</b> To completely disable contract checking, build the application 
@@ -1381,11 +1380,11 @@ The Groovy wrapper of the BSF adapter.</td></tr>
 The Jexl wrapper of the BSF adapter.</td></tr>
  <tr><td><code>org.contract4j5.interpreter.bsf.jruby.JRubyBSFExpressionInterpreter:</code><br/>
 The JRuby wrapper of the BSF adapter.</td></tr>
-  <tr><td><code>org.contract4j5.util.reporter.Reporter:</code><br/>
+  <tr><td><code>org.contract4j5.reporter.Reporter:</code><br/>
   The "reporter" interface that is a thin veneer for a logging abstraction.</td></tr>
-  <tr><td><code>org.contract4j5.util.reporter.Severity:</code><br/>
+  <tr><td><code>org.contract4j5.reporter.Severity:</code><br/>
     Defines logging levels of severity, like INFO, WARN, ERROR, etc.</td></tr>
-  <tr><td><code>org.contract4j5.util.reporter.WriterReporter:</code><br/>
+  <tr><td><code>org.contract4j5.reporter.WriterReporter:</code><br/>
     "Logs" to stdout and stderr by default, but also supports file output. 
     It would be very easy to implement a "log4j reporter", for example.</td></tr>
 </table>
@@ -1455,6 +1454,17 @@ Here is a list of other possible enhancements.
 
 <a name="notes"></a>
 <h3>Notes for Each Release</h3>
+
+<a name="v0710"></a>
+<h4>v0.7.1 January 21, 2007</h4>
+<h5>Minor Documentation Bug Fixes</h5>
+
+<p>Fixed examples that had obsolete package and class references. Added more details
+	about how to use load-time weaving (LTW).
+	<br />
+	Thanks to Chuck H. for valuable feedback.
+</p>
+
 <a name="v0700"></a>
 <h4>v0.7.0 December 31, 2006</h4>
 <h5>Support for Groovy, JRuby, and Other Refinements</h5>
@@ -1476,7 +1486,7 @@ in test expressions:
 
 <p>
 All scripting engine calls now go through the Jakarta
-<a href=""http://jakarta.apache.org/bsf/">Bean Scripting Framework</a> (BSF)
+<a href="http://jakarta.apache.org/bsf/">Bean Scripting Framework</a> (BSF)
 to make it easier to plug and play almost any scripting engine.
 These changes introduce the following new library dependencies:
 </p>
