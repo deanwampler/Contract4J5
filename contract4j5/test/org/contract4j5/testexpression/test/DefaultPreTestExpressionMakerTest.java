@@ -34,7 +34,7 @@ public class DefaultPreTestExpressionMakerTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		maker = new DefaultPreTestExpressionMaker();
-		context = new TestContextImpl();
+		context = TestContextImpl.EmptyTestContext;
 		Instance[] args = new Instance[] {
 				new Instance ("arg0", String.class,  new String("arg0")), 
 				new Instance ("one",  Integer.class, new Integer(1)), 

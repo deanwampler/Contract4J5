@@ -32,9 +32,11 @@ import org.contract4j5.interpreter.ExpressionInterpreterHelper;
 import org.contract4j5.interpreter.TestResult;
 
 /**
- * Wrapper around the Jexl interpreter.
+ * Wrapper around the Jexl interpreter. You might consider using the BSF wrapper.
+ * However, I have discovered that BSF adds <em>significant</em> overhead, perhaps
+ * increasing the time for script evaluation by a factor of 3 or so! Too bad, 
+ * since it makes supporting new interpreters easy.
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
- * @deprecated
  */
 public class JexlExpressionInterpreter extends ExpressionInterpreterHelper {
 

@@ -79,7 +79,7 @@ public aspect InvariantMethodConditions extends AbstractConditions {
 		SourceLocation loc    = thisJoinPointStaticPart.getSourceLocation(); 
 		Instance   instance   = new Instance (clazz.getName(), clazz, obj);
 		TestContext context   = 
-			new TestContextImpl (methodName, instance, null, args, null, null,
+			new TestContextImpl (methodName, methodName, instance, null, args, null, null,
 				loc.getFileName(), loc.getLine());
 		TestResult result  = 
 			getParentTestExpressionFinder().findParentMethodTestExpressionIfEmpty(

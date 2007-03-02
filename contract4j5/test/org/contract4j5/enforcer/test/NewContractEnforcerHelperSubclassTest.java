@@ -64,7 +64,7 @@ public class NewContractEnforcerHelperSubclassTest extends TestCase {
 
 	public void testSpecialContractEnforcerThrowsCustomizedExceptionOnFailure() {
 		try {
-			contractEnforcer.fail("", "pre", "", new TestContextImpl(), null);
+			contractEnforcer.fail("", "pre", "", TestContextImpl.EmptyTestContext, null);
 			fail();
 		} catch (SpecialContractEnforcer.MyError me) {
 		}

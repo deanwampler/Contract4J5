@@ -73,7 +73,6 @@ public class BSFExpressionInterpreterAdapter extends
 	protected Object doDetermineOldValue(String exprStr, TestContext context) {
 		try {
 			return evaluateScript(exprStr, context);
-//			return bsfEngine.eval("determine old value", 0, 0, exprStr);
 		} catch (BSFException e) {
 			throw new TestSpecificationError("BSF Engine failed to evaluate the expression \""+exprStr+"\".", e);
 		}

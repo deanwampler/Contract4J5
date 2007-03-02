@@ -136,7 +136,7 @@ public aspect InvariantFieldCtorConditions {
 				ListElem elem = entry.getValue();
 				SourceLocation loc = thisJoinPointStaticPart.getSourceLocation(); 
 				TestContext context =
-					new TestContextImpl (entry.getKey(), instance, elem.field, null, null, null,
+					new TestContextImpl (entry.getKey(), entry.getKey(), instance, elem.field, null, null, null,
 							loc.getFileName(), loc.getLine());
 				String testExpr = InvariantFieldCtorConditions.aspectOf().getDefaultFieldInvarTestExpressionMaker()
 					.makeDefaultTestExpressionIfEmpty(elem.invar.value(), context);

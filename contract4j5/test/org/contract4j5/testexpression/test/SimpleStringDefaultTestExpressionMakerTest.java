@@ -44,7 +44,7 @@ public class SimpleStringDefaultTestExpressionMakerTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		maker = new SimpleStringDefaultTestExpressionMaker("default");
-		context = new TestContextImpl();
+		context = TestContextImpl.EmptyTestContext;
 	}
 
 	/*

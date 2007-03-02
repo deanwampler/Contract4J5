@@ -38,6 +38,7 @@ import org.contract4j5.interpreter.TestResult;
  * annotations are different; since they will be inherited, the subclass can 
  * optionally add the annotation, which is useful for consistency and 
  * explicit documentation purposes.
+ * TODO remove the "context" stuff, which is not used.
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 public interface ParentTestExpressionFinder {

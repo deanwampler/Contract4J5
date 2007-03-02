@@ -22,6 +22,7 @@ package org.contract4j5.interpreter;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -175,7 +176,11 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 			return makeValidateTestExpressionReturn (warnStr, errStr);
 		} 
 		testExpression = testExpression.trim();
-		
+		// Cache the test expressions with their contexts, so we only validate
+		// an expression once.
+		TestResult cachedResult = getTestCacheEntry(testExpression, context);
+		if (cachedResult != null)
+			return cachedResult;
 		if (testExpression.contains("$this")) {
 			Instance i = context.getInstance();
 			if (i == null) {
@@ -258,9 +263,85 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 		if (badDollarKeyWords.length() > 0) {
 			warnStr += InvalidTestExpression.MISSING_DOLLAR_SIGN_IN_KEYWORD.toString()+badDollarKeyWords+". ";			
 		}
-		return makeValidateTestExpressionReturn (warnStr, errStr);
+		TestResult testResult = makeValidateTestExpressionReturn (warnStr, errStr);
+		putTestCacheEntry(testExpression, context, testResult);
+		return testResult;
 	}
 	
+	// For purposes of validation, we only need to save the test expression,
+	// file name, and line number. They form a sufficiently unique combination
+	// and take up less space than saving the full context.
+	private static class TestCacheEntry {
+		public String testExpression;
+		public String fileName;
+		public int    lineNumber;
+		
+		public TestCacheEntry(String testExpression, TestContext context) {
+			this.testExpression = testExpression;
+			this.fileName = context.getFileName();
+			this.lineNumber = context.getLineNumber();
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result
+					+ ((fileName == null) ? 0 : fileName.hashCode());
+			result = prime * result + lineNumber;
+			result = prime
+					* result
+					+ ((testExpression == null) ? 0 : testExpression.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			final TestCacheEntry other = (TestCacheEntry) obj;
+			if (fileName == null) {
+				if (other.fileName != null)
+					return false;
+			} else if (!fileName.equals(other.fileName))
+				return false;
+			if (lineNumber != other.lineNumber)
+				return false;
+			if (testExpression == null) {
+				if (other.testExpression != null)
+					return false;
+			} else if (!testExpression.equals(other.testExpression))
+				return false;
+			return true;
+		}
+
+	}
+	
+	private TestResult getTestCacheEntry(String testExpression, TestContext context) {
+		TestResult result = getTestCache().get(new TestCacheEntry(testExpression, context));
+//		System.err.println("getting test cache entry: result = "+result);
+		return result;
+	}
+
+	private void putTestCacheEntry(String testExpression, TestContext context, TestResult testResult) {
+//		System.err.println("putting test cache entry:");
+		getTestCache().put(new TestCacheEntry(testExpression, context), testResult);
+	}
+
+	private HashMap<TestCacheEntry, TestResult> testCache;
+
+	private Map<TestCacheEntry, TestResult> getTestCache() {
+		// Keep it from growing too big, with an arbitrary cutoff.
+		// Better would be an LRU cache.
+		if (testCache == null || testCache.size() > 10000)  
+			testCache = new HashMap<TestCacheEntry, TestResult>();
+		return testCache;
+	}
+
 	private TestResult makeValidateTestExpressionReturn (String warnStr, String errStr) {
 		boolean pass = (errStr.length() == 0) ? true : false;
 		StringBuffer sb = new StringBuffer(256);

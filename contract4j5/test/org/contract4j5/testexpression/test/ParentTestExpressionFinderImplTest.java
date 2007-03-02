@@ -55,7 +55,7 @@ public class ParentTestExpressionFinderImplTest extends TestCase {
 		base     = new OverriddenContractBase("f1", "f2", "f3");
 		derived  = new OverriddenContractDerived("f1", "f2", "f3");
 		object   = new Instance("derived", OverriddenContractDerived.class, derived);
-		context  = new TestContextImpl("", object, null, new Instance[0], null);
+		context  = new TestContextImpl("", "", object, null, new Instance[0], null, "", 0);
 	}
 
 	/*
@@ -73,7 +73,7 @@ public class ParentTestExpressionFinderImplTest extends TestCase {
 		Method method = OverriddenContractDerived.class.getDeclaredMethod("setField3", (Class[]) argTypes);
 		Pre pre = method.getAnnotation(Pre.class);
 		assertNotNull (pre);
-		context = new TestContextImpl("setField3", object, null, args, null);
+		context = new TestContextImpl("setField3", "", object, null, args, null, "", 0);
 		// If "object" points to "derived", it will find derived's own test expression.
 		// Also test whitespace suppression
 		TestResult expected = new TestResult(true, "$args[0] != null && $args[0].length() >= 1");
@@ -94,7 +94,7 @@ public class ParentTestExpressionFinderImplTest extends TestCase {
 		Post post = method.getAnnotation(Post.class);
 		assertNotNull (post);
 		Instance result = new Instance("", String.class, new String("f3"));
-		context = new TestContextImpl("getField3", object, null, args, result);
+		context = new TestContextImpl("getField3", "", object, null, args, result, "", 0);
 		// Will find "derived's" test first:
 		TestResult expected = new TestResult(true, "$this.field.equals(\"foo\")");
 		assertEquals (expected, finder.findParentMethodTestExpressionIfEmpty("", post, method, context));
@@ -111,7 +111,7 @@ public class ParentTestExpressionFinderImplTest extends TestCase {
 		Method method = OverriddenContractDerived.class.getDeclaredMethod("doNothing", new Class[0]);
 		Invar  invar  = method.getAnnotation(Invar.class);
 		assertNotNull (invar);
-		context = new TestContextImpl("doNothing", object, null, new Instance[0], null);
+		context = new TestContextImpl("doNothing", "", object, null, new Instance[0], null, "", 0);
 		TestResult expected = new TestResult(true, "$this.invarFlagMethod == 0");
 		assertEquals (expected, finder.findParentMethodTestExpressionIfEmpty("", invar, method, context));
 	}
@@ -125,7 +125,7 @@ public class ParentTestExpressionFinderImplTest extends TestCase {
 			}; 
 		Constructor<?> constructor = OverriddenContractDerived.class.getConstructor((Class[]) argTypes);
 		assertNotNull(constructor.getAnnotation(Pre.class));
-		context = new TestContextImpl("OverriddenContractDerived", object, null, args, null);
+		context = new TestContextImpl("OverriddenContractDerived", "", object, null, args, null, "", 0);
 		// Will find the derived test first (since it isn't empty)
 		// We also test the whitespace suppression while we're at it.
 		TestResult expected = new TestResult(true, "$args[0] != null");
@@ -147,7 +147,7 @@ public class ParentTestExpressionFinderImplTest extends TestCase {
 			}; 
 		Constructor<?> constructor = OverriddenContractDerived.class.getConstructor((Class[]) argTypes);
 		assertNotNull (constructor.getAnnotation(Post.class));
-		context = new TestContextImpl("OverriddenContractDerived", object, null, args, null);
+		context = new TestContextImpl("OverriddenContractDerived", "", object, null, args, null, "", 0);
 		// Will find the derived test first (since it isn't empty)
 		// We also test the whitespace suppression while we're at it.
 		TestResult expected = new TestResult(true, "$this.postFlag > 1");
@@ -169,7 +169,7 @@ public class ParentTestExpressionFinderImplTest extends TestCase {
 			}; 
 		Constructor<?> constructor = OverriddenContractDerived.class.getConstructor((Class[]) argTypes);
 		assertNotNull (constructor.getAnnotation(Invar.class));
-		context = new TestContextImpl("OverriddenContractDerived", object, new Instance(), args, new Instance());
+		context = new TestContextImpl("OverriddenContractDerived", "", object, new Instance(), args, new Instance(), "", 0);
 		TestResult expected = new TestResult(true, "$this.invarFlagCtor == 0");
 		assertEquals (expected, finder.findParentConstructorTestExpressionIfEmpty("", constructor.getAnnotation(Invar.class), constructor, context));
 	}

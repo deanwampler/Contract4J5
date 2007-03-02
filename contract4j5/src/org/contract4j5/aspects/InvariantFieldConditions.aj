@@ -81,11 +81,10 @@ public aspect InvariantFieldConditions extends AbstractConditions {
 
 	void around (Invar invar, Object obj, Object arg) : invarSetField (invar, obj, arg) {
 		// Set up the context so we can retrieve any "old" values, before proceeding.
-		TestContext context = new TestContextImpl();
-		String testExpr = 
-			doBeforeTest (context, thisJoinPoint, 
+		TestContext context = doBeforeTest (thisJoinPoint, 
 					obj, arg, "Invar", invar.value(), invar.message(),
 					getDefaultFieldInvarTestExpressionMaker());
+		String testExpr = getDefaultFieldInvarTestExpressionMaker().makeDefaultTestExpressionIfEmpty(context.getTestExpression(), context);
 		context.setOldValuesMap (determineOldValues (testExpr, context));
 		proceed (invar, obj, arg);
 		getContractEnforcer().invokeTest(testExpr, "Invar", invar.message(), context);
@@ -100,11 +99,10 @@ public aspect InvariantFieldConditions extends AbstractConditions {
 	 * for this field, at least.
 	 */
 	Object around (Invar invar, Object obj) : invarGetField (invar, obj) {
-		TestContext context = new TestContextImpl();
-		String testExpr = 
-			doBeforeTest (context, thisJoinPoint, 
+		TestContext context = doBeforeTest (thisJoinPoint, 
 					obj, null, "Invar", invar.value(), invar.message(),
 					getDefaultFieldInvarTestExpressionMaker());
+		String testExpr = getDefaultFieldInvarTestExpressionMaker().makeDefaultTestExpressionIfEmpty(context.getTestExpression(), context);
 		context.setOldValuesMap (determineOldValues (testExpr, context));
 		Object fieldValue2 = proceed (invar, obj);
 		// Actually use the "new" value of the field for the test.
@@ -114,8 +112,7 @@ public aspect InvariantFieldConditions extends AbstractConditions {
 		return fieldValue2;
 	}
 
-	protected String doBeforeTest (
-			TestContext context,
+	protected TestContext doBeforeTest (
 			JoinPoint   thisJoinPoint, 
 			Object      obj,
 			Object      fieldValue,
@@ -131,17 +128,12 @@ public aspect InvariantFieldConditions extends AbstractConditions {
 		// Get the "old" value of the field. We need it now, even though we
 		// don't test with it, so that the default test expression can be
 		// constructed properly.
-		Field  field         = ((FieldSignature) sig).getField();
-		Class  fieldClass    = field.getType();
-		Instance i           = new Instance(clazz.getName(), clazz, obj);
-		Instance f           = new Instance(fieldName, fieldClass, fieldValue);
-		context.setItemName(fieldName);
-		context.setInstance(i);
-		context.setField(f);
-		context.setLineNumber(loc.getLine());
-		context.setFileName(loc.getFileName());
-		String testExpr = 
-			getDefaultFieldInvarTestExpressionMaker().makeDefaultTestExpressionIfEmpty(annoTestExpr, context);
-		return testExpr;
+		Field  field        = ((FieldSignature) sig).getField();
+		Class  fieldClass   = field.getType();
+		Instance instance   = new Instance(clazz.getName(), clazz, obj);
+		Instance fieldInstance = new Instance(fieldName, fieldClass, fieldValue);
+		TestContext context = new TestContextImpl(annoTestExpr, fieldName,
+				instance, fieldInstance, null, null, loc.getFileName(), loc.getLine());
+		return context;
 	}
 }

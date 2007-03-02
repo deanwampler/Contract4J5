@@ -34,7 +34,7 @@ public class DefaultFieldInvarTestExpressionMakerTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		maker = new DefaultFieldInvarTestExpressionMaker();
-		context = new TestContextImpl();
+		context = TestContextImpl.EmptyTestContext;
 	}
 
 	/*

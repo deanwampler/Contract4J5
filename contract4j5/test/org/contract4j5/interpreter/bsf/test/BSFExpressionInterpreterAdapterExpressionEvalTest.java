@@ -101,7 +101,7 @@ public class BSFExpressionInterpreterAdapterExpressionEvalTest extends TestCase 
 		Instance    objecti = new Instance ("foo", Foo.class, object);
 		Instance    targeti = new Instance ("target", String.class, target); 
 		TestContext context = 
-			new TestContextImpl(name, objecti, targeti, args, result, oldMap);
+			new TestContextImpl(name, name, objecti, targeti, args, result, oldMap, "", 0);
 		TestResult testResult = interpreter.expandKeywords (testExpression, context);
 		String actual = testResult.getMessage();
 		// Unfortunately, we don't really know which "c4jExprVar?" will be returned, because
@@ -342,7 +342,7 @@ public class BSFExpressionInterpreterAdapterExpressionEvalTest extends TestCase 
 			Instance object, Instance target, Instance[] args, Instance result) {
 		String expectedErrMsg = msgs[expectedErrMsgIndex]; 
 		String expectedErrMsgRE = "^.*" + expectedErrMsg + ".*$";
-		TestContext context = new TestContextImpl(itemName, object, target, args, result);
+		TestContext context = new TestContextImpl(itemName, itemName, object, target, args, result, "", 0);
 		TestResult testResult = interpreter.validateTestExpression(testExpression, context); 
 		String msg = "Test expression: \""+testExpression+"\", result = \""+testResult.toString()+"\", expected to contain = \""+expectedErrMsg+"\".";
 		switch (whenFails[expectedErrMsgIndex]) {
@@ -491,7 +491,7 @@ public class BSFExpressionInterpreterAdapterExpressionEvalTest extends TestCase 
 	}
 
 	private void doTest2 (boolean shouldPass, String testExpression, String itemName, Instance object, Instance target, Instance[] args, Instance result) {
-		TestContext context = new TestContextImpl(itemName, object, target, args, result);
+		TestContext context = new TestContextImpl(itemName, itemName, object, target, args, result, "", 0);
 		Map<String, Object> oldMap = interpreter.determineOldValues(testExpression, context);
 		context.setOldValuesMap(oldMap);
 		TestResult testResult = interpreter.invokeTest (testExpression, context);
@@ -551,7 +551,7 @@ public class BSFExpressionInterpreterAdapterExpressionEvalTest extends TestCase 
 		Instance result = new Instance ("", String.class, new String("result"));
 		Instance[] args = makeTestArgs(); 
 		TestContext context = 
-			new TestContextImpl("itemName", object, target, args, result);
+			new TestContextImpl("itemName", "", object, target, args, result, "", 0);
 		String expr = "$this $old($this) $target $old($target) $return, $args[0], $args[1]";
 		Map<String, Object> map = interpreter.determineOldValues(expr, context);
 		assertEquals  (2, map.size());
@@ -703,7 +703,7 @@ public class BSFExpressionInterpreterAdapterExpressionEvalTest extends TestCase 
 	private TestContextImpl makeTestContextForCaptureOldValueTest() {
 		Instance foo1 = new Instance ("foo1", Foo.class, new Foo());
 		Instance foo2 = new Instance ("foo2", Foo.class, new Foo("v21", "v22", 2));
-		return new TestContextImpl("number", foo1, foo2, null, null);
+		return new TestContextImpl("number", "", foo1, foo2, null, null, "", 0);
 	}
 
 }

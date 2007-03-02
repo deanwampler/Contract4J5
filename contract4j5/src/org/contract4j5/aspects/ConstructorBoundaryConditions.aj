@@ -130,7 +130,7 @@ public aspect ConstructorBoundaryConditions extends AbstractConditions {
 		SourceLocation loc    = thisJoinPoint.getSourceLocation(); 
 		Instance    instance  = new Instance (clazz.getName(), clazz, obj);
 		TestContext context   = 
-			new TestContextImpl (clazz.getName(), instance, null, args, null, null, 
+			new TestContextImpl (clazz.getName(), clazz.getSimpleName(), instance, null, args, null, null, 
 					loc.getFileName(), loc.getLine());
 		TestResult  result    = 
 			getParentTestExpressionFinder().findParentConstructorTestExpressionIfEmpty(

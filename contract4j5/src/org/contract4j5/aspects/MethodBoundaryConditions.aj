@@ -116,25 +116,21 @@ public aspect MethodBoundaryConditions extends AbstractConditions {
 	 * Before advice for methods, including methods returning void.
 	 */
 	before (Pre pre, ContractMarker obj) : preMethod (pre, obj) {
-		TestContext context = new TestContextImpl();
-		String testExpr = 
-			doBeforeTest (context, thisJoinPoint, obj, pre, "Pre", pre.value(), pre.message(),
+		TestContext context = doBeforeTest (thisJoinPoint, obj, pre, "Pre", pre.value(), pre.message(),
 				getDefaultPreTestExpressionMaker());
-		getContractEnforcer().invokeTest (testExpr, "Pre", pre.message(), context);
+		getContractEnforcer().invokeTest (context.getTestExpression(), "Pre", pre.message(), context);
 	}
 
 	/**
 	 * After advice for methods, excluding methods returning void.
 	 */
 	Object around (Post post, ContractMarker obj) : postMethod (post, obj) {
-		TestContext context = new TestContextImpl();
-		String testExpr = 
-			doBeforeTest (context, thisJoinPoint, obj, post, "Post", post.value(), post.message(),
+		TestContext context = doBeforeTest (thisJoinPoint, obj, post, "Post", post.value(), post.message(),
 				getDefaultPostTestExpressionMaker());
-		context.setOldValuesMap (determineOldValues (testExpr, context));
+		context.setOldValuesMap (determineOldValues (context.getTestExpression(), context));
 		Object result = proceed (post, obj);
 		context.getMethodResult().setValue(result);
-		getContractEnforcer().invokeTest (testExpr, "Post", post.message(), context);
+		getContractEnforcer().invokeTest (context.getTestExpression(), "Post", post.message(), context);
 		return result;
 	}
 
@@ -142,23 +138,19 @@ public aspect MethodBoundaryConditions extends AbstractConditions {
 	 * After advice for methods returning void.
 	 */
 	void around (Post post, ContractMarker obj) : postVoidMethod (post, obj) {
-		TestContext context = new TestContextImpl();
-		String testExpr = 
-			doBeforeTest (context, thisJoinPoint, obj, post, "Post", post.value(), post.message(),
+		TestContext context = doBeforeTest (thisJoinPoint, obj, post, "Post", post.value(), post.message(),
 				getDefaultPostReturningVoidTestExpressionMaker());
-		context.setOldValuesMap (determineOldValues (testExpr, context));
+		context.setOldValuesMap (determineOldValues (context.getTestExpression(), context));
 		proceed (post, obj);
-		getContractEnforcer().invokeTest (testExpr, "Post", post.message(), context);
+		getContractEnforcer().invokeTest (context.getTestExpression(), "Post", post.message(), context);
 	}
 	
 	/**
 	 * Need to pass both the annotation and the fields extracted from our contract annotations, because
 	 * Java won't let us have our annotations implement an interface with these fields, nor any common
 	 * interface, so we have to pass everything in.
-	 * @return the test expression
 	 */
-	protected String doBeforeTest (
-			TestContext context,
+	protected TestContext doBeforeTest (
 			JoinPoint   thisJoinPoint, 
 			Object      obj,
 			Annotation  anno,
@@ -179,21 +171,18 @@ public aspect MethodBoundaryConditions extends AbstractConditions {
 		// The returned value is set in the advice for post tests for 
 		// functions not returning void.
 		Instance    returnz    = new Instance ("", ms.getReturnType(), null);
-		context.setItemName(methodName);
-		context.setInstance(instance);
-		context.setMethodResult(returnz);
-		context.setLineNumber(loc.getLine());
-		context.setFileName(loc.getFileName());
-		context.setMethodArgs(args);
 		TestResult result = 
 			getParentTestExpressionFinder().findParentMethodTestExpressionIfEmpty(
-				annoTestExpr, anno, ms.getMethod(), context);
+				annoTestExpr, anno, ms.getMethod(), null);
+		TestContext context    = new TestContextImpl(annoTestExpr, methodName,
+				instance, null, args, returnz, loc.getFileName(), loc.getLine());
 		if (result.isPassed() == false) {
 			getContractEnforcer().fail(annoTestExpr, testTypeName, result.getMessage(),  
 					context, new TestSpecificationError());
 		}
 		String testExpr = result.getMessage(); 
 		testExpr = maker.makeDefaultTestExpressionIfEmpty(testExpr, context);
-		return testExpr;
+		context.setTestExpression(testExpr);
+		return context;
 	}
 }

@@ -34,7 +34,7 @@ public class DefaultPostTestExpressionMakerTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		maker = new DefaultPostTestExpressionMaker();
-		context = new TestContextImpl();
+		context = TestContextImpl.EmptyTestContext;
 	}
 
 	/*

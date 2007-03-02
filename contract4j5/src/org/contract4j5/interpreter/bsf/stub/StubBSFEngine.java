@@ -17,8 +17,9 @@
  *
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
-package org.contract4j5.interpreter.bsf.jexl;
+package org.contract4j5.interpreter.bsf.stub;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.bsf.BSFException;
@@ -27,31 +28,26 @@ import org.apache.commons.jexl.ExpressionFactory;
 import org.apache.commons.jexl.JexlContext;
 import org.apache.commons.jexl.JexlHelper;
 import org.contract4j5.interpreter.bsf.BSFEngineAdapter;
+import org.contract4j5.interpreter.bsf.jexl.JexlBSFEngine;
 
-public class JexlBSFEngine extends BSFEngineAdapter {
+public abstract class StubBSFEngine extends BSFEngineAdapter {
 
 	public static void registerWithBSF() {
 		BSFManager.registerScriptingEngine(
-				"jexl", 
+				"stub", 
 				JexlBSFEngine.class.getName(),
-				new String[] { "jexl", "jl" }
+				new String[] { "stub" }
 			);
 	}
-	
-	private JexlContext jexlContext = null;
 
+	private Map<String, Object> stubMap = new HashMap<String, Object>();
+	
 	protected Map<String, Object> getVariableMap() {
-		if (jexlContext == null)
-			jexlContext = JexlHelper.createContext();
-		return (Map<String, Object>) jexlContext.getVars();
+		return stubMap;
 	}
 
 	public Object eval(String source, int lineNo, int columnNo, Object script)
 			throws BSFException {
-	   try {
-		   return ExpressionFactory.createExpression ((String) script).evaluate(jexlContext);
-	   } catch (Exception e) {
-		   throw new BSFException(-1, e.toString(), e);
-	   }
+		return script;
 	}
 }

@@ -31,6 +31,12 @@ import org.contract4j5.instance.Instance;
  */
 public interface TestContext {
 	/**
+	 * @return the raw test expression (i.e., before processing it).
+	 */
+	String getTestExpression();
+	void   setTestExpression(String testExpression);
+	
+	/**
 	 * @return the name of the item being tested, the class, method, or field.
 	 */
 	String getItemName();

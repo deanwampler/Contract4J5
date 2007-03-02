@@ -29,6 +29,14 @@ import org.contract4j5.instance.Instance;
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 public class TestContextImpl implements TestContext {
+	private String testExpression = null;
+	public String getTestExpression() {
+		return testExpression;
+	}
+	public void setTestExpression(String testExpression) {
+		this.testExpression = testExpression;
+	}
+
 	private String itemName = null;
 	public  String getItemName() {
 		return this.itemName;
@@ -93,42 +101,28 @@ public class TestContextImpl implements TestContext {
 		this.lineNumber = lineNumber;
 	}
 	
-	public TestContextImpl() {}
-	
 	public TestContextImpl(
+			String     testExpression,
 			String     itemName,
 			Instance   instance, 
 			Instance   field, 
 			Instance[] methodArgs, 
-			Instance   methodResult) {
+			Instance   methodResult,
+			String     fileName,
+			int        lineNumber) {
+		setTestExpression(testExpression);
 		setItemName(itemName);
 		setInstance(instance);
 		setField(field);
 		setMethodArgs(methodArgs);
 		setMethodResult(methodResult);
 		setOldValuesMap(new HashMap<String, Object>());
-		setFileName("");
-		setLineNumber(0);
+		setFileName(fileName);
+		setLineNumber(lineNumber);
 	}
 	
 	public TestContextImpl(
-			String     itemName,
-			Instance   instance, 
-			Instance   field, 
-			Instance[] methodArgs, 
-			Instance   methodResult,
-			Map<String, Object> oldValuesMap) {
-		setItemName(itemName);
-		setInstance(instance);
-		setField(field);
-		setMethodArgs(methodArgs);
-		setMethodResult(methodResult);
-		setOldValuesMap(oldValuesMap);
-		setFileName("");
-		setLineNumber(0);
-	}
-	
-	public TestContextImpl(
+			String     testExpression,
 			String     itemName,
 			Instance   instance, 
 			Instance   field, 
@@ -137,6 +131,7 @@ public class TestContextImpl implements TestContext {
 			Map<String, Object> oldValuesMap,
 			String     fileName,
 			int        lineNumber) {
+		setTestExpression(testExpression);
 		setItemName(itemName);
 		setInstance(instance);
 		setField(field);
@@ -167,4 +162,8 @@ public class TestContextImpl implements TestContext {
 		sb.append(getMethodResult());
 		return sb.toString();
 	}
+
+	public static TestContextImpl EmptyTestContext = 
+			new TestContextImpl("", "", null, null, new Instance[0], null, "", 0);
+
 }

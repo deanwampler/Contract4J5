@@ -88,7 +88,8 @@ public class ExpressionInterpreterHelperTest extends TestCase {
 		doTestValidateTestExpression (true,  " old ",    ExpressionInterpreter.InvalidTestExpression.MISSING_DOLLAR_SIGN_IN_KEYWORD);
 	}
 	private void doTestValidateTestExpression (boolean shouldPass, String expr, ExpressionInterpreter.InvalidTestExpression expected) {
-		TestResult result = interpreter.validateTestExpression(expr, new TestContextImpl());
+		TestResult result = interpreter.validateTestExpression(expr, 
+				new TestContextImpl("", "", null, null, new Instance[0], null, "", 0));
 		String msg = result.getMessage();
 		assertEquals (shouldPass, result.isPassed());
 		assertTrue   (msg, msg.contains(expected.toString()));
@@ -190,7 +191,7 @@ public class ExpressionInterpreterHelperTest extends TestCase {
 		oldValuesMap.put ("$this",   oldInstance);
 		oldValuesMap.put ("$target", oldTarget);
 		TestContext context = 
-			new TestContextImpl("itemName", thiz, target, args, returnz, oldValuesMap);
+			new TestContextImpl("itemName", "itemName", thiz, target, args, returnz, oldValuesMap, "", 0);
 		return context;
 	}
 	
@@ -226,11 +227,13 @@ public class ExpressionInterpreterHelperTest extends TestCase {
 	 * Test method for 'org.contract4j5.interpreter.ExpressionInterpreterHelper.invokeTest(String, String, Object, Object[], Object)'
 	 */
 	public void testInvokeTest() {
-		TestResult result = interpreter.invokeTest(null, new TestContextImpl("foo", null, null, null, null, null));
+		TestContext fooContext = new TestContextImpl("foo", "", null, null, new Instance[0], null, "", 0);
+		TestResult result = interpreter.invokeTest(null, fooContext);
 		assertFalse (result.getMessage(), result.isPassed());
-		result = interpreter.invokeTest("foo", new TestContextImpl(null, null, null, null, null, null));
+		TestContext nullContext = new TestContextImpl(null, "", null, null, new Instance[0], null, "", 0);
+		result = interpreter.invokeTest("foo", nullContext);
 		assertFalse (result.getMessage(), result.isPassed());
-		result = interpreter.invokeTest("foo", new TestContextImpl("foo", null, null, null, null, null));
+		result = interpreter.invokeTest("foo", fooContext);
 		assertFalse  (result.getMessage(), result.isPassed());
 	}
 	

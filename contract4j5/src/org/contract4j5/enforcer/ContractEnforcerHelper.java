@@ -191,21 +191,26 @@ public abstract class ContractEnforcerHelper implements ContractEnforcer {
 		if (empty(testPrefix)) {
 			testPrefix = "<unknown test>";
 		}
-		String fn = context.getFileName();
+		String fn = context != null ? context.getFileName() : null;
 		if (empty(fn)) {
 			fn = "<unknown file>";
 		}
 		StringBuffer msg = new StringBuffer(256);
 		msg.append("*** Contract Failure ");
-		msg.append("("+fn+":"+context.getLineNumber()+"): ");				
+		String lineNumber = context != null ? Integer.toString(context.getLineNumber()) : "<unknown>";
+		msg.append("("+fn+":"+lineNumber +"): ");				
 		if (testResult.isFailureCauseATestSpecificationFailure()) {
 			msg.append("Test specification error, ");
 		}
 		msg.append(testPrefix).append(" test \"").append(testExpression);
-		Instance thiz = context.getInstance();
-		String name = thiz != null ? thiz.getItemName() : "<unknown>";
+		Instance thiz = context != null ? context.getInstance() : null;
+		String name = thiz != null ? thiz.getItemName() : "";
 		if (name.length() == 0) {
-			name = context.getField().getItemName();
+			name = "<unknown>";
+			if (context != null) {
+				if (context.getField() != null)
+					name = context.getField().getItemName();
+			}
 		}
 		msg.append("\" for \"").append(name).append("\" failed. ");
 		if (!empty(extraMessage)) {
