@@ -41,7 +41,7 @@ import org.contract4j5.errors.TestSpecificationError;
  * Support is planned....
  */
 public class OverriddenContractTest extends TestCase {
-	protected OverriddenContractBase bases[] = null;
+	protected OverriddenContractBase[] bases = null;
 	
 	protected void setUp() throws Exception {
 		super.setUp();

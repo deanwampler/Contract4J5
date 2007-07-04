@@ -127,6 +127,7 @@ public class BSFExpressionInterpreterAdapter extends
 			break;
 		default:
 			buff.append("Unknown BSFException reason code \""+e.getReason()+"\"");
+			break;
 		}
 		Throwable targetException = e.getTargetException();
 		if (targetException != null) {

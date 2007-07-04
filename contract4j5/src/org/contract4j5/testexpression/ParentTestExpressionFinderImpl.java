@@ -151,7 +151,7 @@ public class ParentTestExpressionFinderImpl implements
 
 
 	/**
-	 * @param clazz of the object currently being examined
+	 * @param classOfThisObject of the object currently being examined
 	 * @param methodName  the method name, when applicable, for which annotations are being searched
 	 * @param methodArgsTypes the arguments to the method
 	 * @param isConstructor true if we are looking for a constructor annotation.
@@ -161,18 +161,20 @@ public class ParentTestExpressionFinderImpl implements
 	 * @return a {@link TestResult} object with the the parent test's expression.
 	 */
 	protected TestResult findParentMethodTestExpressionSupport (
-			Class clazz,
+			Class classOfThisObject,
 			String methodName,
 			Class<?>[] methodArgsTypes,
 			boolean    isConstructor,
 			Annotation whichAnnotationType,
 			NameDeterminator nameDeterminator) {
+		Class clazz = classOfThisObject;
+		String whichMethod = methodName;
 		while (!clazz.equals(Object.class)) {
 			// Somewhat superfluous on the first iteration, because
 			// we already know it has no expression!
 			TestResult result = findParentMethodAnnoTestExpression (
 					clazz,
-					methodName,
+					whichMethod,
 					methodArgsTypes,
 					isConstructor,
 					whichAnnotationType);
@@ -188,7 +190,7 @@ public class ParentTestExpressionFinderImpl implements
 
 				result = findParentMethodAnnoTestExpression (
 					tClass,
-					methodName,
+					whichMethod,
 					methodArgsTypes,
 					isConstructor,
 					whichAnnotationType);
@@ -198,7 +200,7 @@ public class ParentTestExpressionFinderImpl implements
 			}
 			Type parent = clazz.getGenericSuperclass();
 			clazz = (Class) parent;
-			methodName = nameDeterminator.getName(clazz, methodName);
+			whichMethod = nameDeterminator.getName(clazz, whichMethod);
 		}
 		return makeEmptyTestResult();
 	}

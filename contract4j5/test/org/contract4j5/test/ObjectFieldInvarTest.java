@@ -143,7 +143,7 @@ public class ObjectFieldInvarTest extends TestCase {
 		doTestDefaultSet (false, false);
 	}	
 	
-	private static final String names[] = new String[] {
+	private static final String[] names = new String[] {
 		null, "foo", "bad"
 	};
 	

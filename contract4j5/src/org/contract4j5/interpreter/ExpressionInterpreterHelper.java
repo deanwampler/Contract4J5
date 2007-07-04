@@ -175,42 +175,42 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 			}
 			return makeValidateTestExpressionReturn (warnStr, errStr);
 		} 
-		testExpression = testExpression.trim();
+		String expression = testExpression.trim();
 		// Cache the test expressions with their contexts, so we only validate
 		// an expression once.
-		TestResult cachedResult = getTestCacheEntry(testExpression, context);
+		TestResult cachedResult = getTestCacheEntry(expression, context);
 		if (cachedResult != null)
 			return cachedResult;
-		if (testExpression.contains("$this")) {
+		if (expression.contains("$this")) {
 			Instance i = context.getInstance();
 			if (i == null) {
 				errStr += InvalidTestExpression.THIS_KEYWORD_WITH_NO_INSTANCE.toString();
 			}
 		}
-		if (testExpression.contains("$target")) {
+		if (expression.contains("$target")) {
 			Instance i = context.getField();
 			if (i == null) {
 				errStr += InvalidTestExpression.TARGET_KEYWORD_WITH_NO_TARGET.toString();
 			}
 		}
-		if (testExpression.contains("$return") && context.getMethodResult() == null) {
+		if (expression.contains("$return") && context.getMethodResult() == null) {
 			errStr += InvalidTestExpression.RETURN_KEYWORD_WITH_NO_RETURN.toString();
 		}
 		Object[] args = context.getMethodArgs();
-		if (testExpression.contains("$args") && (args == null || args.length == 0)) {
+		if (expression.contains("$args") && (args == null || args.length == 0)) {
 			errStr += InvalidTestExpression.ARGS_KEYWORD_WITH_NO_ARGS.toString();
 		}
-		if (testExpression.contains("$old")) {
-			if (testExpression.matches("\\$old\\s*[^\\(]+")) {  // "$old ..." w/out "(..)"
+		if (expression.contains("$old")) {
+			if (expression.matches("\\$old\\s*[^\\(]+")) {  // "$old ..." w/out "(..)"
 				errStr += InvalidTestExpression.OLD_KEYWORD_NO_ARGS.toString();			
-			} else if (testExpression.matches("\\$old\\s*$")) {  // "$old" w/out "(..)"
+			} else if (expression.matches("\\$old\\s*$")) {  // "$old" w/out "(..)"
 				errStr += InvalidTestExpression.OLD_KEYWORD_NO_ARGS.toString();			
 			} 
-			if (testExpression.matches("\\$old\\s*\\(\\s*\\)")) { // $old() (no arg)
+			if (expression.matches("\\$old\\s*\\(\\s*\\)")) { // $old() (no arg)
 				errStr += InvalidTestExpression.OLD_KEYWORD_INVALID_ARGS.toString();			
 			} else { 
 				Pattern p = Pattern.compile("\\$old\\s*\\(\\s*[^\\(\\)]*(\\([^\\)]*\\))?[^\\(\\)]*\\)"); 
-				Matcher m = p.matcher(testExpression);
+				Matcher m = p.matcher(expression);
 				while (m.find()) {
 					String s1 = m.group();
 					String expr = s1.substring(s1.indexOf('(')+1, s1.length()-1); // grab everything between '(' and ')'
@@ -222,11 +222,11 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 				}
 			}
 		}
-		if (testExpression.matches("\\$\\s+.*")) { // '$' followed by whitespace
+		if (expression.matches("\\$\\s+.*")) { // '$' followed by whitespace
 			errStr += InvalidTestExpression.INVALID_WHITESPACE_IN_KEYWORD.toString();			
 		}
 		Pattern p1 = Pattern.compile ("\\$\\w+");
-		Matcher m1 = p1.matcher (testExpression);
+		Matcher m1 = p1.matcher (expression);
 		boolean firstBad = true;
 		String badKeyWords = "";
 		while (m1.find()) {
@@ -247,7 +247,7 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 			errStr += InvalidTestExpression.UNRECOGNIZED_KEYWORDS.toString()+badKeyWords+". ";			
 		}
 		Pattern p2 = Pattern.compile ("(?:(^|[^\\$]))\\s*(this|target|args|return|old)");
-		Matcher m2 = p2.matcher (testExpression);
+		Matcher m2 = p2.matcher (expression);
 		boolean firstBadDollar = true;
 		String  badDollarKeyWords = "";
 		while (m2.find()) {
@@ -264,7 +264,7 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 			warnStr += InvalidTestExpression.MISSING_DOLLAR_SIGN_IN_KEYWORD.toString()+badDollarKeyWords+". ";			
 		}
 		TestResult testResult = makeValidateTestExpressionReturn (warnStr, errStr);
-		putTestCacheEntry(testExpression, context, testResult);
+		putTestCacheEntry(expression, context, testResult);
 		return testResult;
 	}
 	
@@ -364,7 +364,7 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 	 * Expands all keywords, using the user-supplied optional mappings, if defined, followed
 	 * by the substitution of the "dollar" keywords. Does <em>not</em> expand keywords within
 	 * quoted strings.
-	 * @param testExpression
+	 * @param expression
 	 * @param context
 	 * @return TestResult with {@link TestResult#isPassed()} equals true and the new test 
 	 * expression returned by {@link TestResult#getMessage()} or, if an error occurred, 
@@ -376,15 +376,15 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 	public TestResult expandKeywords (
 			String      testExpression, 
 			TestContext context) {
-		if (testExpression == null || testExpression.length() == 0) {
-			return new TestResult (false, testExpression);
+		if (empty(testExpression)) {
+			return new TestResult (false, "No test expression!");
 		}
-		testExpression = testExpression.trim();
+		String expression = testExpression.trim();
 		Map<String, String> keyWordSubs = getOptionalKeywordSubstitutions();
 		if (keyWordSubs == null || keyWordSubs.size() == 0)
-			return expandDollarKeywords(testExpression, context);
+			return expandDollarKeywords(expression, context);
 
-		String newExpression = testExpression;
+		String newExpression = expression;
 		for (Map.Entry<String,String> entry: keyWordSubs.entrySet()) 
 			newExpression = substituteInTestExpression(newExpression, entry.getKey(), entry.getValue());
 		
@@ -433,7 +433,7 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 	 *   preceeded by <code>c4jThis.</code>, to avoid potential scoping issues.</td>
 	 * </tr>
 	 * </table>
-	 * @param testExpression
+	 * @param expression
 	 * @param context
 	 * @return TestResult with {@link TestResult#isPassed()} equals true and the new test 
 	 * expression returned by {@link TestResult#getMessage()} or, if an error occurred, 
@@ -448,34 +448,35 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 			TestContext context) {
 		Map<String, Object> ovmap = context.getOldValuesMap();
 		int magicSymbolCounter = 1;
+		String expression = testExpression;
 		if (ovmap != null) {
 			for (Map.Entry<String, Object> entry: ovmap.entrySet()) {
 				Object obj = entry.getValue();
 				String key = Pattern.quote (entry.getKey());  // escape regex characters!!
 				String magicSymbol = Matcher.quoteReplacement("c4jExprVar"+magicSymbolCounter);
 				magicSymbolCounter++;
-				testExpression = 
-					substituteInTestExpression(testExpression, "\\$old\\s*\\(\\s*"+key+"\\s*\\)", magicSymbol);
+				expression = 
+					substituteInTestExpression(expression, "\\$old\\s*\\(\\s*"+key+"\\s*\\)", magicSymbol);
 				recordContextChange (magicSymbol, obj);
 			}
 		}
 		
 		// There *should* be no $old(..) expressions remaining!!
-		if (testExpression.contains ("$old")) {
+		if (expression.contains ("$old")) {
 			getReporter().report(Severity.WARN, ExpressionInterpreterHelper.class, 
 					"One or more \"$old(..)\" strings remain in test expression \"" +
-					testExpression +
+					expression +
 					"\" after previous substitutions of known values." +
 					" Test results may be inaccurate!");
-			testExpression = substituteInTestExpression(testExpression, "\\$old\\s*\\(\\s*\\$this([^\\(\\)]*(\\([^\\)]*\\))?[^\\(\\)]*)\\)",   "c4jThis$1");
-			testExpression = substituteInTestExpression(testExpression, "\\$old\\s*\\(\\s*\\$target([^\\(\\)]*(\\([^\\)]*\\))?[^\\(\\)]*)\\)", "c4jTarget$1");
+			expression = substituteInTestExpression(expression, "\\$old\\s*\\(\\s*\\$this([^\\(\\)]*(\\([^\\)]*\\))?[^\\(\\)]*)\\)",   "c4jThis$1");
+			expression = substituteInTestExpression(expression, "\\$old\\s*\\(\\s*\\$target([^\\(\\)]*(\\([^\\)]*\\))?[^\\(\\)]*)\\)", "c4jTarget$1");
 			// If $old(..) and ".." doesn't start with $target or $this, then assume "$this." prefix.
-			testExpression = substituteInTestExpression(testExpression, "\\$old\\s*\\(\\s*([^\\(\\)]*(\\([^\\)]*\\))?[^\\(\\)]*)\\)", "c4jThis.$1");
+			expression = substituteInTestExpression(expression, "\\$old\\s*\\(\\s*([^\\(\\)]*(\\([^\\)]*\\))?[^\\(\\)]*)\\)", "c4jThis.$1");
 		}
-		testExpression = substituteInTestExpression(testExpression, "\\$this",   "c4jThis");
-		testExpression = substituteInTestExpression(testExpression, "\\$target", "c4jTarget");
-		testExpression = substituteInTestExpression(testExpression, "\\$return", "c4jReturn");
-		testExpression = substituteInTestExpression(testExpression, "\\$args",   "c4jArgs"  );
+		expression = substituteInTestExpression(expression, "\\$this",   "c4jThis");
+		expression = substituteInTestExpression(expression, "\\$target", "c4jTarget");
+		expression = substituteInTestExpression(expression, "\\$return", "c4jReturn");
+		expression = substituteInTestExpression(expression, "\\$args",   "c4jArgs"  );
 		Instance i = context.getInstance();
 		Instance f = context.getField();
 		recordContextChange ("c4jThis",   i != null ? i.getValue() : null);
@@ -485,14 +486,14 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 		}
 		recordContextChange ("c4jArgs", InstanceUtils.getInstanceValues(context.getMethodArgs()));
 
-		testExpression = substituteArguments (testExpression, context);
+		expression = substituteArguments (expression, context);
 
 		// Look for "bare" items, matching "itemName", but without $this or $target; prepend $this.
 		String itemName = context.getItemName();
 	    if (itemName != null && itemName.length() != 0) {
-	        testExpression = substituteInTestExpression(testExpression, "(?<!(c4jThis|c4jTarget)\\.)\\b"+itemName+"\\b", "c4jThis."+itemName);
+	        expression = substituteInTestExpression(expression, "(?<!(c4jThis|c4jTarget)\\.)\\b"+itemName+"\\b", "c4jThis."+itemName);
 	    }
-		return new TestResult (true, testExpression);
+		return new TestResult (true, expression);
 	}
 
 	/**
@@ -507,12 +508,13 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 		if (args == null || args.length == 0) {
 			return testExpression;
 		}
+		String expression = testExpression;
 		for (int ia = 0; ia < args.length; ia++) {
 			String argName = args[ia].getItemName();
-			testExpression = substituteInTestExpression(testExpression, 
+			expression = substituteInTestExpression(expression, 
 					"(?<!(c4jThis|c4jTarget)\\.)\\b"+argName+"\\b", "c4jArgs["+ia+"]");			
 		}
-		return testExpression;
+		return expression;
 	}
 
 	public String substituteInTestExpression(String expression, String key,	String value) {

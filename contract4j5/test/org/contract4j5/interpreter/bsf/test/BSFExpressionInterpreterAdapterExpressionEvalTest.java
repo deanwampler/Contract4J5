@@ -356,6 +356,7 @@ public class BSFExpressionInterpreterAdapterExpressionEvalTest extends TestCase 
 			break;
 		default:
 			assertTrue  (msg, testResult.isPassed());	
+			break;
 		}
 		testResult = interpreter.invokeTest(testExpression, context); 
 		msg = "Test expression: \""+testExpression+"\", result = \""+testResult.getMessage()+"\", expected to contain = \""+expectedErrMsg+"\".";
@@ -366,6 +367,8 @@ public class BSFExpressionInterpreterAdapterExpressionEvalTest extends TestCase 
 			break;
 		case ERROR_INVOKE_TEST:
 			assertTrue  (msg, testResult.getMessage().matches(expectedErrMsgRE));
+			break;
+		default:
 			break;
 		}
 	}

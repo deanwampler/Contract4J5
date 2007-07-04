@@ -33,7 +33,7 @@ import org.contract4j5.reporter.WriterReporter;
  */
 public class Contract4J {
 
-	private static Contract4J systemInstance;
+	private static Contract4J systemInstance = null;
 
 	/**
 	 * An unavoidable singleton (UNLESS you're using Spring, which we can't assume...), 
@@ -62,7 +62,7 @@ public class Contract4J {
 	 */
 	public enum TestType { Pre, Post, Invar };
 	
-	private boolean isEnabled[] = {true, true, true};
+	private boolean[] isEnabled = {true, true, true};
 	
 	/**
 	 * Is the test type enabled globally?

@@ -30,6 +30,7 @@ import org.contract4j5.interpreter.TestResult;
 import org.contract4j5.interpreter.bsf.BSFExpressionInterpreterAdapter;
 import org.contract4j5.reporter.Reporter;
 import org.contract4j5.reporter.Severity;
+import org.contract4j5.utils.StringUtils;
 
 /**
  * Class that implements {@link ContractEnforcer}. Most of the interesting work is
@@ -134,19 +135,22 @@ public abstract class ContractEnforcerHelper implements ContractEnforcer {
 		StringBuilder buff = new StringBuilder(1024); // arbitrary size
 		buff.append(message);
 		if (throwable != null) {
-			if (throwable.getCause() != null) {
-				throwable = throwable.getCause();
+			Throwable t = throwable;
+			if (t.getCause() != null) {
+				t = t.getCause();
 			}
-			while (throwable != null) {
-				buff.append("\n");
-				buff.append(throwable.toString());
-				if (throwable.getMessage() != null) {
-					buff.append("\n  Message: \"");
-					buff.append(throwable.getMessage());
+			String newline = StringUtils.newline();
+			while (t != null) {
+				buff.append(newline);
+				buff.append(t.toString());
+				if (t.getMessage() != null) {
+					buff.append(newline);
+					buff.append("  Message: \"");
+					buff.append(t.getMessage());
 					buff.append("\", ");
 				}
-				appendStackTrace(throwable, buff);
-				throwable = throwable.getCause();
+				appendStackTrace(t, buff);
+				t = t.getCause();
 			}
 		}
 		String report = buff.toString();
@@ -155,10 +159,15 @@ public abstract class ContractEnforcerHelper implements ContractEnforcer {
 	
 	protected void appendStackTrace(Throwable throwable, StringBuilder buff) {
 		if (getIncludeStackTrace()) {
-			buff.append("\n  Stack Trace:\n");
+			String newline = StringUtils.newline();
+			buff.append(newline);
+			buff.append("  Stack Trace:");
+			buff.append(newline);
 			StackTraceElement[] trace = throwable.getStackTrace();
 			for (int i = 0; i < trace.length; i++) {
-				buff.append("    " + trace[i].toString() + "\n");
+				buff.append("    ");
+				buff.append(trace[i].toString());
+				buff.append(newline);
 			}
 		}
 	}
@@ -185,14 +194,10 @@ public abstract class ContractEnforcerHelper implements ContractEnforcer {
 			String extraMessage, 
 			TestContext context, 
 			TestResult testResult) {
-		if (empty(testExpression)) {
-			testExpression = "<empty test expression>";
-		}
-		if (empty(testPrefix)) {
-			testPrefix = "<unknown test>";
-		}
+		String expression = StringUtils.empty(testExpression) ? "<empty test expression>" : testExpression;
+		String prefix = StringUtils.empty(testPrefix) ? "<unknown test>" : testPrefix;
 		String fn = context != null ? context.getFileName() : null;
-		if (empty(fn)) {
+		if (StringUtils.empty(fn)) {
 			fn = "<unknown file>";
 		}
 		StringBuffer msg = new StringBuffer(256);
@@ -202,7 +207,7 @@ public abstract class ContractEnforcerHelper implements ContractEnforcer {
 		if (testResult.isFailureCauseATestSpecificationFailure()) {
 			msg.append("Test specification error, ");
 		}
-		msg.append(testPrefix).append(" test \"").append(testExpression);
+		msg.append(prefix).append(" test \"").append(expression);
 		Instance thiz = context != null ? context.getInstance() : null;
 		String name = thiz != null ? thiz.getItemName() : "";
 		if (name.length() == 0) {
@@ -213,18 +218,14 @@ public abstract class ContractEnforcerHelper implements ContractEnforcer {
 			}
 		}
 		msg.append("\" for \"").append(name).append("\" failed. ");
-		if (!empty(extraMessage)) {
+		if (!StringUtils.empty(extraMessage)) {
 			msg.append(" ").append(extraMessage);
 		}
-		if(!empty(testResult.getMessage())) {
+		if(!StringUtils.empty(testResult.getMessage())) {
 			msg.append(" (").append(testResult.getMessage()).append(")");
 		}
 		msg.append(" [").append(testResult.getFailureCauseMessage()).append("]");
 		return msg.toString();
-	}
-	
-	protected boolean empty (String s) {
-		return (s == null || s.length() == 0);
 	}
 	
 	/**

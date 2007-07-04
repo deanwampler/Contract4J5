@@ -25,6 +25,8 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
 
+import org.contract4j5.utils.StringUtils;
+
 /** 
  * A Reporter implementation that uses a {@link Writer}, which can wrap 
  * {@link System#out} and {@link System#err}, the default case. It can also be 
@@ -39,7 +41,7 @@ public class WriterReporter extends ReporterHelper {
 			buff.append("[").append(level).append("] ");
 			String cname = clazz != null ? clazz.getSimpleName() : "<null>";
 			buff.append(cname).append(": ");
-			buff.append(message).append("\n");
+			buff.append(message).append(StringUtils.newline());
 			writers[level.ordinal()].write(buff.toString());
 			writers[level.ordinal()].flush();
 		} catch (IOException e) {
@@ -48,7 +50,7 @@ public class WriterReporter extends ReporterHelper {
 		}
 	}
 	
-	private Writer writers[] = null; 
+	private Writer[] writers = null; 
 	
 	/**
 	 * Get the stream to use for a particular level. 

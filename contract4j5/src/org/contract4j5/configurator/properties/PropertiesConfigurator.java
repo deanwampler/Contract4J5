@@ -39,6 +39,7 @@ import org.contract4j5.reporter.Severity;
 import org.contract4j5.reporter.WriterReporter;
 import org.contract4j5.testexpression.DefaultTestExpressionMaker;
 import org.contract4j5.testexpression.ParentTestExpressionFinder;
+import org.contract4j5.utils.StringUtils;
 
 /**
  * Configure Contract4J using properties.  The System properties
@@ -226,11 +227,13 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 						reportErrors = convertToBoolean(propValue);
 						reportErrorsWasSet = true;
 					}
+					break;
 					case ContractEnforcerErrorReportingSeverity:
 					{
 						errorReportingSeverity = convertToSeverity(propValue);
 						errorReportingSeverityWasSet = true;
 					}
+					break;
 					case ContractEnforcerIncludeStackTrace:
 					{
 						includeStackTrace = convertToBoolean(propValue);
@@ -371,7 +374,8 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 		if (s == null) {
 			errors.append("No Reporter Severity matching string \"");
 			errors.append(propValue);
-			errors.append("\". Ignored.\n");
+			errors.append("\". Ignored.");
+			errors.append(StringUtils.newline());
 		}
 		return s;
 	}
@@ -385,7 +389,8 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 				errors.append("keyword substitution format error: name empty in a name value pair.");
 				errors.append("Map definition string is \"");
 				errors.append(propValue);
-				errors.append("\". Format should be \"name1=value1, name2=value2, ...\"\n");
+				errors.append("\". Format should be \"name1=value1, name2=value2, ...\"");
+				errors.append(StringUtils.newline());
 			} else {
 				optionalKeywordSubstitutions.put(pair[0], pair[1]);
 			}
@@ -438,7 +443,8 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 		if ((globalWriterReporterWriter != null ||
 			globalWriterReporterOutputStream != null) && 
 			!(globalReporter instanceof WriterReporter)) {
-			errors.append("The \"global\" reporter is not a \"WriterReporter\", so the value for the java.io.Writer or the java.io.OutputStream is ignored.\n");
+			errors.append("The \"global\" reporter is not a \"WriterReporter\", so the value for the java.io.Writer or the java.io.OutputStream is ignored.");
+			errors.append(StringUtils.newline());
 		} else {
 			if (globalWriterReporterWriter != null) {
 				WriterReporter wr = (WriterReporter) globalReporter;
@@ -448,7 +454,8 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 				WriterReporter wr = (WriterReporter) globalReporter;
 				wr.setStreams(globalWriterReporterOutputStream);
 				if (globalWriterReporterWriter != null) {
-					errors.append("Both a global java.io.OutputStream and java.io.Writer specified for the global \"Reporter\". The OutputStream will be used.\n");
+					errors.append("Both a global java.io.OutputStream and java.io.Writer specified for the global \"Reporter\". The OutputStream will be used.");
+					errors.append(StringUtils.newline());
 				}
 			}
 		}
@@ -464,7 +471,8 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 		errors.append(k);
 		errors.append("\" (value = \"");
 		errors.append(value);
-		errors.append("\") ignored.\n");
+		errors.append("\") ignored.");
+		errors.append(StringUtils.newline());
 	}
 
 	private void recordEnableTestTypeError(String propKey, String propValue) {
@@ -472,7 +480,8 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 		errors.append(propValue);
 		errors.append("\" for property \"");
 		errors.append(propKey);
-		errors.append("\" ignored.\n");
+		errors.append("\" ignored.");
+		errors.append(StringUtils.newline());
 	}
 	
 	private void recordBeanPropertyError(String beanName, Object object, Throwable th) {
@@ -482,20 +491,21 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 		errors.append(beanName);
 		errors.append("\" ignored. (");
 		errors.append(th.toString());
-		errors.append(")\n");
+		errors.append(")");
+		errors.append(StringUtils.newline());
 	}
 	
 	/**
-	 * @param s string that should start with "t", "f", "y", "n", or equals
+	 * @param booleanString string that should start with "t", "f", "y", "n", or equals
 	 * "on", or "off", case ignored. We assume the string is not null or empty.
 	 * @return true or false corresponding to input string
 	 * @throws IllegalArgumentException if the input string doesn't match an expected value.
 	 */
-	protected static boolean convertToBoolean (String s) throws IllegalArgumentException {
-		if (s == null || s.length() == 0)
+	protected static boolean convertToBoolean (String booleanString) throws IllegalArgumentException {
+		if (booleanString == null || booleanString.length() == 0)
 			throw new IllegalArgumentException("Boolean value string actually null or empty.");
-		s = s.trim();
-		char c = s.charAt(0);
+		String bool = booleanString.trim();
+		char c = bool.charAt(0);
 		switch (c) {
 		case 't':
 		case 'T':
@@ -509,18 +519,17 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 			return false;
 			default:
 		}
-		if (s.equalsIgnoreCase("on")) {
+		if (bool.equalsIgnoreCase("on")) {
 			return true;
 		}
-		if (s.equalsIgnoreCase("off")) {
+		if (bool.equalsIgnoreCase("off")) {
 			return false;
 		}
-		throw new IllegalArgumentException("Boolean value string unrecognized: \""+s+"\".");
+		throw new IllegalArgumentException("Boolean value string unrecognized: \""+bool+"\".");
 	}
 
 	private Severity convertToSeverity(String propValue) {
 		return Severity.parse(propValue);
 	}
 	
-
 }

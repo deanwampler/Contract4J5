@@ -21,6 +21,7 @@
 package org.contract4j5.interpreter;
 
 import org.contract4j5.errors.TestSpecificationError;
+import org.contract4j5.utils.StringUtils;
 
 /**
  * Value object for a test result, not only pass or fail, but the cause of a failure.
@@ -104,13 +105,16 @@ public class TestResult {
 			return "";
 		}
 		StringBuffer sb = new StringBuffer(256);
-		sb.append("\nStack Trace: [");
+		sb.append(StringUtils.newline());
+		sb.append("Stack Trace: [");
 		StackTraceElement[] elems = getFailureCause().getStackTrace();
 		for (StackTraceElement elem: elems) {
-			sb.append("\n  ");
+			sb.append(StringUtils.newline());
+			sb.append("  ");
 			sb.append(elem.toString());
 		}
-		sb.append("\n]");
+		sb.append(StringUtils.newline());
+		sb.append("]");
 		return sb.toString();
 	}
 	

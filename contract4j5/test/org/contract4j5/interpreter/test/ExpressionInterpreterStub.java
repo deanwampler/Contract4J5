@@ -39,15 +39,15 @@ public class ExpressionInterpreterStub extends ExpressionInterpreterHelper {
 
 	@Override
 	protected Object doDetermineOldValue(String exprStr, TestContext context) {
-		exprStr = exprStr.trim();
-		Object o = cmap.get(exprStr);
+		String expr = exprStr.trim();
+		Object o = cmap.get(expr);
 		if (o != null) {
 			return o;
 		}
-		if (exprStr.equals("c4jOldThis")) {
+		if (expr.equals("c4jOldThis")) {
 			return context.getInstance();
 		}
-		if (exprStr.equals("c4jOldTarget")) {
+		if (expr.equals("c4jOldTarget")) {
 			return context.getField();
 		}
 		return null;

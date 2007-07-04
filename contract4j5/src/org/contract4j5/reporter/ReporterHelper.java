@@ -30,10 +30,7 @@ public abstract class ReporterHelper implements Reporter {
 		if (threshold == Severity.OFF || level.compareTo(threshold) < 0) {
 			return;
 		}
-		if (message == null) {
-			message = "";
-		}
-		reportSupport (level, clazz, message);
+		reportSupport (level, clazz, (message == null ? "" : message));
 	}
 
 	/**

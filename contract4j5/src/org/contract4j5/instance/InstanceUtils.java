@@ -62,7 +62,7 @@ public class InstanceUtils {
 	 */
 	static public String[] getInstanceNames(Instance[] instances) {
 		if (instances == null) {
-			return null;
+			return new String[0];
 		}
 		String[] s = new String[instances.length];
 		for (int i=0; i<instances.length; i++) {
@@ -77,7 +77,7 @@ public class InstanceUtils {
 	 */
 	static public Class[] getInstanceClasses(Instance[] instances) {
 		if (instances == null) {
-			return null;
+			return new Class[0];
 		}
 		Class[] c = new Class[instances.length];
 		for (int i=0; i<instances.length; i++) {
@@ -92,7 +92,7 @@ public class InstanceUtils {
 	 */
 	static public Object[] getInstanceValues(Instance[] instances) {
 		if (instances == null) {
-			return null;
+			return new Object[0];
 		}
 		Object[] o = new Object[instances.length];
 		for (int i=0; i<instances.length; i++) {

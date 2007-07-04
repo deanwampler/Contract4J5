@@ -55,16 +55,12 @@ abstract public class DefaultTestExpressionMakerHelper implements
 				if (isNotPrimitive (argClass)) {
 					if (first) { 
 						first = false; 
-						//test.append("(");
 					} else {
 						test.append(" && ");
 					}
 					test.append("$args["+i+"]");
 					test.append(" != null");
 				}
-			}
-			if (!first) {  // Did we actually have any expressions?
-				//test.append(")");
 			}
 		}
 		return test.toString();

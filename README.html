@@ -1440,6 +1440,7 @@ subclasses when they aren't annotated.</li>
 	<li>Support end-user extensions with custom annotations and "behavior" handlers.</li>
 	<li>Support tests on static methods.</li>
 	<li>Extend <code>@Pre</code> and <code>@Post</code> to support class-level annotations that will apply to all protected and public instance and static methods. For example, <code>@Contract @Pre @Post public class Foo {...}</code> would require all such methods to take non-null arguments and return non-null values, consistent with the way <code>@Pre</code> and <code>@Post</code> work by default today on methods. Add optional configuration properties to each annotation to set the protection level for which the annotation applies (<i>e.g.</i>, also do private methods.) and whether or not to exclude static methods.</li>
+	<li>Mock out logging output so test runs don't generate so much output.</li>
 </ol>
 Here is a list of other possible enhancements.
 <ol>

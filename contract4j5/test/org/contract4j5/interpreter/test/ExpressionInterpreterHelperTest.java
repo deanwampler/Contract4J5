@@ -133,8 +133,8 @@ public class ExpressionInterpreterHelperTest extends TestCase {
 	 * Test method for 'org.contract4j5.interpreter.ExpressionInterpreterHelper.expandKeywords(String, String, Object, Object[], Object)'
 	 */
 	public void testExpandKeywords() {
-		doTestExpandKeywords (null,           null,               false, makeContext());
-		doTestExpandKeywords ("",             "",                 false, makeContext());
+		doTestExpandKeywords ("No test expression!", null,        false, makeContext());
+		doTestExpandKeywords ("No test expression!", "",          false, makeContext());
 		doTestExpandKeywords ("c4jThis",      "$this",            true,  makeContext());
 		doTestExpandKeywords ("c4jExprVar1",  "$old ($this)",     true,  makeContext());
 		doTestExpandKeywords ("c4jTarget",    "$target",          true,  makeContext());
