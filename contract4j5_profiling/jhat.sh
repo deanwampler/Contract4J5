@@ -23,5 +23,5 @@ done
 export CLASSPATH
 #echo $CLASSPATH
 
-jhat -J-Xmx1000m java.hprof
+jhat -J-Xmx1000m "$@"
 

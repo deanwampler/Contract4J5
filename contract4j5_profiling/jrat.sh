@@ -13,10 +13,10 @@ export JRAT_HOME="$JAVA_TOOLS_HOME/jrat"
 export PATH="$PATH:$JRAT_HOME/bin"
 date
 
-# rm -rf jrat
-# mkdir jrat
-# cp -r bin jrat
-# cp -r ../contract4j5/contract4j5.jar ../contract4j5/lib/*.jar jrat
+rm -rf jrat
+mkdir jrat
+cp -r bin jrat
+cp -r ../contract4j5/contract4j5.jar ../contract4j5/lib/*.jar jrat
 
 $CP=jrat/bin
 for jar in jrat/*.jar
@@ -29,7 +29,7 @@ export ASPECTPATH="ASPECTPATH:jrat/contract4j5.jar"
 for interp in "jexl" "groovy" "jruby" "stub" "nobsf"
 do
 	echo "running with the expression interpreter \"$interp\". Output written to jrat.$interp.log:"
-	rm jrat/out.jar
+	rm -f jrat/out.jar
 	ajc -aspectpath jrat/contract4j5.jar
 	java -ea -javaagent:$ASPECTJ_HOME/lib/aspectjweaver.jar -Djrat.factory=org.shiftone.jrat.provider.tree.TreeMethodHandlerFactory -cp $CLASSPATH org.contract4j5.performance.test.Person 10000 $interp > jrat.$interp.log
 	echo "jrat.$interp.log:"

@@ -19,6 +19,7 @@ case "$OS_NAME" in
 				;;
 		darwin*)
 				export DYLD_LIBRARY_PATH="$DYLD_LIBRARY_PATH;$EJP_HOME/lib"
+				export DYLD_LIBRARY_PATH=$EJP_HOME/lib/osx:${DYLD_LIBRARY_PATH}
 				;;
 esac
 
@@ -31,6 +32,7 @@ do
 done
 export CLASSPATH
 #echo $CLASSPATH
+
 
 # Very lame: it appears you have to run it from the following directory, due
 # to hard-coded paths in EJP!
