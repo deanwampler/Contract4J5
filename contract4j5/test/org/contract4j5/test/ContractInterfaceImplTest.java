@@ -26,6 +26,7 @@ import org.contract4j5.configurator.Configurator;
 import org.contract4j5.configurator.test.ConfiguratorForTesting;
 import org.contract4j5.errors.ContractError;
 import org.contract4j5.errors.TestSpecificationError;
+import org.contract4j5.util.ExampleContractInterfaceImpl;
 
 public class ContractInterfaceImplTest extends TestCase {
 	private ExampleContractInterfaceImpl obj = null;

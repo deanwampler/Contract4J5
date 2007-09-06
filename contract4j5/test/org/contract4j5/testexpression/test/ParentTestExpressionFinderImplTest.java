@@ -34,9 +34,9 @@ import org.contract4j5.contract.Post;
 import org.contract4j5.contract.Pre;
 import org.contract4j5.instance.Instance;
 import org.contract4j5.interpreter.TestResult;
-import org.contract4j5.test.OverriddenContractBase;
-import org.contract4j5.test.OverriddenContractDerived;
 import org.contract4j5.testexpression.ParentTestExpressionFinderImpl;
+import org.contract4j5.util.OverriddenContractBase;
+import org.contract4j5.util.OverriddenContractDerived;
 
 public class ParentTestExpressionFinderImplTest extends TestCase {
 	ParentTestExpressionFinderImpl finder;

@@ -62,6 +62,24 @@ public aspect InvariantTypeConditions extends AbstractConditions {
 	declare parents: (@Contract @Invar *) implements InvarMarker;
 		
 	/**
+	 * Preferred PCD; match on the marker interface or subclasses. This does not work with
+	 * generics (AJ bug??).
+	 */
+	pointcut invarTypeMethodUsingMarker() :
+		execution (!static * InvarMarker+.*(..)) &&
+		! (execution (* InvarMarker+.get*(..)) || execution (* InvarMarker+.set*(..))) &&
+		! cflow (execution (InvarMarker+.new(..)));
+	
+	/**
+	 * Support generics, by matching on the annotation. Requires derived classes to apply
+	 * the annotation explicitly!!
+	 */
+	pointcut invarTypeMethodUsingInvarAnno() :
+		execution (!static * (@Invar *).*(..)) &&
+		! (execution (* (@Invar *).get*(..)) || execution (* (@Invar *).set*(..))) &&
+		! cflow (execution ((@Invar *).new(..)));
+
+	/**
 	 * PCD for type (class, aspect, ...) invariant tests that should be evaluated
 	 * as both before and after advice. (We actually use around advice).
 	 * In addition to excluding static methods, we don't advise 
@@ -70,12 +88,19 @@ public aspect InvariantTypeConditions extends AbstractConditions {
 	 * These cases are handled separately.
 	 * @note We prevent recursion into the aspect itself.
 	 */
-	pointcut invarTypeMethod(Invar invar, InvarMarker obj) :
+	pointcut invarTypeMethod(Invar invar, Object obj) :
 		invarCommon() && !within (InvariantTypeConditions) &&
-		execution (!static * InvarMarker+.*(..)) &&
-		! (execution (* InvarMarker+.get*(..)) || execution (* InvarMarker+.set*(..))) &&
-		! cflow (execution (InvarMarker+.new(..))) &&
+		(invarTypeMethodUsingMarker() || invarTypeMethodUsingInvarAnno()) &&
 		@this (invar) && this (obj);
+
+
+	pointcut invarTypeGetSetUsingMarker () :
+		(execution (* InvarMarker+.get*(..)) || execution (* InvarMarker+.set*(..))) &&
+		! cflowbelow (execution (InvarMarker+.new(..)));
+
+	pointcut invarTypeGetSetUsingInvarAnno () :
+		(execution (* (@Invar *).get*(..)) || execution (* (@Invar *).set*(..))) &&
+		! cflowbelow (execution ((@Invar *).new(..)));
 
 	/**
 	 * PCD for type (class, aspect, ...) invariant tests that are only evaluated
@@ -83,24 +108,30 @@ public aspect InvariantTypeConditions extends AbstractConditions {
 	 * and are handled separately below.
 	 * @note We prevent recursion into the aspect itself.
 	 */
-	pointcut invarTypeGetSet (Invar invar, InvarMarker obj) :
+	pointcut invarTypeGetSet (Invar invar, Object obj) :
 		invarCommon() && !within (InvariantTypeConditions) &&
-		(execution (* InvarMarker+.get*(..)) || execution (* InvarMarker+.set*(..))) &&
-		! cflowbelow (execution (InvarMarker+.new(..))) &&
+		(invarTypeGetSetUsingMarker() || invarTypeGetSetUsingInvarAnno()) &&
 		@this (invar) && this (obj); 
+
+	
+	pointcut invarTypeCtorUsingMarker () : 
+		execution (InvarMarker+.new(..));
+
+	pointcut invarTypeCtorUsingInvarAnno () : 
+		execution ((@Invar *).new(..));
 
 	/**
 	 * PCD for type (class, aspect, ...) invariant tests for after advice after
 	 * c'tor execution.
 	 * @note We prevent recursion into the aspect itself.
 	 */
-	pointcut invarTypeCtor (Invar invar, InvarMarker obj) : 
+	pointcut invarTypeCtor (Invar invar, Object obj) : 
 		invarCommon() && !within (InvariantTypeConditions) &&
-		execution (InvarMarker+.new(..)) &&
+		(invarTypeCtorUsingMarker() || invarTypeCtorUsingInvarAnno()) &&
 		@this (invar) && this (obj);
 
 	
-	Object around (Invar invar, InvarMarker obj) : 
+	Object around (Invar invar, Object obj) : 
 			invarTypeMethod (invar, obj) || invarTypeGetSet (invar, obj) {
 		MethodSignature ms   = (MethodSignature) thisJoinPointStaticPart.getSignature();
 		Class      clazz     = obj.getClass();
@@ -125,7 +156,7 @@ public aspect InvariantTypeConditions extends AbstractConditions {
 		return result2;
 	}
 	
-	after(Invar invar, InvarMarker obj) returning () : invarTypeCtor (invar, obj) {
+	after(Invar invar, Object obj) returning () : invarTypeCtor (invar, obj) {
 		ConstructorSignature cs = 
 			(ConstructorSignature) thisJoinPointStaticPart.getSignature();
 		Class      clazz     = obj.getClass();

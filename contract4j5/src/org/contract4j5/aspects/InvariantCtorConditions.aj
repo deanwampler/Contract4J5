@@ -52,12 +52,12 @@ public aspect InvariantCtorConditions extends AbstractConditions {
 	 * Constructor invariant PCD.
 	 * @note We prevent recursion into the aspect itself.
 	 */
-	pointcut invarCtor (Invar invar, ContractMarker obj) : 
+	pointcut invarCtor (Invar invar, Object obj) : 
 		invarCommon() && !within (InvariantCtorConditions) &&
-		execution (@Invar ContractMarker+.new(..)) && 
+		execution (@Invar *.new(..)) && 
 		@annotation (invar) && this (obj);
 
-	after (Invar invar, ContractMarker obj) returning : invarCtor (invar, obj) {
+	after (Invar invar, Object obj) returning : invarCtor (invar, obj) {
 		ConstructorSignature cs = (ConstructorSignature) thisJoinPointStaticPart.getSignature();
 		Class       clazz     = obj.getClass();
 		String[]    argNames  = cs.getParameterNames();

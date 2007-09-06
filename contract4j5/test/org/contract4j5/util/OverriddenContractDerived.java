@@ -18,42 +18,46 @@
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 
-package org.contract4j5.test;
+package org.contract4j5.util;
 
+import org.contract4j5.contract.Contract;
 import org.contract4j5.contract.Invar;
 import org.contract4j5.contract.Post;
 import org.contract4j5.contract.Pre;
 
-/**
- * Class implementing the interface w/out the "@Contract" annotation. 
- * Note that we can't declare field invariant tests nor constructor tests
- * in interfaces; there is no where to put them. The best you can do is 
- * tests on accessor methods and class invariants.
- */
-public class NoContractInterfaceImpl implements NoContractInterface {
-	int flag = 0;
-	private String name = null;
-	@Invar("b == true")
-	private boolean b = false;
-	
-	public String getName() {
-		return name;
+@Contract
+@Invar
+public class OverriddenContractDerived extends OverriddenContractBase {
+	public String getField1() {
+		return super.getField1();
 	}
-	public void setName(String name) {
-		this.name = name;
+	public void setField1(String field1) {
+		super.setField1(field1);
 	}
-	
-	public boolean getB() {
-		return b;
+
+	// Covariant postcondition (narrowed)
+	@Post("$this.field.equals(\"foo\")")
+	public String getField3() {
+		return super.getField3();
+	}
+	// Contravariant precondition (widened)
+	@Pre ("$args[0] != null && $args[0].length() >= 1")
+	public void setField3(String field3) {
+		super.setField3(field3);
 	}
 	
-	public int getFlag() { return flag; }
-	
-	public void m(String s) {
-		this.name = "";
+	@Invar
+	public void doNothing() {
+		super.doNothing();
 	}
-	
-	@Pre("$args[0] != 100")
-	@Post("!$this.name.equals(\"bad\")")
-	public NoContractInterfaceImpl (int flag) { this.flag = flag; }
+
+	@Invar
+	// Contravariant precondition (widened)
+	@Pre  ("$args[0] != null")
+	// Covariant postcondition (narrowed)
+	@Post ("$this.postFlag > 1")
+	public OverriddenContractDerived (String f1, String f2, String f3) {
+		super(f1, f2, f3);
+		setPostFlag (2);
+	}
 }

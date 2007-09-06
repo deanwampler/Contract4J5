@@ -62,9 +62,9 @@ public aspect InvariantMethodConditions extends AbstractConditions {
 	 * Method invariant before and after PCD.
 	 * @note We prevent recursion into the aspect itself.
 	 */
-	pointcut invarMethod (Invar invar, ContractMarker obj) :
+	pointcut invarMethod (Invar invar, Object obj) :
 		invarCommon() && !within (InvariantMethodConditions) &&
-		execution (@Invar !static * ContractMarker+.*(..)) && 
+		execution (@Invar !static * *.*(..)) && 
 		@annotation (invar) && this (obj);
 
 	Object around (Invar invar, Object obj) : invarMethod (invar, obj) {

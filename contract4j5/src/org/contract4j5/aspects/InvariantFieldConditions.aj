@@ -68,16 +68,16 @@ public aspect InvariantFieldConditions extends AbstractConditions {
 	 * withincode(), because the constructor may call other methods.
 	 * @note We prevent recursion into the aspect itself.
 	 */
-	pointcut invarFieldCommon (Invar invar, ContractMarker obj) :
-		invarCommon() && ! cflowbelow (execution (ContractMarker+.new(..))) &&
+	pointcut invarFieldCommon (Invar invar, Object obj) :
+		invarCommon() && ! cflowbelow (execution (*.new(..))) &&
 		!within (InvariantFieldConditions) &&
 		@annotation (invar) && target (obj);
 	
-	pointcut invarSetField (Invar invar, ContractMarker obj, Object arg) :
-		invarFieldCommon (invar, obj) && set (@Invar * ContractMarker+.*) && args(arg); 
+	pointcut invarSetField (Invar invar, Object obj, Object arg) :
+		invarFieldCommon (invar, obj) && set (@Invar * *.*) && args(arg); 
 
-	pointcut invarGetField (Invar invar, ContractMarker obj) :
-		invarFieldCommon (invar, obj) && get (@Invar * ContractMarker+.*); 
+	pointcut invarGetField (Invar invar, Object obj) :
+		invarFieldCommon (invar, obj) && get (@Invar * *.*); 
 
 	void around (Invar invar, Object obj, Object arg) : invarSetField (invar, obj, arg) {
 		// Set up the context so we can retrieve any "old" values, before proceeding.

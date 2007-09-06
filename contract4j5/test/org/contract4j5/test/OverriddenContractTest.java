@@ -26,6 +26,8 @@ import org.contract4j5.configurator.Configurator;
 import org.contract4j5.configurator.test.ConfiguratorForTesting;
 import org.contract4j5.errors.ContractError;
 import org.contract4j5.errors.TestSpecificationError;
+import org.contract4j5.util.OverriddenContractBase;
+import org.contract4j5.util.OverriddenContractDerived;
 
 /**
  * Tests behavior when a base class' contract is overridden by a 

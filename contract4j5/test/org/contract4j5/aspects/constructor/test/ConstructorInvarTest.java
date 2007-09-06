@@ -18,7 +18,7 @@
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 
-package org.contract4j5.test;
+package org.contract4j5.aspects.constructor.test;
 
 import junit.framework.TestCase;
 
@@ -30,10 +30,9 @@ import org.contract4j5.controller.Contract4J;
 import org.contract4j5.errors.ContractError;
 import org.contract4j5.errors.TestSpecificationError;
 
-public class TypeInvarTest extends TestCase {
+public class ConstructorInvarTest extends TestCase {
 	@Contract
-	@Invar  // default test (nothing!)
-	public static class TypeInvarWithDefaultExpr {
+	public static class ConstructorInvarWithDefaultExpr {
 		String name = null;
 		public String getName() { return name; }
 		public void setName(String name) { this.name = name; }		
@@ -42,15 +41,15 @@ public class TypeInvarTest extends TestCase {
 		public int getI() {	return i; }
 		public void setI(int i) { this.i = i; }		
 		
-		public TypeInvarWithDefaultExpr (String name, int i) {
+		@Invar  // default test; nothing so it will be a test specification error
+		public ConstructorInvarWithDefaultExpr (String name, int i) {
 			this.name = name;
 			this.i = i;
 		}
 	}
 	
 	@Contract
-	@Invar ("$this.name != null && $this.i > 0") 
-	public static class TypeInvarWithDefinedExpr {
+	public static class ConstructorInvarWithDefinedExpr {
 		String name = null;
 		public String getName() { return name; }
 		public void setName(String name) { this.name = name; }		
@@ -59,7 +58,8 @@ public class TypeInvarTest extends TestCase {
 		public int getI() {	return i; }
 		public void setI(int i) { this.i = i; }		
 		
-		public TypeInvarWithDefinedExpr (String name, int i) {
+		@Invar ("$this.name != null && $this.i > 0") 
+		public ConstructorInvarWithDefinedExpr (String name, int i) {
 			this.name = name;
 			this.i = i;
 		}
@@ -74,40 +74,33 @@ public class TypeInvarTest extends TestCase {
 		c.configure();
 		c4j = Contract4J.getInstance();
 	}
-
-	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
-		c4j.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(false);
-	}
-
+	
 	public void testWithDefaultFalse() {
-		TypeInvarWithDefaultExpr t = 
+		ConstructorInvarWithDefaultExpr t = 
 			doTestCtorWithDefault(false, "foo", 1);  // Won't pass if empty test strings, but args irrelevant
 		t = doTestCtorWithDefault(false, null,  1); 
 		t = doTestCtorWithDefault(false, "foo", 0); 
 		t = doTestCtorWithDefault(false, null,  0); 
-		// Now temporarily disable the test failure when the test is empty so we can
-		// successfully create an object for subsequent tests.
+		// In order to test the setters, must construct an object while the empty-test issue is bypassed!
 		c4j.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(true);
-		t = new TypeInvarWithDefaultExpr("foo", 1);  // Will pass if empty test strings.
-		c4j.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(false);
-		doTestSetIWithDefault(t, false);
-		doTestSetNameWithDefault(t, false);
+		t = doTestCtorWithDefault(true, "foo", 1);  // Won't pass if empty test strings, but args irrelevant
+		doTestSetIWithDefault(t);
+		doTestSetNameWithDefault(t);
 	}
-	public void testCtorWithDefaultTrue() {
+	public void testWithDefaultTrue() {
 		c4j.getContractEnforcer().getExpressionInterpreter().setTreatEmptyTestExpressionAsValidTest(true);
-		TypeInvarWithDefaultExpr t = 
-			doTestCtorWithDefault(true, "foo", 1);  // Will pass if empty test strings.
+		ConstructorInvarWithDefaultExpr t = 
+			doTestCtorWithDefault(true, "foo", 1);  // Won't pass if empty test strings, but args irrelevant
 		t = doTestCtorWithDefault(true, null,  1); 
 		t = doTestCtorWithDefault(true, "foo", 0); 
 		t = doTestCtorWithDefault(true, null,  0); 
-		doTestSetIWithDefault(t, true);
-		doTestSetNameWithDefault(t, true);
+		doTestSetIWithDefault(t);
+		doTestSetIWithDefault(t);
+		doTestSetNameWithDefault(t);
 	}
-	protected TypeInvarWithDefaultExpr doTestCtorWithDefault (boolean shouldPass, String name, int i) {
+	protected ConstructorInvarWithDefaultExpr doTestCtorWithDefault (boolean shouldPass, String name, int i) {
 		try {
-			TypeInvarWithDefaultExpr t = new TypeInvarWithDefaultExpr(name, i);
+			ConstructorInvarWithDefaultExpr t = new ConstructorInvarWithDefaultExpr(name, i);
 			if (!shouldPass) {
 				fail();
 			}
@@ -121,84 +114,52 @@ public class TypeInvarTest extends TestCase {
 		}
 		return null;
 	}
-	protected void doTestSetIWithDefault (TypeInvarWithDefaultExpr t, boolean shouldPass) {
+	protected void doTestSetIWithDefault (ConstructorInvarWithDefaultExpr t) {
 		try {
 			t.setI(0);
-			if (!shouldPass) {
-				fail();
-			}
-		} catch (TestSpecificationError tse) {
-			if (shouldPass) {
-				fail();
-			}
 		} catch (ContractError ce) {
 			fail();
 		}
 	}
-	protected void doTestSetNameWithDefault (TypeInvarWithDefaultExpr t, boolean shouldPass) {
+	protected void doTestSetNameWithDefault (ConstructorInvarWithDefaultExpr t) {
 		try {
 			t.setName(null);
-			if (!shouldPass) {
-				fail();
-			}
-		} catch (TestSpecificationError tse) {
-			if (shouldPass) {
-				fail();
-			}
 		} catch (ContractError ce) {
 			fail();
 		}
 	}
 	
-	public void testInvarWithDefinedNullExprAndFlag1() {
+	public void testDefined() {
+		ConstructorInvarWithDefinedExpr t = null;
 		try {
-			new TypeInvarWithDefinedExpr(null, 1);
-			fail();
-		} catch (TestSpecificationError tse) {
+			t = new ConstructorInvarWithDefinedExpr(null, 1);
 			fail();
 		} catch (ContractError ce) {
 		}
-	}
-	
-	public void testInvarWithDefinedNonemptyExprAndFlag0() {
 		try {
-			new TypeInvarWithDefinedExpr("foo", 0);
-			fail();
-		} catch (TestSpecificationError tse) {
+			t = new ConstructorInvarWithDefinedExpr("foo", 0);
 			fail();
 		} catch (ContractError ce) {
 		}
-	}
-	
-	public void testInvarWithDefinedNullExprAndFlag0() {
 		try {
-			new TypeInvarWithDefinedExpr(null, 0);
-			fail();
-		} catch (TestSpecificationError tse) {
+			t = new ConstructorInvarWithDefinedExpr(null, 0);
 			fail();
 		} catch (ContractError ce) {
 		}
-	}
-	
-	public void testSetICallWithInvarWithDefinedNonemptyExprAndFlag1() {
 		try {
-			TypeInvarWithDefinedExpr t = new TypeInvarWithDefinedExpr("foo", 1);
+			t = new ConstructorInvarWithDefinedExpr("foo", 1);
+		} catch (ContractError ce) {
+			fail();
+		}
+		try {
 			t.setI(0);
-			fail();
-		} catch (TestSpecificationError tse) {
-			fail();
 		} catch (ContractError ce) {
+			fail();
 		}
-	}
-	
-	public void testSetNameCallWithInvarWithDefinedNonemptyExprAndFlag1() {
 		try {
-			TypeInvarWithDefinedExpr t = new TypeInvarWithDefinedExpr("foo", 1);
 			t.setName(null);
-			fail();
-		} catch (TestSpecificationError tse) {
-			fail();
 		} catch (ContractError ce) {
+			fail();
 		}
 	}
 }

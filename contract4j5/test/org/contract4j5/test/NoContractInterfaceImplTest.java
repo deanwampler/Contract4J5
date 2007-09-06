@@ -25,6 +25,7 @@ import junit.framework.TestCase;
 import org.contract4j5.configurator.Configurator;
 import org.contract4j5.configurator.test.ConfiguratorForTesting;
 import org.contract4j5.errors.ContractError;
+import org.contract4j5.util.NoContractInterfaceImpl;
 
 public class NoContractInterfaceImplTest extends TestCase {
 	private NoContractInterfaceImpl obj = null;

@@ -17,7 +17,7 @@
  *
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
-package org.contract4j5.test;
+package org.contract4j5.util;
 
 import org.contract4j5.contract.Contract;
 import org.contract4j5.contract.Invar;

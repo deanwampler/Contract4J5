@@ -18,34 +18,24 @@
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 
-package org.contract4j5.test;
+package org.contract4j5.misc.test;
 
+import org.contract4j5.contract.Contract;
+import org.contract4j5.contract.Invar;
 import org.contract4j5.contract.Post;
+import org.contract4j5.contract.Pre;
 
 /**
- * Class subclassing the {@link NoContractInterfaceImpl} class the implements
- * an interface w/out the "@Contract" annotation. 
+ * Class with static methods that declare tests. The compiler should warn that
+ * this isn't supported. You can ignore those warnings!
+ * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
-public class NoContractInterfaceDerivedImpl extends NoContractInterfaceImpl {
-	public String getName() {
-		return super.getName();
-	}
-	public void setName(String name) {
-		super.setName(name);
-	}
-	
-	public boolean getB() {
-		return super.getB();
-	}
-	
-	public int getFlag() { return super.getFlag(); }
-	
-	public void m(String s) {
-		super.m(s);
-	}
-	
-	@Post("")
-	public NoContractInterfaceDerivedImpl (int flag) { 
-		super(flag);
-	}
+@Contract
+public class ClassWithStaticMethodsWithTests {
+	@Pre
+	public static void staticMethodWithPre() {}
+	@Post
+	public static void staticMethodWithPost() {}
+	@Invar
+	public static void staticMethodWithInvar() {}
 }

@@ -29,6 +29,7 @@ import org.contract4j5.contract.Post;
 import org.contract4j5.contract.Pre;
 import org.contract4j5.errors.ContractError;
 import org.contract4j5.errors.TestSpecificationError;
+import org.contract4j5.util.ExampleContractInterface;
 
 /** 
  * Tests and demonstrates behavior of a class that implements a contract-defining

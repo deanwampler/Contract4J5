@@ -68,6 +68,10 @@ abstract public aspect AbstractConditions {
 		return Contract4J.getInstance();
 	}
 
+	public ContractEnforcer getContractEnforcer () { 
+		return getContract4J().getContractEnforcer();
+	}
+
 	private ParentTestExpressionFinder parentTestExpressionFinder = null;
 
 	/**
@@ -92,9 +96,17 @@ abstract public aspect AbstractConditions {
 	 * exclude the cflow of the {@link ContractEnforcer} object. Tests within tests can
 	 * happen if a test expression invokes a method call on the object and that method 
 	 * call has tests, for example.
+	 * Note that we match on types either annotated with @Contract or implementing
+	 * ContractMarker. The former should be redundant, but there appears to be an AJ bug
+	 * where ITD of an interface on a generic type causes this within(...) clause to not
+	 * match the type! It works fine on non-generic types. So, the hack workaround is to
+	 * explicitly look for the annotation, too. This means that, currently, subtypes of
+	 * generic types <i>must</i> include the @Contract annotation in order for the
+	 * contract to be applied.
 	 */
 	pointcut commonC4J() : 
-		within (ContractMarker+) &&
+//		(within (@Contract *) || within (ContractMarker+)) &&
+		within (@Contract *+) &&
 		!cflow(execution (* ContractEnforcer+.*(..))) &&
 		!cflow(execution (ContractEnforcer+.new(..))); 
 	
@@ -119,10 +131,6 @@ abstract public aspect AbstractConditions {
 		if (getContract4J().isEnabled(Contract4J.TestType.Invar)) &&
 		commonC4J();
 	
-	public ContractEnforcer getContractEnforcer () { 
-		return getContract4J().getContractEnforcer();
-	}
-
 	/**
 	 * Find the "$old(..)" expressions in the test expression, determine the corresponding values
 	 * from the context and return those values in a map.

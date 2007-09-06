@@ -17,7 +17,7 @@
  *
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
-package org.contract4j5.aspects.test;
+package org.contract4j5.misc.test;
 
 import junit.framework.TestCase;
 

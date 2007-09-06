@@ -18,15 +18,21 @@
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 
-package org.contract4j5.test;
+package org.contract4j5.util;
+
+import org.contract4j5.contract.Contract;
+import org.contract4j5.contract.Invar;
+import org.contract4j5.contract.Post;
+import org.contract4j5.contract.Pre;
 
 /**
- * Declares the methods for the test interfaces and classes used in some tests.
+ * Interface that declares some contracts and includes the required
+ * "@Contract" annotation.
  */
-public interface ExampleBaseInterface {
-	void    setName(String s);
-	String  getName();
-	boolean getB();
-	int     getFlag();
-	void    m(String s);
+@Contract
+@Invar ("$this.getFlag() > 0")
+public interface ExampleContractInterface extends ExampleBaseInterface {
+	@Pre   void setName (String s);
+	@Post  String getName ();
+	@Invar("$this.name != null && $this.name.length() > 0") void m (String s);
 }

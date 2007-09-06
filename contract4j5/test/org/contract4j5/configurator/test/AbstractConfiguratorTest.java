@@ -124,6 +124,9 @@ public class AbstractConfiguratorTest extends TestCase {
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		configurator.unsetParentTestExpressionFinder();
+		// Set up fresh system-wide copy. We do it here, rather than in setUp
+		// so it's available for the *next* test case!
+		Contract4J.setInstance(new Contract4J()); 
 	}
 	
 	/*

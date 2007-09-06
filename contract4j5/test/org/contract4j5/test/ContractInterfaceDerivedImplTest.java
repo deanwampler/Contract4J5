@@ -22,6 +22,8 @@ package org.contract4j5.test;
 
 import org.contract4j5.errors.ContractError;
 import org.contract4j5.errors.TestSpecificationError;
+import org.contract4j5.util.ExampleContractInterfaceDerivedImpl;
+import org.contract4j5.util.ExampleContractInterfaceImpl;
 
 public class ContractInterfaceDerivedImplTest extends ContractInterfaceImplTest {
 	private ExampleContractInterfaceImpl obj2 = null;

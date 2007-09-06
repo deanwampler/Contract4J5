@@ -27,6 +27,7 @@ import org.contract4j5.configurator.test.ConfiguratorForTesting;
 import org.contract4j5.controller.Contract4J;
 import org.contract4j5.errors.ContractError;
 import org.contract4j5.errors.TestSpecificationError;
+import org.contract4j5.util.BaseTestClass;
 
 /**
  * Test API programmatic manipulation of properties, as opposed to configuration

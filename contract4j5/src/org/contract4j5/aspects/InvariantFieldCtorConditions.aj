@@ -65,7 +65,7 @@ public aspect InvariantFieldCtorConditions {
 		defaultFieldInvarTestExpressionMaker = maker; 
 	}
 	
-	public static aspect InvariantFieldCtorConditionsPerCtor extends AbstractConditions percflow(invarFieldCtorCall (ContractMarker)) {
+	public static aspect InvariantFieldCtorConditionsPerCtor extends AbstractConditions percflow(invarFieldCtorCall (Object)) {
 
 		private static class ListElem {
 			public Invar    invar;
@@ -88,9 +88,9 @@ public aspect InvariantFieldCtorConditions {
 		 * The enclosing scope of a ctor call. 
 		 * @note We prevent recursion into the aspect itself.
 		 */
-		pointcut invarFieldCtorCall (ContractMarker obj) : 
+		pointcut invarFieldCtorCall (Object obj) : 
 			invarCommon() && !within(InvariantFieldCtorConditions) &&
-			execution (ContractMarker+.new(..)) && target (obj);
+			execution (*.new(..)) && target (obj);
 				
 		/**
 		 * Field invariant pointcut within a constructor context. We match on 
@@ -99,17 +99,17 @@ public aspect InvariantFieldCtorConditions {
 		 * method calls within the c'tor will be ignored!
 		 * @note We prevent recursion into the aspect itself.
 		 */
-		pointcut invarFieldInCtor (Invar invar, ContractMarker obj, Object field) :
+		pointcut invarFieldInCtor (Invar invar, Object obj, Object field) :
 			invarCommon() && !within(InvariantFieldCtorConditions) &&
-			cflowbelow (invarFieldCtorCall (ContractMarker)) && 
-			set (@Invar * ContractMarker+.*) &&
+			cflowbelow (invarFieldCtorCall (Object)) && 
+			set (@Invar * *.*) &&
 			@annotation (invar) && target (obj) && args (field);
 			
 		/**
 		 * Observe any annotated field sets within the c'tor and record the 
 		 * invariant specification.
 		 */
-		after (Invar invar, ContractMarker obj, Object newFieldValue) returning : 
+		after (Invar invar, Object obj, Object newFieldValue) returning : 
 			invarFieldInCtor (invar, obj, newFieldValue) {
 			if (listOfAnnosFound == null) {
 				listOfAnnosFound = new HashMap<String,ListElem>();
@@ -127,7 +127,7 @@ public aspect InvariantFieldCtorConditions {
 		 * After the c'tor completes, if there were any annotated fields set, 
 		 * then test them.
 		 */
-		after(ContractMarker obj) returning : invarFieldCtorCall(obj) {
+		after(Object obj) returning : invarFieldCtorCall(obj) {
 			if (listOfAnnosFound == null) {
 				return;
 			}

@@ -18,21 +18,34 @@
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 
-package org.contract4j5.test;
+package org.contract4j5.util;
 
-import org.contract4j5.contract.Invar;
 import org.contract4j5.contract.Post;
-import org.contract4j5.contract.Pre;
 
 /**
- * Interface that declares some contracts, but fails to include the required
- * "@Contract" annotation. Expect warnings to be generated.
+ * Class subclassing the {@link NoContractInterfaceImpl} class the implements
+ * an interface w/out the "@Contract" annotation. 
  */
-@Invar ("$this.getFlag() > 0")
-public interface NoContractInterface extends ExampleBaseInterface {
-	@Pre   void setName (String s);
-	@Post  String getName ();
-	@Invar("$this.getName().length() > 0") 
-	@Post("!$this.getName.equals(\"bad\")") 
-	void m (String s);
+public class NoContractInterfaceDerivedImpl extends NoContractInterfaceImpl {
+	public String getName() {
+		return super.getName();
+	}
+	public void setName(String name) {
+		super.setName(name);
+	}
+	
+	public boolean getB() {
+		return super.getB();
+	}
+	
+	public int getFlag() { return super.getFlag(); }
+	
+	public void m(String s) {
+		super.m(s);
+	}
+	
+	@Post("")
+	public NoContractInterfaceDerivedImpl (int flag) { 
+		super(flag);
+	}
 }

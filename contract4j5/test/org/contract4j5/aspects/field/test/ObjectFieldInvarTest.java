@@ -18,7 +18,7 @@
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 
-package org.contract4j5.test;
+package org.contract4j5.aspects.field.test;
 
 import junit.framework.TestCase;
 
@@ -36,7 +36,7 @@ import org.contract4j5.testexpression.DefaultTestExpressionMaker;
 import org.contract4j5.testexpression.SimpleStringDefaultTestExpressionMaker;
 
 /**
- * Test field invariants when the field is a primitive.
+ * Test field invariants when the field is an Object.
  */
 public class ObjectFieldInvarTest extends TestCase {
 	@Contract
@@ -87,8 +87,6 @@ public class ObjectFieldInvarTest extends TestCase {
 
 	FieldInvarWithDefaultExpr[] fdefault;
 	Contract4J c4j;
-//	DefaultTestExpressionMaker savedMaker =
-//		InvariantFieldCtorConditions.getStaticDefaultFieldInvarTestExpressionMaker();
 	
 	@Override
 	protected void setUp() throws Exception {
