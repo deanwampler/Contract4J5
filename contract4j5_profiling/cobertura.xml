@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="cobertura" default="coverage-report">
+
+    <!-- <property name="base.dir" value="../scheduler" /> -->
+    <property name="base.dir" value="../videostore" />
+    <property name="lib.dir" value="${base.dir}/lib" />
+
+    <path id="common.libs">
+        <fileset dir="${lib.dir}">
+            <include name="**/*.jar" />
+        </fileset>
+        <fileset dir=".">
+            <include name="**/*.jar" />
+        </fileset>
+    </path>
+
+    <property name="cobertura.dir" value="." />
+
+    <path id="cobertura.classpath">
+        <fileset dir="${cobertura.dir}">
+            <include name="**/*.jar" />
+        </fileset>
+    </path>
+
+    <taskdef classpathref="cobertura.classpath" resource="tasks.properties" />
+
+    <target name="init">
+        <property name="cobertura.out.dir" value="${base.dir}/cobertura_results" />
+        <property name="cobertura.datafile" value="${cobertura.out.dir}/cobertura.ser" />
+        <property name="classes.dir" value="${cobertura.out.dir}/instrumented-classes" />
+        <property name="testreport.dir" value="${cobertura.out.dir}/reports" />
+
+        <delete dir="${cobertura.out.dir}" quiet="true" />
+        <mkdir dir="${cobertura.out.dir}" />
+    </target>
+
+    <target name="instrument" depends="init">
+        <cobertura-instrument todir="${classes.dir}" datafile="${cobertura.datafile}">
+            <ignore regex="org.*" />
+            <classpath refid="cobertura.classpath" />
+            <fileset dir="${base.dir}/bin">
+                <include name="**/*.class" />
+                <exclude name="**/*Test.class" />
+            </fileset>
+        </cobertura-instrument>
+    </target>
+
+    <target name="cover-test" depends="instrument">
+        <mkdir dir="${testreport.dir}/junit" />
+        <junit dir="${cobertura.out.dir}" maxmemory="512m" failureproperty="test.failure" printSummary="withOutAndErr" fork="true" showoutput="yes" forkmode="once" haltonerror="false">
+            <formatter type="plain" />
+            <classpath refid="cobertura.classpath" />
+            <classpath location="${classes.dir}" />
+            <classpath refid="common.libs" />
+            <classpath location="${base.dir}/bin" />
+            <batchtest todir="${testreport.dir}/junit">
+                <fileset dir="${base.dir}/bin/">
+                    <include name="**/*Test.class" />
+                </fileset>
+            </batchtest>
+        </junit>
+    </target>
+
+    <target name="coverage-report" depends="cover-test">
+        <cobertura-report destdir="${testreport.dir}" datafile="${cobertura.datafile}">
+            <fileset dir="${base.dir}/src">
+                <include name="**/*.java" />
+            </fileset>
+        </cobertura-report>
+    </target>
+</project>

@@ -53,4 +53,9 @@ public class NullExpressionInterpreter implements ExpressionInterpreter {
 	public TestResult invokeTest(String testExpression, TestContext context) {
 		return new TestResult(true);
 	}
+
+	public void registerContextObject(String name, Object object) {}
+	public void registerGlobalContextObject(String name, Object object) {}
+	public void unregisterContextObject(String name) {}
+	public void unregisterGlobalContextObject(String name) {}
 }

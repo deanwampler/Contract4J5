@@ -89,7 +89,6 @@ public class PrimitiveFieldInvarTest extends TestCase {
 		@Invar ("defaultField == 0") int defaultField = 0;	
 		public DefaultFieldWithoutAccessor(int i) {
 			defaultField = i;
-			System.err.format("defaultField = %d", defaultField);
 		}
 	}
 	
@@ -98,7 +97,6 @@ public class PrimitiveFieldInvarTest extends TestCase {
 		@Invar ("privateField == 0") private int privateField = 0;	
 		public PrivateFieldWithoutAccessor(int i) {
 			privateField = i;
-			System.err.format("privateField = %d", privateField);
 		}
 	}
 	
@@ -107,7 +105,6 @@ public class PrimitiveFieldInvarTest extends TestCase {
 		@Invar ("protectedField == 0") protected int protectedField = 0;	
 		public ProtectedFieldWithoutAccessor(int i) {
 			protectedField = i;
-			System.err.format("protectedField = %d", protectedField);
 		}
 	}
 	
@@ -116,7 +113,6 @@ public class PrimitiveFieldInvarTest extends TestCase {
 		@Invar ("publicField == 0") public int publicField = 0;	
 		public PublicFieldWithoutAccessor(int i) {
 			publicField = i;
-			System.err.format("publicField = %d", publicField);
 		}
 	}
 	

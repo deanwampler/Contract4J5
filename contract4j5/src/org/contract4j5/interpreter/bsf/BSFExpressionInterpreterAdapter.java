@@ -174,6 +174,11 @@ public class BSFExpressionInterpreterAdapter extends
 	}
 
 	@Override
+	protected Object doObjectInContext(String name) {
+		return bsfManager.lookupBean(name);
+	}
+	
+	@Override
 	protected void doRemoveContextChange(String oldSymbolName) {
 		try {
 			bsfManager.undeclareBean(oldSymbolName);

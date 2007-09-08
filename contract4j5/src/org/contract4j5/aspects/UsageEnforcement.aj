@@ -20,6 +20,7 @@
 
 package org.contract4j5.aspects;
 
+import org.contract4j5.contract.Contract;
 import org.contract4j5.contract.Invar;
 import org.contract4j5.contract.Post;
 import org.contract4j5.contract.Pre;
@@ -40,15 +41,15 @@ import org.contract4j5.contract.Pre;
  */
 public aspect UsageEnforcement {
 	pointcut preNotInContract() : 
-		! within (AbstractConditions.ContractMarker+) &&
+		! within (@Contract *+) &&
 		(execution (@Pre * *.*(..)) || execution (@Pre *.new(..)));
 
 	pointcut postNotInContract() : 
-		! within (AbstractConditions.ContractMarker+) &&
+		! within (@Contract *+) &&
 		(execution (@Post * *.*(..)) || execution (@Post *.new(..)));
 	
 	pointcut invarNotInContract() : 
-		! within (AbstractConditions.ContractMarker+) &&
+		! within (@Contract *+) &&
 		(execution (@Invar * *.*(..)) || execution (@Invar *.new(..)) ||
 		 get (@Invar * *) || set (@Invar * *));
 

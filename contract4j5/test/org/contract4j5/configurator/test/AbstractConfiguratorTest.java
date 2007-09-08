@@ -52,6 +52,10 @@ public class AbstractConfiguratorTest extends TestCase {
 		public void setOptionalKeywordSubstitutions(Map<String, String> optionalKeywordSubstitutions) {}
 		public void setTreatEmptyTestExpressionAsValidTest(boolean emptyOK) {}
 		public TestResult validateTestExpression(String testExpression, TestContext context) { return null;	}
+		public void registerContextObject(String name, Object object) {}
+		public void registerGlobalContextObject(String name, Object object) {}
+		public void unregisterContextObject(String name) {}
+		public void unregisterGlobalContextObject(String name) {}
 	}
 	
 	public static class StubContractEnforcer implements ContractEnforcer {

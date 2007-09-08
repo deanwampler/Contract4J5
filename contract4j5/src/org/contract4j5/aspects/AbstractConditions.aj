@@ -34,14 +34,8 @@ import org.contract4j5.testexpression.ParentTestExpressionFinderImpl;
  * aspects, methods, and fields that have Contract4J annotations applied to
  * them. This aspect provides some common features. Other aspects implement the
  * specific test types, etc.
- * Note that most PCDs will exclude static methods and look for
- * classes and subclasses that implement the ContractMarker interface, which is
- * injected using intertype declaration. We use this marker interface, rather than
- * just looking for the @Contract annotation, because this allows us to match 
- * subclass pointcuts, whereas using the @Contract annotation in PCDs only matches
- * on classes that explicitly use the annotation! Hence, the marker interface allows
- * us to change the typical behavior of annotations to fit the expected model for 
- * contracts, which should be inherited. Note, however, that for practical reasons,
+ * Note that most PCDs will exclude static methods and only match classes (and their
+ * subclasses) that are annotated with @Contract. Note that for practical reasons,
  * the @Contract annotation should always be used on subclasses anyway. One of those
  * reasons is to silence warnings that it is missing if you use the test annotations
  * in the subclasses!
@@ -56,13 +50,6 @@ import org.contract4j5.testexpression.ParentTestExpressionFinderImpl;
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 abstract public aspect AbstractConditions {
-	/**
-	 * Marker interface that is used with intertype declaration to support the
-	 * desired inheritance of contracts.
-	 */
-	public static interface ContractMarker {}
-	
-	declare parents: (@Contract *) implements ContractMarker;
 		
 	public static Contract4J getContract4J() {
 		return Contract4J.getInstance();
@@ -96,16 +83,9 @@ abstract public aspect AbstractConditions {
 	 * exclude the cflow of the {@link ContractEnforcer} object. Tests within tests can
 	 * happen if a test expression invokes a method call on the object and that method 
 	 * call has tests, for example.
-	 * Note that we match on types either annotated with @Contract or implementing
-	 * ContractMarker. The former should be redundant, but there appears to be an AJ bug
-	 * where ITD of an interface on a generic type causes this within(...) clause to not
-	 * match the type! It works fine on non-generic types. So, the hack workaround is to
-	 * explicitly look for the annotation, too. This means that, currently, subtypes of
-	 * generic types <i>must</i> include the @Contract annotation in order for the
-	 * contract to be applied.
+	 * Note that we match only on types annotated with @Contract and their subclasses.
 	 */
 	pointcut commonC4J() : 
-//		(within (@Contract *) || within (ContractMarker+)) &&
 		within (@Contract *+) &&
 		!cflow(execution (* ContractEnforcer+.*(..))) &&
 		!cflow(execution (ContractEnforcer+.new(..))); 

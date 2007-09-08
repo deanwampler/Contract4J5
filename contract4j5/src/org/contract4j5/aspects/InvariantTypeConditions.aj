@@ -24,7 +24,6 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.aspectj.lang.reflect.SourceLocation;
 import org.contract4j5.context.TestContext;
 import org.contract4j5.context.TestContextImpl;
-import org.contract4j5.contract.Contract;
 import org.contract4j5.contract.Invar;
 import org.contract4j5.errors.TestSpecificationError;
 import org.contract4j5.interpreter.TestResult;
@@ -54,30 +53,13 @@ public aspect InvariantTypeConditions extends AbstractConditions {
 	}
 
 	/**
-	 * Marker interface that is used with intertype declaration to support the
-	 * desired inheritance of type invariants.
-	 */
-	public static interface InvarMarker {}
-	
-	declare parents: (@Contract @Invar *) implements InvarMarker;
-		
-	/**
-	 * Preferred PCD; match on the marker interface or subclasses. This does not work with
-	 * generics (AJ bug??).
-	 */
-	pointcut invarTypeMethodUsingMarker() :
-		execution (!static * InvarMarker+.*(..)) &&
-		! (execution (* InvarMarker+.get*(..)) || execution (* InvarMarker+.set*(..))) &&
-		! cflow (execution (InvarMarker+.new(..)));
-	
-	/**
-	 * Support generics, by matching on the annotation. Requires derived classes to apply
+	 * Support generics by matching on the annotation. Requires derived classes to apply
 	 * the annotation explicitly!!
 	 */
 	pointcut invarTypeMethodUsingInvarAnno() :
-		execution (!static * (@Invar *).*(..)) &&
-		! (execution (* (@Invar *).get*(..)) || execution (* (@Invar *).set*(..))) &&
-		! cflow (execution ((@Invar *).new(..)));
+		execution (!static * (@Invar *+).*(..)) &&
+		! (execution (* (@Invar *+).get*(..)) || execution (* (@Invar *+).set*(..))) &&
+		! cflow (execution ((@Invar *+).new(..)));
 
 	/**
 	 * PCD for type (class, aspect, ...) invariant tests that should be evaluated
@@ -90,17 +72,13 @@ public aspect InvariantTypeConditions extends AbstractConditions {
 	 */
 	pointcut invarTypeMethod(Invar invar, Object obj) :
 		invarCommon() && !within (InvariantTypeConditions) &&
-		(invarTypeMethodUsingMarker() || invarTypeMethodUsingInvarAnno()) &&
+		invarTypeMethodUsingInvarAnno() &&
 		@this (invar) && this (obj);
 
-
-	pointcut invarTypeGetSetUsingMarker () :
-		(execution (* InvarMarker+.get*(..)) || execution (* InvarMarker+.set*(..))) &&
-		! cflowbelow (execution (InvarMarker+.new(..)));
-
+	
 	pointcut invarTypeGetSetUsingInvarAnno () :
-		(execution (* (@Invar *).get*(..)) || execution (* (@Invar *).set*(..))) &&
-		! cflowbelow (execution ((@Invar *).new(..)));
+		(execution (* (@Invar *+).get*(..)) || execution (* (@Invar *+).set*(..))) &&
+		! cflowbelow (execution ((@Invar *+).new(..)));
 
 	/**
 	 * PCD for type (class, aspect, ...) invariant tests that are only evaluated
@@ -110,15 +88,12 @@ public aspect InvariantTypeConditions extends AbstractConditions {
 	 */
 	pointcut invarTypeGetSet (Invar invar, Object obj) :
 		invarCommon() && !within (InvariantTypeConditions) &&
-		(invarTypeGetSetUsingMarker() || invarTypeGetSetUsingInvarAnno()) &&
+		invarTypeGetSetUsingInvarAnno() &&
 		@this (invar) && this (obj); 
 
 	
-	pointcut invarTypeCtorUsingMarker () : 
-		execution (InvarMarker+.new(..));
-
 	pointcut invarTypeCtorUsingInvarAnno () : 
-		execution ((@Invar *).new(..));
+		execution ((@Invar *+).new(..));
 
 	/**
 	 * PCD for type (class, aspect, ...) invariant tests for after advice after
@@ -127,7 +102,7 @@ public aspect InvariantTypeConditions extends AbstractConditions {
 	 */
 	pointcut invarTypeCtor (Invar invar, Object obj) : 
 		invarCommon() && !within (InvariantTypeConditions) &&
-		(invarTypeCtorUsingMarker() || invarTypeCtorUsingInvarAnno()) &&
+		invarTypeCtorUsingInvarAnno() &&
 		@this (invar) && this (obj);
 
 	

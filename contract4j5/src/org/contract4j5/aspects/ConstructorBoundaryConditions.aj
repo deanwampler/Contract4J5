@@ -80,13 +80,12 @@ public aspect ConstructorBoundaryConditions extends AbstractConditions {
 		preCommon() && !within(ConstructorBoundaryConditions) &&
 		execution (@Pre new (..)) && 
 		@annotation(pre) && target(Object);
-//	@annotation(pre) && target(ContractMarker);
 
 	/**
 	 * Constructor postcondition PCD.
 	 * @note We prevent recursion into the aspect itself.
 	 */
-	pointcut postCtor (Post post, Object obj) : // ContractMarker
+	pointcut postCtor (Post post, Object obj) : 
 		postCommon() && !within(ConstructorBoundaryConditions) &&
 		execution (@Post new (..)) &&
 		@annotation(post) && target(obj);
@@ -102,7 +101,6 @@ public aspect ConstructorBoundaryConditions extends AbstractConditions {
 	/**
 	 * After advice for constructors.
 	 */
-//	after (Post post, AbstractConditions.ContractMarker obj): postCtor (post, obj) { 
 	after (Post post, Object obj): postCtor (post, obj) { 
 		doTest (thisJoinPoint, obj, post, "Post", post.value(), post.message(),
 				getDefaultPostReturningVoidTestExpressionMaker());

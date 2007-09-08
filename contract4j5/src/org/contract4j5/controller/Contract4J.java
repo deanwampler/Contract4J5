@@ -126,7 +126,14 @@ public class Contract4J {
 		this.reporter = reporter;
 	}
 
-	public Contract4J() {}
+	public void registerGlobalContextObject(String name, Object object) {
+		getContractEnforcer().getExpressionInterpreter().registerGlobalContextObject(name, object);
+	}
 
+	public void unregisterGlobalContextObject(String name) {
+		getContractEnforcer().getExpressionInterpreter().unregisterGlobalContextObject(name);
+	}
+		
+	public Contract4J() {}
 }
 

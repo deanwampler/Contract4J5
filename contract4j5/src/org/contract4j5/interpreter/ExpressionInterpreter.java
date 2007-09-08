@@ -105,6 +105,8 @@ public interface ExpressionInterpreter {
 	 *   <tr><td><code>$args[n]</code></td>
 	 *   <td>The "nth" argument (0 indexed) to a method. The corresponding value for this key 
 	 *   should contain <code>$args[n]</code>, like the <code>$this</code>.</td></tr>
+	 *   <tr><td><code>c4j*</code></td>
+	 *   <td>Any symbol starting with the prefix "c4j" is reserved for internal use.</td></tr> 
 	 * </table>
 	 * These special keywords and substitutions are the default substitutions that are made on the 
 	 * test expression strings.
@@ -228,5 +230,29 @@ public interface ExpressionInterpreter {
 	 * test can't be executed.
 	 */
 	TestResult invokeTest (String testExpression, TestContext context);
-	
+
+	/**
+	 * The expression interpreters don't have the same visibility to classes and objects that 
+	 * the classes under test have. You can "help" the interpreters by fully qualifying class
+	 * names, e.g., when you want to call a static method in a test expression. The alternative
+	 * is to pre-register the class or object with the same name that you use for it in the
+	 * test expression. For example, you could do this in a static initializer block (for registering
+	 * static objects or classes) or in a constructor (in preparation for tests run later on instance
+	 * methods).
+	 * @param name
+	 * @param object
+	 */
+	void registerGlobalContextObject(String name, Object object);
+
+	/**
+	 * Unlike {@link #registerGlobalContextObject(String, Object)}, this method just 
+	 * registers the object for one test run!
+	 * @param name
+	 * @param object
+	 */
+	void registerContextObject(String name, Object object);
+
+	void unregisterGlobalContextObject(String name);
+	void unregisterContextObject(String name);
+
 }

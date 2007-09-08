@@ -83,4 +83,9 @@ public class ExpressionInterpreterStub extends ExpressionInterpreterHelper {
 	protected void doRemoveContextChange(String oldSymbolName) {
 		cmap.remove(oldSymbolName);
 	}
+
+	@Override
+	protected Object doObjectInContext(String name) {
+		return cmap.get(name);
+	}
 }

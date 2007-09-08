@@ -20,9 +20,9 @@
 
 package org.contract4j5.interpreter;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -111,11 +111,11 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 		Instance fieldi = context.getField();
 		Object   obj    =  obji   != null ? obji.getValue()   : null;
 		Object   field  =  fieldi != null ? fieldi.getValue() : null;
-		recordContextChange ("c4jOldThis",   obj);
-		recordContextChange ("c4jOldTarget", field);
+		recordContextChange ("c4jOldThis",   obj, false);
+		recordContextChange ("c4jOldTarget", field, false);
 		Object result = doDetermineOldValue (newExprStr, context);
-		removeContextChange ("c4jOldThis");
-		removeContextChange ("c4jOldTarget");
+		removeContextChange ("c4jOldThis", false);
+		removeContextChange ("c4jOldTarget", false);
 		return result;
 	}
 	
@@ -149,6 +149,7 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 		if (testResult.isPassed() == false) {
 			return testResult;
 		}
+		
 		String expr = testResult.getMessage();
 		getReporter().report(Severity.DEBUG, ExpressionInterpreterHelper.class,
 				"Invoking test (expanded): "+expr);
@@ -323,12 +324,10 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 	
 	private TestResult getTestCacheEntry(String testExpression, TestContext context) {
 		TestResult result = getTestCache().get(new TestCacheEntry(testExpression, context));
-//		System.err.println("getting test cache entry: result = "+result);
 		return result;
 	}
 
 	private void putTestCacheEntry(String testExpression, TestContext context, TestResult testResult) {
-//		System.err.println("putting test cache entry:");
 		getTestCache().put(new TestCacheEntry(testExpression, context), testResult);
 	}
 
@@ -369,7 +368,7 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 	 * @return TestResult with {@link TestResult#isPassed()} equals true and the new test 
 	 * expression returned by {@link TestResult#getMessage()} or, if an error occurred, 
 	 * an error message will be there and {@link TestResult#isPassed()} will return false.
-	 * @note We don't call {@link #recordContextChange(String, Object)} when doing the user
+	 * @note We don't call {@link #recordContextChange(String, Object, boolean)} when doing the user
 	 * substitutions, because they are just string substitutions without corresponding
 	 * objects.
 	 */
@@ -457,7 +456,7 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 				magicSymbolCounter++;
 				expression = 
 					substituteInTestExpression(expression, "\\$old\\s*\\(\\s*"+key+"\\s*\\)", magicSymbol);
-				recordContextChange (magicSymbol, obj);
+				recordContextChange (magicSymbol, obj, false);
 			}
 		}
 		
@@ -479,12 +478,12 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 		expression = substituteInTestExpression(expression, "\\$args",   "c4jArgs"  );
 		Instance i = context.getInstance();
 		Instance f = context.getField();
-		recordContextChange ("c4jThis",   i != null ? i.getValue() : null);
-		recordContextChange ("c4jTarget", f != null ? f.getValue() : null);
+		recordContextChange ("c4jThis",   i != null ? i.getValue() : null, false);
+		recordContextChange ("c4jTarget", f != null ? f.getValue() : null, false);
 		if (context.getMethodResult() != null) {
-			recordContextChange ("c4jReturn", context.getMethodResult().getValue());
+			recordContextChange ("c4jReturn", context.getMethodResult().getValue(), false);
 		}
-		recordContextChange ("c4jArgs", InstanceUtils.getInstanceValues(context.getMethodArgs()));
+		recordContextChange ("c4jArgs", InstanceUtils.getInstanceValues(context.getMethodArgs()), false);
 
 		expression = substituteArguments (expression, context);
 
@@ -493,7 +492,86 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 	    if (itemName != null && itemName.length() != 0) {
 	        expression = substituteInTestExpression(expression, "(?<!(c4jThis|c4jTarget)\\.)\\b"+itemName+"\\b", "c4jThis."+itemName);
 	    }
-		return new TestResult (true, expression);
+
+	    findReferencedObjectsAndLoad(expression, context);
+        return new TestResult (true, expression);
+	}
+
+	public void findReferencedObjectsAndLoad(String expression, TestContext context) {
+	    Pattern pattern = Pattern.compile("([\\w\\.]+)");
+	    String message = "";
+	    Matcher matcher = pattern.matcher(expression);
+	    while (matcher.find()) {
+	    	String bareItem = matcher.group(1);
+	    	if (bareItem.startsWith("c4j"))
+	    		continue;
+	    	if (resolveItem(bareItem, context) == false)
+	    		message += bareItem + ", ";
+        }
+	    if (message.length() > 0) {
+	    	getReporter().report(Severity.INFO, context.getClass(), "Expression may contain references to classes or objects ("+message+") that can't be resolved (expression = \""+expression+"\").");
+	    }
+	}
+	
+	protected boolean resolveItem(String bareItemName, TestContext context) {
+		String name = getPrefix(bareItemName, ".");
+		String previousName = bareItemName;
+		while (name.length() > 0 && !name.equals(previousName)) {
+			if (findAndLoad(name, context))
+				return true;
+			previousName = name;
+			name = getPrefix(name, ".");
+		}
+		return false;
+	}
+	
+	protected String getPrefix(String name, String separator) {
+    	int index  = name.lastIndexOf(separator);
+    	return (index <= 0) ? name : name.substring(0, index);
+	}
+	
+	protected boolean findAndLoad(String name, TestContext context) {
+		if (objectInContext(name) != null)
+			return true;
+		Instance instance = context.getInstance();
+		Class  clazz  = null;
+		Object object = null;
+		if (instance != null) {
+			clazz = instance.getClazz();
+			object = instance.getValue();
+		}
+// Code that attempted to find static fields (which it does successfully), but can't
+// load the field itself. This requires the user to prefix the field with $this in
+// test expressions.
+//		try {
+//			Field field = clazz.getField(name);
+//			System.err.println("  field: "+name+", object: "+object);
+//			Object ofield = field.get(object);
+//			System.err.println("  ofield: "+ofield);
+//			registerContextObject(name, field.get(object));
+//			context.setTestExpression(context.getTestExpression().replaceAll(name, "c4jThis."+name));
+//			return true;
+//		} catch (Exception e) {}
+		if (clazz != null && (clazz.getName().equals(name) || clazz.getSimpleName().equals(name))) {
+			registerContextObject(name, clazz);
+			return true;
+		}
+		if (loadClassIfPossible(name, name) == true)
+			return true;
+		if (clazz != null && loadClassIfPossible(name, clazz.getPackage().getName()+"."+name))
+			return true;
+		return false;
+	}
+	
+	protected boolean loadClassIfPossible(String symbol, String className) {
+		try {
+			Class<?> clazz = Class.forName(className);
+			registerContextObject(symbol, clazz);
+			return true;
+		} catch (ClassNotFoundException e) {
+//			System.err.println("not found: "+className);
+		}
+		return false;
 	}
 
 	/**
@@ -542,20 +620,65 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 		return buff.toString();
 	}
 
-	private Map<String, Object> rememberedContextChanges = new HashMap<String, Object>();
+
+	public Object objectInContext(String name) {
+		return doObjectInContext(name);
+	}
+
+	abstract protected Object doObjectInContext(String name);
+
+	/**
+	 * Register an object with the scripting language interpreter' context for one test run.
+	 */
+	public void registerContextObject(
+			String newSymbolName, 
+			Object newObject) {
+		recordContextChange(newSymbolName, newObject, false);
+	}
 	
 	/**
-	 * A hook that is called when {@link #expandKeywords(String, TestContext)} substitutes 
-	 * an expression with a new symbol name and a corresponding object exists that holds its
-	 * value. for a particular interpreter, capture this information in the implementation 
-	 * of this method for later use in {@link #doTest(String, TestContext)}.
+	 * Register an object globally, not just for one test.
 	 * @param newSymbolName
 	 * @param newObject
 	 */
-	protected void recordContextChange (
+	public void registerGlobalContextObject(
 			String newSymbolName, 
 			Object newObject) {
-		rememberedContextChanges.put(newSymbolName, newObject);
+		recordContextChange(newSymbolName, newObject, true);
+	}
+	
+	/**
+	 * Remove an object from the scripting language interpreter's context for one test run.
+	 */
+	public void unregisterContextObject(String existingSymbolName) {
+		removeContextChange(existingSymbolName, true);
+	}
+	
+	/**
+	 * Remove an object from the scripting language interpreter's context permanently.
+	 */
+	public void unregisterGlobalContextObject(String existingSymbolName) {
+		removeContextChange(existingSymbolName, true);
+	}
+	
+	
+	private Map<String, Object> rememberedContextChanges = new HashMap<String, Object>();
+	
+	/**
+	 * A hook that is called when an expression references an object by name and the object
+	 * needs to be made available to the interpreter. For a particular interpreter, capture 
+	 * this information in the implementation of this method for later use in {@link #doTest(String, TestContext)}.
+	 * @param newSymbolName
+	 * @param newObject
+	 * @param useGlobally is true if this object should be retained for all subsequent tests and not
+	 *   discarded at the end of the current test.
+	 */
+	protected void recordContextChange (
+			String newSymbolName, 
+			Object newObject, 
+			boolean useGlobally) {
+		if (useGlobally == false)
+			rememberedContextChanges.put(newSymbolName, newObject);
 		doRecordContextChange(newSymbolName, newObject);
 	}
 
@@ -575,10 +698,13 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 	 * A hook that is called when a previous context change should be "forgotten", so it
 	 * doesn't potentially cause confusion later on.
 	 * @param oldSymbolName
+	 * @param usedGlobally TODO
 	 */
 	void removeContextChange (
-			String oldSymbolName) {
-		rememberedContextChanges.remove(oldSymbolName);
+			String oldSymbolName, 
+			boolean usedGlobally) {
+		if (usedGlobally == false)
+			rememberedContextChanges.remove(oldSymbolName);
 		doRemoveContextChange(oldSymbolName);
 	}
 

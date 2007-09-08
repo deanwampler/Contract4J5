@@ -7,7 +7,7 @@
 	<meta name="author" content="Dean Wampler">
 	<meta name="keywords"
 	  content="aspect-oriented programming, aspect-oriented software development, object-oriented programming, ruby, ruby on rails, aspectj, aop, aosd, software">
-	<meta name="copyright" content="Copyright 2003-2006 Aspect Research Associates, All Rights Reserved">
+	<meta name="copyright" content="Copyright 2003-2007 Aspect Research Associates, All Rights Reserved">
   <link href="/stylesheets/styles.css?" media="all" rel="Stylesheet" type="text/css" />
   <script src="/javascripts/prototype.js?1145459934" type="text/javascript"></script>
 <script src="/javascripts/effects.js?1145459934" type="text/javascript"></script>
@@ -38,7 +38,8 @@
           <h3>History</h3>
 <table>
 	<tr><th colspan='2' align="left">Contract4J5 (Annotation Form)</th></tr>
-  <tr><td><a href="#v0710">v0.7.1.0</a></td><td>January 21, 2007</td></tr>                                    
+	<tr><td><a href="#v0800">v0.8.0.0</a></td><td>September 8, 2007</td></tr>                                    
+	<tr><td><a href="#v0710">v0.7.1.0</a></td><td>January 21, 2007</td></tr>                                    
 	<tr><td><a href="#v0700">v0.7.0.0</a></td><td>December 31, 2006</td></tr>
 	<tr><td><a href="#v0600">v0.6.0.0</a></td><td>September 21, 2006</td></tr>
 	<tr><td><a href="#v0500">v0.5.0.0</a></td><td>February 7, 2006</td></tr>
@@ -76,6 +77,7 @@ A project of <a href="http://www.aspectresearchassociates.com/">Aspect Research 
   	<li><a href='#usage'>How Do I Use Contract4J5?</a></li>
   	<li><a href='#showme'>Show Me the Code!</a></li>
   	<li><a href='#details'>Details of Contract Specifications</a></li>
+  	<li><a href='#limits'>Known Limitations</a></li>
   	<li><a href='#tips'>Miscellaneous Notes and Debugging Tips</a></li>
   	<li><a href='#config'>Configuration of Contract4J5</a></li>
 	</ul></li>
@@ -98,7 +100,7 @@ the top-level directory of the distribution.
 </p>
 <pre>
 ===========================================================
-Copyright 2005,2006 Dean Wampler
+Copyright 2005-2007 Contract4J Development Team
 
    Licensed under the Eclipse Public License - v 1.0; you
    may not use this software except in compliance with the 
@@ -125,8 +127,9 @@ licenses are described by the <code>LICENSE.txt</code> file.</p>
 <a href="http://www.contract4j.org">contract4j.org</a> web site. The 
 distributions are actually hosted on
 <a href="https://sourceforge.net/project/showfiles.php?group_id=130191">sourceforge.net</a>. 
-Anonymous Subversion access is also available at this path:
-<code>https://contract4j.svn.sourceforge.net/svnroot/contract4j</code>.</p>
+<!--Anonymous Subversion access is also available at this path:
+<code>https://contract4j.svn.sourceforge.net/svnroot/contract4j</code>.-->
+</p>
 
 <a name="versioning"></a>
 <h3>Naming and Versioning</h3>
@@ -142,10 +145,10 @@ href="http://www.contract4j.org">contract4j.org</a> (only <i>Contract4J5</i> is
 available through subversion).</p>
 
 <p>The newest release of <i>Contract4J5</i> described in these notes is
-version 0.7.0.
+version 0.8.0.
 It is "pre-1.0" while planned features are implemented, which may force 
 API changes that break backwards-compatibility. However, at this point, we anticipate
-no such problems going forward. A stable "1.0" release is planned for Spring 2007.</p>
+no such problems going forward. A stable "1.0" release is planned for Early 2008.</p>
 
 <a name="manifest"></a>
 <h3>Distribution Manifest</h3>
@@ -348,7 +351,7 @@ Previous versions of Contract4J5 embedded the Jakarta
 interpreter, an expression evaluator, to evaluate the test expressions in the
 annotations. However, there are quirks and limitations of Jexl (discussed
 throughout this README; search for "Jexl"...). Hence, starting with V0.7, 
-Contract4J5 now supports Jexl, Groovy, and JRuby as scripting engine 
+Contract4J5 supported Jexl, Groovy, and JRuby as scripting engine 
 alternatives. The tests exercise all three options. We recommend either Groovy
 or JRuby, depending on which language best suits your needs. However, Jexl
 offers the best runtime performance. By default, Groovy is used.
@@ -469,8 +472,8 @@ distribution. You may or may not want to remove them.</p>
 For Linux/Unix systems, sue these commands: 
 <pre>
 	1) cd ~/work		# or wherever...
-	3) cp .../contract4j5_060.tar.gz .
-	4) tar xvzf contract4j5_060.tar.gz 
+	3) cp .../contract4j5_XYZ.tar.gz .
+	4) tar xvzf contract4j5_XYZ.tar.gz 
 </pre>
 On Windows systems, Unzip the zip file to an appropriate location.</p>
 <p>
@@ -478,9 +481,9 @@ You will need to have Java 5 or Java 6 and AspectJ 5 installed to use Contract4J
 will need to select which scripting language you prefer for the annotation
 scripts used to define contracts. The distribution includes all the
 currently-supported options; Jakarta Commons Jexl
-1.0, Groovy 1.0 RC1 (or later), and JRuby 0.9 (or later). (Commons Logging
+1.1 (or later), Groovy 1.0 (or later), and JRuby 1.0 (or later). (Commons Logging
 is also included; it is required by Jexl).</p>
-<p>If you build Contract4J5 yourself, you will also need JUnit 3.8.1.</p>
+<p>If you build Contract4J5 yourself, you will also need JUnit 3.8.X.</p>
 <p>
 <b>Note:</b> You must use AspectJ v1.5.3 or later if you want to use load-time weaving
 (LTW) with Contract4J5.</p>
@@ -1260,6 +1263,55 @@ define field invariant tests, either on declared accessor methods or as
 invariants on the class itself. You can refer to the (implied) bare field in
 the test, as long as you declare an appropriate accessor method for it.</p>
 
+<a name="limits"></a>
+<h4>Known Limitations</h4>
+(New for V0.8.0) See also <a href="#tips">Miscellaneous Notes and Debugging Tips</a>.
+<ul>
+	<li><b>Referencing other objects, classes, and static methods/fields in test expressions.</b> The scripting engines all run in a different "context" from your running classes. This means that simply referring to an object in an expression doesn't guarantee that the script will see it, even if the same reference would compile if it were in regular Java code appearing in the class under test. Hence, there are limitations. C4J offers some help and where it won't be able to resolve a reference, here are a few workarounds:
+		<ul>
+			<li>In most cases, you can reference another instance field or method without the prefix <code>$this.</code>.</li>
+			<li>You can reference a static field or method in the class under test, <b>but</b> you must prefix it with <code>$this.</code>. This appears to be a limitation of some of the scripting engines supported.</li>
+			<li>You can reference another class in the same package as the class under test, without qualifying it with its package.</li>
+			<li>You can reference another class in a different package with its fully qualified name. However, <i>nested</i> classes probably won't work, because you have to use '$' instead of '.', as C4J will attempt to load the class in the scripting context using <code>Class.forName(...),</code>, which requires the '$' delimiter (<i>e.g.,</i> <code>com.foo.bar.MyClass$MyNestedClass</code>). However, when the expression is evaluated later, some scripting engines (<i>e.g.,</i> Groovy) will choke on the '$' (catch-22...). Workaround: use a validation method in your class under test to invoke the static method or use one of the other workarounds described here.</li>
+			<li>You can "preregister" classes or objects in your static initializer block or constructor. Using the static initializer block will usually be the easiest approach, especially if you need the classes or objects in constructor precondition tests. You can register the classes or objects in the constructor they are only needed by subsequent calls to instance methods. For example:
+	<pre>
+		// In Validator.java
+		package com.foo.bar1;
+		public class Validator {
+			public static boolean called = false;
+			public static boolean valid(String s) { return s != null && s.length() > 0; }
+			public        boolean valid2(String s) { return valid(s); }
+		}
+		
+		// In MyClass1.java
+		package com.foo.bar2; // different package
+		class MyClass1 {
+			static {
+				Contract4J.getInstance().registerGlobalContextObject("Validator", com.foo.bar1.Validator.class);
+			}
+			
+			@Pre("Validator.valid(name)")
+			public MyClass1(String name) {...}
+			
+		}
+		
+		// In MyClass2.java
+		package com.foo.bar2; // different package
+		import com.foo.bar1.Validator;
+		class MyClass2 {
+			static {
+				Contract4J.getInstance().registerGlobalContextObject("validator", new Validator());
+			}
+			
+			@Pre("validator.valid2(name)")
+			public MyClass2(String name) {...}
+			
+		}
+	</pre>
+			See <code>ConstructorBoundaryExpressionsWithObjectReferencesTest</code> for more examples.</li>
+		</ul>
+</ul>
+
 <a name="tips"></a>
 <h4>Miscellaneous Notes and Debugging Tips</h4>
 <ul>
@@ -1409,16 +1461,16 @@ To build Contract4J5 the following third-party tools are required, along with
 corresponding "HOME" environment variable definitions needed by the ant build 
 scripts:
 <ol>
-	<li>JUnit 3.8.1 (<code>JUNIT_HOME</code>)</li>
+	<li>JUnit 3.8.1+ (<code>JUNIT_HOME</code>)</li>
 	<li>Java 5 (<code>JAVA_HOME</code>)</li>
-	<li>AspectJ 1.5 (<code>ASPECTJ_HOME</code>) The 1.5.2a or later release is recommended (required if you do load-time weaving).</li>
+	<li>AspectJ 1.5.3+ (<code>ASPECTJ_HOME</code>)</li>
 	<li>Ant 1.6.2+ (<code>ANT_HOME</code>)</li>
-	<li>Jexl 1.0 (included in <code>lib</code> directory)</li>
-	<li>JRuby 0.9+ (included in <code>lib</code> directory)</li>
-	<li>Groovy 1.0RC1+ (included in <code>lib</code> directory)</li>
+	<li>Jexl 1.1+ (included in <code>lib</code> directory)</li>
+	<li>JRuby 1.0+ (included in <code>lib</code> directory)</li>
+	<li>Groovy 1.0+ (included in <code>lib</code> directory)</li>
 	<li>Commons Logging (<code>COMMONS_LOGGING_HOME</code>)</li>
 </ol>
-Also define <code>Contract4J5_HOME</code> to be the <code>.../contract4j5_060/contract4j5</code>
+Also define <code>Contract4J5_HOME</code> to be the <code>.../contract4j5_XYZ/contract4j5</code>
 directory where you installed it.</p>
 <p>
 For your convenience, you can use the build driver script "build.sh" or "build.bat". Edit the values of the environment variables in the corresponding scripts "env.sh" or "env.bat" for your environment.</p>
@@ -1440,6 +1492,7 @@ subclasses when they aren't annotated.</li>
 	<li>Support end-user extensions with custom annotations and "behavior" handlers.</li>
 	<li>Support tests on static methods.</li>
 	<li>Extend <code>@Pre</code> and <code>@Post</code> to support class-level annotations that will apply to all protected and public instance and static methods. For example, <code>@Contract @Pre @Post public class Foo {...}</code> would require all such methods to take non-null arguments and return non-null values, consistent with the way <code>@Pre</code> and <code>@Post</code> work by default today on methods. Add optional configuration properties to each annotation to set the protection level for which the annotation applies (<i>e.g.</i>, also do private methods.) and whether or not to exclude static methods.</li>
+	<li>Improve performance.</li>
 	<li>Mock out logging output so test runs don't generate so much output.</li>
 </ol>
 Here is a list of other possible enhancements.
@@ -1456,6 +1509,18 @@ Here is a list of other possible enhancements.
 <a name="notes"></a>
 <h3>Notes for Each Release</h3>
 
+<a name="v0800"></a>
+<h4>v0.8.0 September 8, 2007</h4>
+<h5>Bug Fixes in Test Expression Handling and Robustness Improvements</h5>
+
+<ol>
+	<li>Fixed bugs that prevented tests from being applied for generic classes.</li>
+	<li>Added support for referencing other objects and classes in test expressions, which was not well supported previously. (See the <a href="#limits">Known Limitations</a> for details.)</li>
+	<li>Increased the number of tests by ~15%.</li>
+</ol>
+<p>Thanks to Chuck H. for additional feedback and Sebastiaan v. E. and Daniel S. for finding bugs!
+</p>
+ 
 <a name="v0710"></a>
 <h4>v0.7.1 January 21, 2007</h4>
 <h5>Minor Documentation Bug Fixes</h5>
@@ -1554,7 +1619,7 @@ support user-defined annotations and associated behaviors, so that the
 infrastructure can be used for a variety of applications beyond Design by
 Contract.</p>
 
-<h5>More Robust Hanlding of String Literals With Test Expressions</h5>
+<h5>More Robust Handling of String Literals With Test Expressions</h5>
 <p>Previously, if a
 variable (field, parameter, <i>etc.</i>) name appeared within a string literal, it was
 sometimes replaced with an internal representation of the variable. This would break test expressions like <code>param1.equals("param1")</code>, where <code>param1</code> is a
@@ -1768,6 +1833,9 @@ in Aspect-Oriented Programming, enterprise Java, and Ruby on Rails. ARA also
 manages the <a href="http://www.aspectprogramming.com/">Aspect Programming</a> web site, where you will find more information and whitepapers on Contract4J5 and 
 Aspect-Oriented Software Development (AOSD), in general.</p>
 <p>
+We recently released the first version of a new AOP framework for Ruby called <a href="http://aquarium.rubyforge.org">Aquarium</a>. The examples included with Aquarium include a basic Design-by-Contract module.
+</p>
+<p>
 The <a href="http://www.ibm.com/developerworks/views/java/libraryview.jsp?search_by=aop@work:">AOP@Work series</a> at <a href="http://www.developerWorks.com">developerWorks.com</a> contains an article about <a href="http://www-128.ibm.com/developerworks/java/library/j-aopwork17.html">Contract4J5</a>. It introduces <i>Design by Contract</i> and how Contract4J5 supports it in Java. The article concludes with a discussion
 of emerging trends in Aspect-Oriented Design.</p>
 <p>
@@ -1776,6 +1844,10 @@ a talk in the Industry Track on Contract4J5, specifically on the lessoned learne
 writing generic, reusable aspects in AspectJ while implementing Contract4J5. 
 There was also a paper on aspect-oriented design patterns in
 Contract4J5 in the ACP4IS workshop. Both papers can be found <a href='http://www.aspectprogramming.com/papers'>here</a>.</p>
+<p>
+The AOSD.07 Conference in Vancouver, British Columbia (March 12-16) featured
+a talk in the Industry Track on emerging principles of Aspect-Oriented Design, based on adaptations of well-known
+Object-Oriented Design principles. The paper can be found <a href='http://aosd.net/2007/program/industry/I6-AspectDesignPrinciples.pdf'>here</a>.</p>
 <p>
 The definitive site on AOSD is <a href="http://www.aosd.net">http://www.aosd.net</a>.</p>
 <p>
@@ -1809,12 +1881,12 @@ Another project is the <a href="http://www.cs.iastate.edu/~leavens/JML/">Java Mo
 	</tr>
   </tbody>
 </table>
-					<div id="copyright">
-						Copyright ©2003-2007 
-						Aspect Research Associates. 
-							All Rights Reserved.
-					</div>
-      </div>
+		<div id="copyright">
+			Copyright &copy; 2003-2007 
+			Aspect Research Associates. 
+				All Rights Reserved.
+		</div>
+    </div>
 
 	  </div>
 		<br/>

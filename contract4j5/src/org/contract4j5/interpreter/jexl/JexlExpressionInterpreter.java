@@ -91,7 +91,7 @@ public class JexlExpressionInterpreter extends ExpressionInterpreterHelper {
 	
 	/**
 	 * Save the change by adding the new symbol name and object to the {@link #jexlContext} map.
-	 * @see org.contract4j5.interpreter.ExpressionInterpreterHelper#recordContextChange(java.lang.String, java.lang.Object)
+	 * @see org.contract4j5.interpreter.ExpressionInterpreterHelper#recordContextChange(java.lang.String, java.lang.Object, boolean)
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
@@ -102,7 +102,7 @@ public class JexlExpressionInterpreter extends ExpressionInterpreterHelper {
 	
 	/**
 	 * Remove the change by removing the symbol name and object from the {@link #jexlContext} map.
-	 * @see org.contract4j5.interpreter.ExpressionInterpreterHelper#removeContextChange(java.lang.String)
+	 * @see org.contract4j5.interpreter.ExpressionInterpreterHelper#removeContextChange(java.lang.String, boolean)
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
@@ -111,6 +111,12 @@ public class JexlExpressionInterpreter extends ExpressionInterpreterHelper {
 		map.remove(oldSymbolName);
 	}
 	
+	@Override
+	protected Object doObjectInContext(String name) {
+		Map<String, Object> map = jexlContext.getVars();
+		return map.get(name);
+	}
+
 	public JexlExpressionInterpreter() {
 		super();
 		jexlContext = JexlHelper.createContext();
