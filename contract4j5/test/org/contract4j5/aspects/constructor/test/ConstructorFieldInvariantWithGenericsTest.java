@@ -5,6 +5,7 @@ import junit.framework.TestCase;
 import org.contract4j5.contract.Contract;
 import org.contract4j5.contract.Invar;
 import org.contract4j5.errors.ContractError;
+import org.contract4j5.util.SystemUtils;
 import org.contract4j5.util.Valid;
 import org.contract4j5.util.Validatable;
 
@@ -36,7 +37,8 @@ public class ConstructorFieldInvariantWithGenericsTest extends TestCase {
 		}
 	}
 	
-	public void testFieldInvariantAllowsConstructorCallWithValidParameter() {
-		new GenericTestClass<Valid>(new Valid("foo"));
+	public void testFieldInvariantAllowsConstructorCallWithValidParameterExceptForJexl() {
+		if (!SystemUtils.isJexl())
+			new GenericTestClass<Valid>(new Valid("foo"));
 	}
 }

@@ -2,7 +2,7 @@
 <!--
   build.xml - "Ant" build file for Aspect Programming's "Contract4J5" library.
 
-  Copyright 2005-2006 Dean Wampler. All rights reserved.
+  Copyright 2005-2007 Dean Wampler. All rights reserved.
   http://www.aspectprogramming.com
  
   Licensed under the Eclipse Public License - v 1.0; you may not use this
@@ -21,10 +21,11 @@
 -->
 
 <!-- The conventional targets, "all", "build", etc. work with the core 
-	 Contract4J5 code rooted in the "src" and "test" directories. To build
-   the optional "spring" example, build the "all.spring" target. 
-   To build the load-time weaving (LTW) test, build "test.ltw" (load time weaving).
-   To build all three options, build "all.plus.extras"
+	Contract4J5 code rooted in the "src" and "test" directories. These targets
+	build the Groovy, Jexl, and JRuby support. 
+	To build the optional "spring" example, build the "all.spring" target. 
+	To build the load-time weaving (LTW) test, build "test.ltw" (load time weaving).
+	To build all these options, build "all.plus.extras"
 -->
 
 <project name="Contract4J5" default="all" basedir=".">
@@ -35,17 +36,17 @@
 	<patternset id="aspectj.exclusions" />
 
 	<target name="init" depends="common-init">
-		<!-- This release version -->
-		<property name="version"          value="050" />
 		<!-- "contract4J5.jar" contains the runtime deployment aspects and classes -->
-		<property name="project.jar"      value="contract4j5.jar" />
 		<!-- "contract4J5-test.jar" contains the test/example aspects and classes -->
-		<property name="project.test.jar" value="contract4j5-test.jar" />
+		<property name="version"           value="080" />
+		<property name="project.jar"       value="contract4j5.jar" />
+		<property name="project.test.jar"  value="contract4j5-test.jar" />
 		<path id="extra.classpath" />  <!-- empty by default -->
 	</target>
 
 	<target name="all" depends="init, clean, build, test, docs" />
 	<target name="all.plus.extras" depends="all, test.ltw, all.spring" />
+	
 	
 	<!-- Build an example using Spring configuration. -->
 	<target name="all.spring" depends="init">
@@ -54,20 +55,20 @@
 			<fileset file="${project.jar}" />
 		</path>
 		<antcall target="_all.spring">
-			<param name="src.reldir"       value="${spring.example.reldir}/src" />
-			<param name="test.reldir"      value="${spring.example.reldir}/test" />
+			<param name="src.reldir"          value="${spring.example.reldir}/src" />
+			<param name="test.reldir"         value="${spring.example.reldir}/test" />
 			<param name="src.classes.reldir"  value="${spring.example.reldir}/src-classes" />
 			<param name="test.classes.reldir" value="${spring.example.reldir}/test-classes" />
-			<param name="bin.reldir"       value="${spring.example.reldir}/bin"/>
-			<param name="javadocs.reldir"  value="${spring.example.reldir}/doc/api"/>
-			<param name="project.test.jar" value="${spring.example.reldir}/spring_example.test.jar" />
+			<param name="bin.reldir"          value="${spring.example.reldir}/bin"/>
+			<param name="javadocs.reldir"     value="${spring.example.reldir}/doc/api"/>
+			<param name="project.test.jar"    value="${spring.example.reldir}/spring_example.test.jar" />
 		</antcall>
 	</target>
 	<!-- No "project.jar" to build, so we skip the build target and just build the test jar. -->
 	<target name="_all.spring" depends="clean.spring, project-test.jar, test" />
 
 	<target name="build" depends="init, jar" />
-
+	
 	<target name="jar" depends="project.jar, project-test.jar" />
 	
 	<target name="project.jar" depends="compile">
@@ -81,9 +82,10 @@
 
 	<target name="project-test.jar" depends="compile-test">
 		<antcall target="binaryWeaveTemplate">
-			<param name="src.reldir"  value="${test.reldir}" />
+			<param name="src.reldir"     value="${test.reldir}" />
 			<param name="classes.reldir" value="${test.classes.reldir}" />
-			<param name="aspectpath"  value="${project.jar}" />
+			<param name="classpath"      value="project.classpath" />
+			<param name="aspectpath"     value="${project.jar}" />
 		</antcall>
 	</target>
 	
@@ -91,32 +93,34 @@
 	<target name="compile" depends="init">
 		<antcall target="compileAspectJTemplate">
 			<param name="classes.reldir" value="${src.classes.reldir}" />
-			<param name="aspectpath" value="" />
+			<param name="aspectpath"     value="" />
+			<param name="classpath"      value="project.classpath" />
 		</antcall>
 	</target>
-	
+
+
 	<!-- Compile the test java files with javac (there are no aj files), then use
 	     binary weaving in the jar step above. -->
-	<target name="compile-test" depends="init">
+	<target name="compile-test">
+		<antcall target="_compile-test">
+			<param name="classpath"   value="project.classpath" />
+		</antcall>
+	</target>
+
+	<target name="_compile-test">
 		<antcall target="compileJavaCTemplate">
-			<param name="src.reldir"  value="${test.reldir}" />
+			<param name="src.reldir"     value="${test.reldir}" />
 			<param name="classes.reldir" value="${test.classes.reldir}" />
+			<param name="classpath"      value="${classpath}" />
 		</antcall>
 	</target>
 	
-	<target name="test" depends="test.groovy, test.jruby, test.jexl" />
+	<target name="test" depends="test.jruby, test.groovy, test.jexl" />
 
 	<target name="test.groovy" depends="test.setup">
 		<antcall target="junitTemplate">
 			<param name="test.jar"         value="${project.test.jar}" />
 			<param name="interpreter.lang" value="groovy" />
-		</antcall>
-	</target>
-
-	<target name="test.jruby" depends="test.setup">
-		<antcall target="junitTemplate">
-			<param name="test.jar"         value="${project.test.jar}" />
-			<param name="interpreter.lang" value="jruby" />
 		</antcall>
 	</target>
 
@@ -127,26 +131,25 @@
 		</antcall>
 	</target>
 
+	<target name="test.jruby" depends="test.setup">
+		<antcall target="junitTemplate">
+			<param name="test.jar"         value="${project.test.jar}" />
+			<param name="interpreter.lang" value="jruby" />
+		</antcall>
+	</target>
+
 
 	<!-- Run the tests using load-time weaving (LTW).
 		 WARNING: This target requires AspectJ 1.5.3 or later!
 	 -->
 	<target name="test.load.time.weaving" depends="test.ltw" /> <!-- old name -->
-  <target name="test.ltw" depends="test.ltw.groovy, test.ltw.jruby, test.ltw.jexl" />
+	<target name="test.ltw" depends="test.ltw.groovy, test.ltw.jexl, test.ltw.jruby" />
 
 	<target name="test.ltw.groovy" depends="compile-test, test.setup, project.unwoven.test.jar">
 		<antcall target="junitTemplate.ltw">
 			<param name="test.jar"    value="unwoven-${project.test.jar}" />
 			<param name="aspectpath"  value="${project.jar}" />
 			<param name="interpreter.lang" value="groovy" />
-		</antcall>
-	</target>
-	
-	<target name="test.ltw.jruby" depends="compile-test, test.setup, project.unwoven.test.jar">
-		<antcall target="junitTemplate.ltw">
-			<param name="test.jar"    value="unwoven-${project.test.jar}" />
-			<param name="aspectpath"  value="${project.jar}" />
-			<param name="interpreter.lang" value="jruby" />
 		</antcall>
 	</target>
 	
@@ -158,6 +161,14 @@
 		</antcall>
 	</target>
 	
+	<target name="test.ltw.jruby" depends="compile-test, test.setup, project.unwoven.test.jar">
+		<antcall target="junitTemplate.ltw">
+			<param name="test.jar"    value="unwoven-${project.test.jar}" />
+			<param name="aspectpath"  value="${project.jar}" />
+			<param name="interpreter.lang" value="jruby" />
+		</antcall>
+	</target>
+		
 	<target name="project.unwoven.test.jar">
 		<jar destfile="unwoven-${project.test.jar}">  
 			<fileset dir="${test.classes.reldir}" />

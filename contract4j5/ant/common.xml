@@ -3,7 +3,7 @@
   common.xml - Ant "common" build file for AspectProgramming/Contract4J5 software.
   Imported into "build.xml".
 
-  Copyright 2005 Dean Wampler. All rights reserved.
+  Copyright 2005-2007 Dean Wampler. All rights reserved.
   http://www.aspectprogramming.com
 
   Licensed under the Eclipse Public License - v 1.0; you may not use this

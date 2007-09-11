@@ -52,7 +52,8 @@ public interface ExpressionInterpreter {
 		INVALID_WHITESPACE_IN_KEYWORD  ("Test Expression contains whitespace between \"$\" and one or more keywords. "),
 		MISSING_DOLLAR_SIGN_IN_KEYWORD ("Test Expression contains possible keywords without the leading \"$\": "),
 		UNRECOGNIZED_KEYWORDS          ("Test Expression contains unrecognized \"$\" keywords (mispellings?): "),
-		DUPLICATE_INVAR_TEST_EXPRESSIONS ("Two or more invariant test expressions found on corresponding types, methods, or constructors in the type hierarchy that appear to be different. They must be equal (ignoring whitespace): ");
+		DUPLICATE_INVAR_TEST_EXPRESSIONS ("Two or more invariant test expressions found on corresponding types, methods, or constructors in the type hierarchy that appear to be different. They must be equal (ignoring whitespace): "), 
+		FIELD_NAME_WITH_NO_FIELD       ("Test context has item/field name set, but no data to match it.");
 		
 		public String toString() { return message; }
 
@@ -254,5 +255,9 @@ public interface ExpressionInterpreter {
 
 	void unregisterGlobalContextObject(String name);
 	void unregisterContextObject(String name);
+
+	public String getScriptingEngineName();
+
+	public Object getObjectInContext(String name);
 
 }

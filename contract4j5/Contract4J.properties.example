@@ -44,8 +44,11 @@ org.contract4j5.ContractEnforcerReportErrors=true
 org.contract4j5.ContractEnforcerErrorReportingSeverity=FATAL
 org.contract4j5.ContractEnforcerIncludeStackTrace=false
 
-# The expression interpreter, e.g., the one based on JEXL.
-org.contract4j5.ExpressionInterpreter=org.contract4j5.interpreter.jexl.JexlExpressionInterpreter
+# The expression interpreter, e.g., the one based on Bean-Scripting Framework JEXL and Groovy interpreters
+# or the non-BSF JRuby interpreter (see the README for why we're not using BSF with JRuby).
+#org.contract4j5.ExpressionInterpreter=org.contract4j5.interpreter.bsf.groovy.GroovyBSFExpressionInterpreter
+#org.contract4j5.ExpressionInterpreter=org.contract4j5.interpreter.jruby.JRubyExpressionInterpreter
+org.contract4j5.ExpressionInterpreter=org.contract4j5.interpreter.bsf.jexl.JexlBSFExpressionInterpreter
 org.contract4j5.ExpressionInterpreterEmptyTestExpressionsValid=false
 # Optional keyword substitutions: "name1=value1, name2=value2, ..."
 org.contract4j5.ExpressionInterpreterOptionalKeywordSubstitutions=FOO=foo, BAR=bar

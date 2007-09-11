@@ -34,7 +34,7 @@ import org.contract4j5.interpreter.TestResult;
 public class ExpressionInterpreterStub extends ExpressionInterpreterHelper {
 
 	public ExpressionInterpreterStub() {
-		super();
+		super("stub");
 	}
 
 	@Override
@@ -85,7 +85,13 @@ public class ExpressionInterpreterStub extends ExpressionInterpreterHelper {
 	}
 
 	@Override
-	protected Object doObjectInContext(String name) {
+	protected Object doGetObjectInContext(String name) {
 		return cmap.get(name);
+	}
+
+	@Override
+	protected boolean isLikelyTestSpecificationError(
+			Throwable throwable) {
+		return false;
 	}
 }

@@ -3,7 +3,7 @@
   targets.xml - Common ant targets for AspectProgramming software.
   See common.xml for usage details.
 
-  Copyright 2005 Dean Wampler. All rights reserved.
+  Copyright 2005-2007 Dean Wampler. All rights reserved.
   http://www.aspectprogramming.com
 	 
   Licensed under the Eclipse Public License - v 1.0; you may not use this
@@ -83,6 +83,12 @@
 		</fileset>
 	</path>
 
+	<!-- <path id="jruby.classpath">
+		<fileset dir="${jruby.home}/lib">
+			<include name="jruby-complete-1.0.1.jar"/>
+		</fileset>
+	</path> -->
+	
 	<path id="ant.classpath">
 		<fileset dir="${ant.home}/lib">
 			<include name="**/*.jar"/>
@@ -96,10 +102,22 @@
 	</path>
 	
 	<path id="project.classpath">
-		<path refid="aspectj.classpath" />
+		<!-- <path refid="jruby.classpath" /> -->
 		<path refid="junit.classpath" />
+		<path refid="aspectj.classpath" />
 		<path refid="lib.classpath" />
 		<path refid="extra.classpath" />
+	</path>
+	<path id="jruby.project.classpath">
+		<!-- <path refid="junit.classpath" />
+		<path refid="jruby.classpath" /> -->
+		<path refid="project.classpath" />
+	</path>
+	<path id="groovy.project.classpath">
+		<path refid="project.classpath" />
+	</path>
+	<path id="jexl.project.classpath">
+		<path refid="project.classpath" />
 	</path>
 	
 
@@ -159,7 +177,7 @@
 			debug="${build.compiler.debug}"
 			debuglevel="${build.compiler.debuglevel}"
 			optimize="${build.compiler.optimize}">
-			<classpath refid="project.classpath"/>
+			<classpath refid="${classpath}"/>
 			<include name="**/*.java" />
 			<patternset refid="common.exclusions" />
 			<patternset refid="java.exclusions" />
@@ -196,9 +214,7 @@
 			<srcdir> 
 				<pathelement location="${src.reldir}" />
 			</srcdir>
-			<classpath>
-				<path refid="project.classpath"/>
-			</classpath>
+			<classpath refid="${classpath}"/>
 			<include name="**/*.java" />
 			<include name="**/*.aj" />
 			<patternset refid="common.exclusions" />
@@ -236,7 +252,7 @@
 			inpathDirCopyFilter="**/.svn/*,**/*.java,**/*.aj,**/*.class"
 			argfiles="${contract4j5.home}/ant/ajc.args.lst">
 			<classpath>
-				<path refid="project.classpath"/>
+				<path refid="${classpath}"/>
 			</classpath>
 			<patternset refid="common.exclusions" />
 			<patternset refid="java.exclusions" />
@@ -277,7 +293,7 @@
 			<classpath>
 				<pathelement location="${test.jar}"/>
 				<pathelement location="${project.jar}"/>
-				<path refid="project.classpath"/>
+				<path refid="${interpreter.lang}.project.classpath"/>
 			</classpath>
 			<batchtest>
 				<fileset refid="test.fileset" />

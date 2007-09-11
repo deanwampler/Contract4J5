@@ -24,6 +24,6 @@ package org.contract4j5.configurator;
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 public class NullConfigurator extends AbstractConfigurator {
-	protected void doConfigure() {
-	}
+	protected void doConfigure() {}
+	protected void doConfigureWithInterpreter(String whichInterpreter) {}
 }

@@ -56,6 +56,12 @@ public class AbstractConfiguratorTest extends TestCase {
 		public void registerGlobalContextObject(String name, Object object) {}
 		public void unregisterContextObject(String name) {}
 		public void unregisterGlobalContextObject(String name) {}
+		public String getScriptingEngineName() {
+			return null;
+		}
+		public Object getObjectInContext(String name) {
+			return null;
+		}
 	}
 	
 	public static class StubContractEnforcer implements ContractEnforcer {
@@ -99,6 +105,10 @@ public class AbstractConfiguratorTest extends TestCase {
 			c4j.setReporter(new WriterReporter());
 			c4j.setContractEnforcer(new StubContractEnforcer()); 
 			setParentTestExpressionFinder(new StubTestExpressionFinder(c4j));
+		}
+		protected void doConfigureWithInterpreter(String whichInterpreter)
+				throws ConfigurationFailedException {
+			doConfigure();
 		}
 
 		private void setParentTestExpressionFinder(ParentTestExpressionFinder ptef) {

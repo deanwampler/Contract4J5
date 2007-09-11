@@ -48,7 +48,7 @@ public class ExpressionInterpreterHelperTest extends TestCase {
 	 * Test method for 'org.contract4j5.interpreter.ExpressionInterpreterHelper.getOptionalKeywordSubstitutions()'
 	 */
 	public void testGetOptionalKeywordSubstitutions() {
-		assertNull (interpreter.getOptionalKeywordSubstitutions());
+		assertEquals (0, interpreter.getOptionalKeywordSubstitutions().size());
 	}
 
 	/*

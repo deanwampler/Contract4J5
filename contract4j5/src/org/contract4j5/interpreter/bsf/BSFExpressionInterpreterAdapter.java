@@ -37,21 +37,18 @@ public class BSFExpressionInterpreterAdapter extends
 
 	private BSFEngine  bsfEngine;
 	private BSFManager bsfManager;
-	private String     scriptingEngineName;
-
 	public BSFEngine  getBSFEngine()  { return bsfEngine;  }
 	public BSFManager getBSFManager() { return bsfManager; }
-	public String     getScriptingEngineName() { return scriptingEngineName; }
 	
 	public BSFExpressionInterpreterAdapter(String whichScriptingEngine) throws BSFException {
-		super();
+		super(whichScriptingEngine);
 		init(whichScriptingEngine);
 	}
 
 	public BSFExpressionInterpreterAdapter(
 			String whichScriptingEngine,
 			boolean treatEmptyTestExpressionAsValid) throws BSFException {
-		super(treatEmptyTestExpressionAsValid, new HashMap<String, String>());
+		super(whichScriptingEngine, treatEmptyTestExpressionAsValid, new HashMap<String, String>());
 		init(whichScriptingEngine);
 	}
 
@@ -59,7 +56,7 @@ public class BSFExpressionInterpreterAdapter extends
 			String whichScriptingEngine,
 			boolean treatEmptyTestExpressionAsValid, 
 			Map<String, String> optionalKeywordSubstitutions) throws BSFException {
-		super(treatEmptyTestExpressionAsValid, optionalKeywordSubstitutions);
+		super(whichScriptingEngine, treatEmptyTestExpressionAsValid, optionalKeywordSubstitutions);
 		init(whichScriptingEngine);
 	}
 	
@@ -174,7 +171,7 @@ public class BSFExpressionInterpreterAdapter extends
 	}
 
 	@Override
-	protected Object doObjectInContext(String name) {
+	protected Object doGetObjectInContext(String name) {
 		return bsfManager.lookupBean(name);
 	}
 	
@@ -196,4 +193,10 @@ public class BSFExpressionInterpreterAdapter extends
 				context.getInstance().getClazz().getSimpleName()+"."+scriptingEngineName : null;
 	}
 
+	@Override
+	protected boolean isLikelyTestSpecificationError(
+			Throwable throwable) {
+		// TODO what exceptions should we observe here?
+		return false;
+	}
 }

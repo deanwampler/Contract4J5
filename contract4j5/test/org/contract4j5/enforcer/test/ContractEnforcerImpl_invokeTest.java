@@ -38,6 +38,7 @@ import org.contract4j5.reporter.CompositeReporter;
 import org.contract4j5.reporter.Reporter;
 import org.contract4j5.reporter.Severity;
 import org.contract4j5.reporter.WriterReporter;
+import org.contract4j5.util.SystemUtils;
 
 /**
  * Test ContractEnforcerImpl.invokeTest(). Other tests for this class are handled by
@@ -143,11 +144,13 @@ public class ContractEnforcerImpl_invokeTest extends TestCase {
 		}
 	}
 
-	public void testResultKeywordIsUndefinedCausingAnError() {
+	public void testResultKeywordIsUndefinedCausingAnErrorExceptForJRuby() {
+		if (SystemUtils.isJRuby()) return;
 		doTestUnknownKeywordIsAnError("$result");
 	}
 
-	public void testUnknownKeywordIsAnError() {
+	public void testUnknownKeywordIsAnErrorExceptForJRuby() {
+		if (SystemUtils.isJRuby()) return;
 		doTestUnknownKeywordIsAnError("$foo");
 	}
 

@@ -20,7 +20,6 @@
 
 package org.contract4j5.interpreter;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -167,14 +166,7 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 		String errStr = "";
 		String warnStr = "";
 		if (empty(testExpression)) {
-			warnStr = "";
-			errStr  = InvalidTestExpression.EMPTY_EXPRESSION_ERROR.toString();
-			if (getTreatEmptyTestExpressionAsValidTest()) { 
-				// If here, consider empty test "valid"; just warn about it.
-				warnStr = InvalidTestExpression.EMPTY_EXPRESSION_WARNING.toString();
-				errStr  = "";
-			}
-			return makeValidateTestExpressionReturn (warnStr, errStr);
+			return handleEmptyTestExpression();
 		} 
 		String expression = testExpression.trim();
 		// Cache the test expressions with their contexts, so we only validate
@@ -182,25 +174,78 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 		TestResult cachedResult = getTestCacheEntry(expression, context);
 		if (cachedResult != null)
 			return cachedResult;
-		if (expression.contains("$this")) {
-			Instance i = context.getInstance();
-			if (i == null) {
-				errStr += InvalidTestExpression.THIS_KEYWORD_WITH_NO_INSTANCE.toString();
+		errStr = checkDollarThis(context, expression, errStr);
+		errStr = checkDollarTarget(context, expression, errStr);
+		errStr = checkFieldName(context, expression, errStr);
+		errStr = checkDollarArgs(context, expression, errStr);
+		errStr = checkDollarReturn(context, expression, errStr);
+		errStr = checkDollarOld(expression, errStr);
+		errStr = checkForInvalidWhitespace(expression, errStr);
+		errStr = checkForUnrecognizedKeywords(expression, errStr);
+		warnStr = checkForMissingDollarSignsInPossibleKeywords(expression,
+				warnStr);
+		TestResult testResult = makeValidateTestExpressionReturn (warnStr, errStr);
+		putTestCacheEntry(expression, context, testResult);
+		return testResult;
+	}
+
+	private String checkForMissingDollarSignsInPossibleKeywords(
+			String expression, String warnStr) {
+		Pattern p2 = Pattern.compile ("(?:(^|[^\\$]))\\s*(this|target|args|return|old)");
+		Matcher m2 = p2.matcher (expression);
+		boolean firstBadDollar = true;
+		String  badDollarKeyWords = "";
+		while (m2.find()) {
+			String match   = m2.group();
+			//String keyWord = match.replaceAll("(^|[^\\$])\\s*", "");
+			if (firstBadDollar) {
+				firstBadDollar = false;
+			} else {
+				badDollarKeyWords += ", ";
 			}
+			badDollarKeyWords += match;
 		}
-		if (expression.contains("$target")) {
-			Instance i = context.getField();
-			if (i == null) {
-				errStr += InvalidTestExpression.TARGET_KEYWORD_WITH_NO_TARGET.toString();
+		if (badDollarKeyWords.length() > 0) {
+			warnStr += InvalidTestExpression.MISSING_DOLLAR_SIGN_IN_KEYWORD.toString()+badDollarKeyWords+". ";			
+		}
+		return warnStr;
+	}
+
+	private String checkForUnrecognizedKeywords(String expression, String errStr) {
+		if (getAllowUnrecognizedKeywords())
+			return errStr;
+		Pattern p1 = Pattern.compile ("\\$\\w+");
+		Matcher m1 = p1.matcher (expression);
+		boolean firstBad = true;
+		String badKeyWords = "";
+		while (m1.find()) {
+			String match = m1.group();
+			if (match.equals("$this")   || match.equals("$target") ||
+				match.equals("$return") || match.equals("$args")   ||
+				match.equals("$old")) {
+				continue;
 			}
+			if (firstBad) {
+				firstBad = false;
+			} else {
+				badKeyWords += ", ";
+			}
+			badKeyWords += match;
 		}
-		if (expression.contains("$return") && context.getMethodResult() == null) {
-			errStr += InvalidTestExpression.RETURN_KEYWORD_WITH_NO_RETURN.toString();
+		if (badKeyWords.length() > 0) {
+			errStr += InvalidTestExpression.UNRECOGNIZED_KEYWORDS.toString()+badKeyWords+". ";			
 		}
-		Object[] args = context.getMethodArgs();
-		if (expression.contains("$args") && (args == null || args.length == 0)) {
-			errStr += InvalidTestExpression.ARGS_KEYWORD_WITH_NO_ARGS.toString();
+		return errStr;
+	}
+
+	private String checkForInvalidWhitespace(String expression, String errStr) {
+		if (expression.matches("\\$\\s+.*")) { // '$' followed by whitespace
+			errStr += InvalidTestExpression.INVALID_WHITESPACE_IN_KEYWORD.toString();			
 		}
+		return errStr;
+	}
+
+	private String checkDollarOld(String expression, String errStr) {
 		if (expression.contains("$old")) {
 			if (expression.matches("\\$old\\s*[^\\(]+")) {  // "$old ..." w/out "(..)"
 				errStr += InvalidTestExpression.OLD_KEYWORD_NO_ARGS.toString();			
@@ -223,50 +268,65 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 				}
 			}
 		}
-		if (expression.matches("\\$\\s+.*")) { // '$' followed by whitespace
-			errStr += InvalidTestExpression.INVALID_WHITESPACE_IN_KEYWORD.toString();			
+		return errStr;
+	}
+
+	private String checkDollarArgs(TestContext context, String expression,
+			String errStr) {
+		Object[] args = context.getMethodArgs();
+		if (expression.contains("$args") && (args == null || args.length == 0)) {
+			errStr += InvalidTestExpression.ARGS_KEYWORD_WITH_NO_ARGS.toString();
 		}
-		Pattern p1 = Pattern.compile ("\\$\\w+");
-		Matcher m1 = p1.matcher (expression);
-		boolean firstBad = true;
-		String badKeyWords = "";
-		while (m1.find()) {
-			String match = m1.group();
-			if (match.equals("$this")   || match.equals("$target") ||
-				match.equals("$return") || match.equals("$args")   ||
-				match.equals("$old")) {
-				continue;
+		return errStr;
+	}
+
+	private String checkDollarReturn(TestContext context, String expression,
+			String errStr) {
+		if (expression.contains("$return") && context.getMethodResult() == null) {
+			errStr += InvalidTestExpression.RETURN_KEYWORD_WITH_NO_RETURN.toString();
+		}
+		return errStr;
+	}
+
+	private String checkFieldName(TestContext context, String expression,
+			String errStr) {
+		// TODO: The following is too restrictive.
+//		if (!empty(context.getItemName()) && (context.getField() == null || context.getInstance() == null))
+//			errStr += InvalidTestExpression.FIELD_NAME_WITH_NO_FIELD.toString();
+		return errStr;
+	}
+
+	private String checkDollarTarget(TestContext context, String expression,
+			String errStr) {
+		if (expression.contains("$target")) {
+			Instance i = context.getField();
+			if (i == null) {
+				errStr += InvalidTestExpression.TARGET_KEYWORD_WITH_NO_TARGET.toString();
 			}
-			if (firstBad) {
-				firstBad = false;
-			} else {
-				badKeyWords += ", ";
+		}
+		return errStr;
+	}
+
+	private String checkDollarThis(TestContext context, String expression,
+			String errStr) {
+		if (expression.contains("$this")) {
+			Instance i = context.getInstance();
+			if (i == null) {
+				errStr += InvalidTestExpression.THIS_KEYWORD_WITH_NO_INSTANCE.toString();
 			}
-			badKeyWords += match;
 		}
-		if (badKeyWords.length() > 0) {
-			errStr += InvalidTestExpression.UNRECOGNIZED_KEYWORDS.toString()+badKeyWords+". ";			
+		return errStr;
+	}
+
+	protected TestResult handleEmptyTestExpression() {
+		String warnStr = "";
+		String errStr  = InvalidTestExpression.EMPTY_EXPRESSION_ERROR.toString();
+		if (getTreatEmptyTestExpressionAsValidTest()) { 
+			// If here, consider empty test "valid"; just warn about it.
+			warnStr = InvalidTestExpression.EMPTY_EXPRESSION_WARNING.toString();
+			errStr  = "";
 		}
-		Pattern p2 = Pattern.compile ("(?:(^|[^\\$]))\\s*(this|target|args|return|old)");
-		Matcher m2 = p2.matcher (expression);
-		boolean firstBadDollar = true;
-		String  badDollarKeyWords = "";
-		while (m2.find()) {
-			String match   = m2.group();
-			//String keyWord = match.replaceAll("(^|[^\\$])\\s*", "");
-			if (firstBadDollar) {
-				firstBadDollar = false;
-			} else {
-				badDollarKeyWords += ", ";
-			}
-			badDollarKeyWords += match;
-		}
-		if (badDollarKeyWords.length() > 0) {
-			warnStr += InvalidTestExpression.MISSING_DOLLAR_SIGN_IN_KEYWORD.toString()+badDollarKeyWords+". ";			
-		}
-		TestResult testResult = makeValidateTestExpressionReturn (warnStr, errStr);
-		putTestCacheEntry(expression, context, testResult);
-		return testResult;
+		return makeValidateTestExpressionReturn (warnStr, errStr);
 	}
 	
 	// For purposes of validation, we only need to save the test expression,
@@ -531,14 +591,14 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 	}
 	
 	protected boolean findAndLoad(String name, TestContext context) {
-		if (objectInContext(name) != null)
+		if (getObjectInContext(name) != null)
 			return true;
 		Instance instance = context.getInstance();
-		Class  clazz  = null;
-		Object object = null;
+		Class<?>  clazz  = null;
+//		Object object = null;
 		if (instance != null) {
 			clazz = instance.getClazz();
-			object = instance.getValue();
+//			object = instance.getValue();
 		}
 // Code that attempted to find static fields (which it does successfully), but can't
 // load the field itself. This requires the user to prefix the field with $this in
@@ -558,7 +618,7 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 		}
 		if (loadClassIfPossible(name, name) == true)
 			return true;
-		if (clazz != null && loadClassIfPossible(name, clazz.getPackage().getName()+"."+name))
+		if (clazz != null && Character.isUpperCase(name.charAt(0)) && loadClassIfPossible(name, clazz.getPackage().getName()+"."+name))
 			return true;
 		return false;
 	}
@@ -568,7 +628,7 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 			Class<?> clazz = Class.forName(className);
 			registerContextObject(symbol, clazz);
 			return true;
-		} catch (ClassNotFoundException e) {
+		} catch (Throwable th) {
 //			System.err.println("not found: "+className);
 		}
 		return false;
@@ -621,11 +681,11 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 	}
 
 
-	public Object objectInContext(String name) {
-		return doObjectInContext(name);
+	public Object getObjectInContext(String name) {
+		return doGetObjectInContext(name);
 	}
 
-	abstract protected Object doObjectInContext(String name);
+	abstract protected Object doGetObjectInContext(String name);
 
 	/**
 	 * Register an object with the scripting language interpreter' context for one test run.
@@ -742,20 +802,56 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 		return s == null || s.trim().length() == 0;
 	}
 	
-	public ExpressionInterpreterHelper() {
-		super();
-	}
-
-	public ExpressionInterpreterHelper(
-			boolean treatEmptyTestExpressionAsValid, 
-			Map<String, String> optionalKeywordSubstitutions) {
-		super();
-		this.treatEmptyTestExpressionAsValidTest = treatEmptyTestExpressionAsValid;
-		this.optionalKeywordSubstitutions = optionalKeywordSubstitutions;
-	}
-
 	private Reporter reporter;
 	protected Reporter getReporter() {
 		return reporter;
-	}	
+	}
+
+	protected String scriptingEngineName;
+	public String getScriptingEngineName() { return scriptingEngineName; }	
+
+	protected boolean allowUnrecognizedKeywords = false;
+	
+	/**
+	 * Languages like JRuby allow '$' in variable names (in JRuby, they mark global variables). 
+	 * This flag disables the error checking for unrecognized "$word" in expressions.
+	 * @return
+	 */
+	public boolean getAllowUnrecognizedKeywords() { return allowUnrecognizedKeywords; }
+	public void    setAllowUnrecognizedKeywords(boolean b) { allowUnrecognizedKeywords = b; }
+	
+	protected TestResult makeExceptionThrownTestResult(String expression, TestContext context,
+			Throwable throwable) {
+		String msg = "Evaluation of expression \""+expression+"\" failed: " + makeThrowableMsg(throwable);
+		if (isLikelyTestSpecificationError(throwable)) 
+			return new TestResult (false, msg, new TestSpecificationError(msg, throwable));
+		return new TestResult(false, msg);
+	}
+
+	abstract protected boolean isLikelyTestSpecificationError(Throwable throwable);
+
+	protected String makeThrowableMsg(Throwable throwable) {
+		Throwable cause  = throwable.getCause();
+		if (cause != null)
+			return throwable.toString() + " (cause: " + cause.toString() + ")";
+		return throwable.toString();
+	}
+
+	protected String didNotReturnBooleanErrorMessage(String testExpression, Object value) {
+		return "Expression \""+testExpression+"\" did not return a boolean. \""+value.toString()+"\" returned instead.";
+	}
+
+	public ExpressionInterpreterHelper(String scriptingEngineName) {
+		this(scriptingEngineName, false, new HashMap<String, String>());
+	}
+	
+	public ExpressionInterpreterHelper(
+			String scriptingEngineName, 
+			boolean treatEmptyTestExpressionAsValid, Map<String, String> optionalKeywordSubstitutions) {
+		super();
+		this.scriptingEngineName = scriptingEngineName;
+		this.treatEmptyTestExpressionAsValidTest = treatEmptyTestExpressionAsValid;
+		this.optionalKeywordSubstitutions = optionalKeywordSubstitutions;
+	}
+	
 }

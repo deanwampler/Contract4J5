@@ -117,6 +117,13 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 		}
 	}
 
+	@Override
+	protected void doConfigureWithInterpreter(String whichInterpreter)
+			throws ConfigurationFailedException {
+		expressionInterpreterAlreadySet = true;
+		instantiateExpressionInterpreter(whichInterpreter);
+	}
+	
 	private Reporter globalReporter = null;
 	private Severity globalReporterThreshold = null;
 	private java.io.Writer globalWriterReporterWriter = null;
@@ -136,6 +143,7 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 
 	private StringBuffer errors = new StringBuffer(1024);
 	private Reporter reporter;
+	private boolean expressionInterpreterAlreadySet = false;
 	
 	protected void initSystemProps(Properties properties) {
 		for (Object key: properties.keySet()) {
@@ -164,6 +172,7 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 	private Contract4J getContract4J() {
 		return Contract4J.getInstance();
 	}
+	
 	protected boolean processEnableTestTypeProperty(String propKey, String propValue) {
 		for (int i = 0; i < EnabledPropertyKeys.values().length; i++) {
 			if (propKey != null && 
@@ -242,7 +251,8 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 					break;
 					case ExpressionInterpreter:
 					{
-						ei = (ExpressionInterpreter) propertyToObject(propValue);
+						if (expressionInterpreterAlreadySet == false)
+							ei = (ExpressionInterpreter) propertyToObject(propValue);
 					}
 					break;
 					case ExpressionInterpreterEmptyTestExpressionsValid:
@@ -398,7 +408,7 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 	}
 
 	private Object propertyToObject(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-		Class clazz = Class.forName(className);
+		Class<?> clazz = Class.forName(className);
 		Object object = clazz.newInstance();
 		return object;
 	}
@@ -532,4 +542,31 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 		return Severity.parse(propValue);
 	}
 	
+	// Hack!
+	private void instantiateExpressionInterpreter(String whichInterpreter) throws ConfigurationFailedException {
+		if (tryInstantiatingExpressionInterpreter(whichInterpreter) != null)
+			return;
+		String prefix = "org.contract4j5.interpreter.";
+		String fullName = prefix + whichInterpreter + "." + interpreterToClassName(whichInterpreter) + "ExpressionInterpreter";
+		if (tryInstantiatingExpressionInterpreter(fullName) != null)
+			return;
+		String fullName2 = prefix + "bsf" + whichInterpreter + "." + interpreterToClassName(whichInterpreter) + "BSFExpressionInterpreter";
+		if (tryInstantiatingExpressionInterpreter(fullName2) != null)
+			return;
+		throw new ConfigurationFailedException("Could not find a class for interpreter \""+whichInterpreter+"\"!");
+	}
+	
+	private String interpreterToClassName(String whichInterpreter) {
+		int end = whichInterpreter.contains("ruby") ? 2 : 1;
+		return whichInterpreter.substring(0, end).toUpperCase() + whichInterpreter.substring(end);
+	}
+	
+	private Object tryInstantiatingExpressionInterpreter(String className) {
+		try {
+			ei = (ExpressionInterpreter) propertyToObject(className);
+			return ei;
+		} catch (Throwable th) {}
+		return null;
+	}
+
 }

@@ -58,4 +58,10 @@ public class NullExpressionInterpreter implements ExpressionInterpreter {
 	public void registerGlobalContextObject(String name, Object object) {}
 	public void unregisterContextObject(String name) {}
 	public void unregisterGlobalContextObject(String name) {}
+	public String getScriptingEngineName() {
+		return null;
+	}
+	public Object getObjectInContext(String name) {
+		return null;
+	}
 }

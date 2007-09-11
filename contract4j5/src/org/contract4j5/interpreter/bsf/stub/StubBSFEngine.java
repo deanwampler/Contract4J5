@@ -24,9 +24,6 @@ import java.util.Map;
 
 import org.apache.bsf.BSFException;
 import org.apache.bsf.BSFManager;
-import org.apache.commons.jexl.ExpressionFactory;
-import org.apache.commons.jexl.JexlContext;
-import org.apache.commons.jexl.JexlHelper;
 import org.contract4j5.interpreter.bsf.BSFEngineAdapter;
 import org.contract4j5.interpreter.bsf.jexl.JexlBSFEngine;
 

@@ -24,6 +24,11 @@ public abstract class AbstractConfigurator implements Configurator {
 	public void configure() throws ConfigurationFailedException {
 		doConfigure();
 	}
+	public void configureWithInterpreter(String whichInterpreter)
+			throws ConfigurationFailedException {
+		doConfigureWithInterpreter(whichInterpreter);
+	}
 	
 	abstract protected void doConfigure() throws ConfigurationFailedException;
+	abstract protected void doConfigureWithInterpreter(String whichInterpreter) throws ConfigurationFailedException;
 }

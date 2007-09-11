@@ -20,6 +20,7 @@
 
 package org.contract4j5.interpreter.jexl;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.jexl.Expression;
@@ -80,8 +81,8 @@ public class JexlExpressionInterpreter extends ExpressionInterpreterHelper {
 		try {
 			Object o = expr.evaluate(jexlContext);
 			if (!(o instanceof Boolean)) {
-				String ostr = o != null ? o.getClass().getName() : "null object";
-				return new TestResult (false, "Test returned \""+ostr+"\", instead of boolean for test expression \""+testExpression+"\".");
+				String msg = didNotReturnBooleanErrorMessage(testExpression, o);
+				return new TestResult (false, msg);
 			}
 			return new TestResult ((Boolean) o);
 		} catch (Exception e) {
@@ -112,13 +113,26 @@ public class JexlExpressionInterpreter extends ExpressionInterpreterHelper {
 	}
 	
 	@Override
-	protected Object doObjectInContext(String name) {
+	@SuppressWarnings("unchecked")
+	protected Object doGetObjectInContext(String name) {
 		Map<String, Object> map = jexlContext.getVars();
 		return map.get(name);
 	}
 
 	public JexlExpressionInterpreter() {
-		super();
+		this(false, new HashMap<String,String>());
+	}
+
+	public JexlExpressionInterpreter(
+			boolean treatEmptyTestExpressionAsValid, Map<String, String> optionalKeywordSubstitutions) {
+		super("jexl", treatEmptyTestExpressionAsValid, optionalKeywordSubstitutions);
 		jexlContext = JexlHelper.createContext();
+	}
+
+	@Override
+	protected boolean isLikelyTestSpecificationError(
+			Throwable throwable) {
+		// TODO what Jexl exceptions should we observe here?
+		return false;
 	}
 }

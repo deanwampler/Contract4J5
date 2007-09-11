@@ -5,6 +5,7 @@ import junit.framework.TestCase;
 import org.contract4j5.contract.Contract;
 import org.contract4j5.contract.Invar;
 import org.contract4j5.errors.ContractError;
+import org.contract4j5.util.SystemUtils;
 import org.contract4j5.util.Valid;
 import org.contract4j5.util.Validatable;
 
@@ -39,7 +40,9 @@ public class TypeInvariantWithGenericsTest extends TestCase {
 		}
 	}
 	
-	public void testTypeInvariantAllowsFieldSetsWithValidParameter() {
+	public void testTypeInvariantAllowsFieldSetsWithValidParameterExceptForJexl() {
+		if (SystemUtils.isJexl())
+			return;
 		GenericTestClass<Valid> gtc = new GenericTestClass<Valid>(new Valid("bar"));
 		gtc.setValidatable(new Valid("foo"));
 	}

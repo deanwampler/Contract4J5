@@ -57,6 +57,9 @@ public class PropertiesConfiguratorTest extends TestCase {
 		protected void doConfigure() {
 			wasCalled = true;
 		}
+		protected void doConfigureWithInterpreter(String whichInterpreter) {
+			wasCalled = true;
+		}
 	}
 	
 	public static class StubReporter implements Reporter {
@@ -261,6 +264,12 @@ public class PropertiesConfiguratorTest extends TestCase {
 		public void registerGlobalContextObject(String name, Object object) {}
 		public void unregisterContextObject(String name) {}
 		public void unregisterGlobalContextObject(String name) {}
+		public String getScriptingEngineName() {
+			return null;
+		}
+		public Object getObjectInContext(String name) {
+			return null;
+		}
 	}
 	
 	public void testSetExpressionInterpreterThroughProperty() {
@@ -610,9 +619,9 @@ public class PropertiesConfiguratorTest extends TestCase {
 	private void unsetProp(EnabledPropertyKeys enabledPropertyKey) {
 		System.clearProperty(PropertiesConfigurator.PROPERTY_PREFIX + enabledPropertyKey);
 	}
-	private void unsetProp(String name) {
-		System.clearProperty(PropertiesConfigurator.PROPERTY_PREFIX + name);
-	}
+//	private void unsetProp(String name) {
+//		System.clearProperty(PropertiesConfigurator.PROPERTY_PREFIX + name);
+//	}
 	
 //	public void testDumpSystemProps() {
 //		Properties props = System.getProperties();

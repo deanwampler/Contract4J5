@@ -40,6 +40,7 @@ public class JexlBSFEngine extends BSFEngineAdapter {
 	
 	private JexlContext jexlContext = null;
 
+	@SuppressWarnings("unchecked")
 	protected Map<String, Object> getVariableMap() {
 		if (jexlContext == null)
 			jexlContext = JexlHelper.createContext();

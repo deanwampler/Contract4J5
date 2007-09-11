@@ -95,6 +95,7 @@ public class PrimitiveFieldInvarTest extends TestCase {
 	@Contract
 	public static class PrivateFieldWithoutAccessor {
 		@Invar ("privateField == 0") private int privateField = 0;	
+		public int getPrivateField() { return privateField; }
 		public PrivateFieldWithoutAccessor(int i) {
 			privateField = i;
 		}

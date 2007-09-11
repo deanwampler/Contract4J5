@@ -19,6 +19,7 @@
  */
 package org.contract4j5.interpreter.bsf.jruby;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.bsf.BSFException;
@@ -61,18 +62,19 @@ public class JRubyBSFExpressionInterpreter extends BSFExpressionInterpreterAdapt
 	}
 
 	public JRubyBSFExpressionInterpreter() throws BSFException {
-		super("jruby");
+		this(false, new HashMap<String,String>());
 	}
 	
 	public JRubyBSFExpressionInterpreter(
 			boolean treatEmptyTestExpressionAsValid) throws BSFException {
-		super("jruby", treatEmptyTestExpressionAsValid);
+		this(treatEmptyTestExpressionAsValid, new HashMap<String,String>());
 	}
 	
 	public JRubyBSFExpressionInterpreter(
 			boolean treatEmptyTestExpressionAsValid, 
 			Map<String, String> optionalKeywordSubstitutions) throws BSFException {
 		super("jruby", treatEmptyTestExpressionAsValid, optionalKeywordSubstitutions);
+		setAllowUnrecognizedKeywords(true);
 	}
 	
 }

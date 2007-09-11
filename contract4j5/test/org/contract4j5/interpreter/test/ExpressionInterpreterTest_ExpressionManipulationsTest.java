@@ -2,16 +2,15 @@ package org.contract4j5.interpreter.test;
 
 import java.util.Map;
 
+import junit.framework.TestCase;
+
 import org.apache.bsf.BSFException;
 import org.contract4j5.context.TestContext;
-import org.contract4j5.context.TestContextImpl;
 import org.contract4j5.contract.Pre;
 import org.contract4j5.controller.Contract4J;
 import org.contract4j5.instance.Instance;
 import org.contract4j5.interpreter.ExpressionInterpreterHelper;
-import org.contract4j5.interpreter.bsf.groovy.GroovyBSFExpressionInterpreter;
-
-import junit.framework.TestCase;
+import org.contract4j5.interpreter.groovy.GroovyExpressionInterpreter;
 
 public class ExpressionInterpreterTest_ExpressionManipulationsTest extends TestCase {
 
@@ -62,26 +61,26 @@ public class ExpressionInterpreterTest_ExpressionManipulationsTest extends TestC
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		interpreter = new GroovyBSFExpressionInterpreter();
+		interpreter = new GroovyExpressionInterpreter();
 	}
 	
 	public void testFindReferencedObjectsAndLoadCanFindQualifiedClass() throws BSFException {
-		assertNull(interpreter.objectInContext(COLOR_FQN));
+		assertNull(interpreter.getObjectInContext(COLOR_FQN));
 		interpreter.findReferencedObjectsAndLoad("c4jX.foo "+COLOR_FQN+".BLUE", new NullTestContext());
-		assertNotNull(interpreter.objectInContext(COLOR_FQN));
+		assertNotNull(interpreter.getObjectInContext(COLOR_FQN));
 	}
 	
 	public void testFindReferencedObjectsAndLoadCantFindUnqualifiedClass() throws BSFException {
-		assertNull(interpreter.objectInContext("Color"));
+		assertNull(interpreter.getObjectInContext("Color"));
 		interpreter.findReferencedObjectsAndLoad("c4jX.foo Color.BLUE", new NullTestContext());
-		assertNull(interpreter.objectInContext("Color"));
+		assertNull(interpreter.getObjectInContext("Color"));
 	}
 		
 	public void testFindReferencedObjectsAndLoadCanFindUnqualifiedClassIfPreviouslyRegistered() throws BSFException {
-		assertNull(interpreter.objectInContext("Color"));
+		assertNull(interpreter.getObjectInContext("Color"));
 		Contract4J.getInstance().registerGlobalContextObject("Color", Color.class);
 		interpreter.findReferencedObjectsAndLoad("c4jX.foo Color.BLUE", new NullTestContext());
-		assertNull(interpreter.objectInContext("Color"));
+		assertNull(interpreter.getObjectInContext("Color"));
 	}
 	
 	static class Tester {
@@ -93,9 +92,9 @@ public class ExpressionInterpreterTest_ExpressionManipulationsTest extends TestC
 	}
 	
 	public void testFindReferencedObjectsAndLoadCanFindUnqualifiedClassIfPreviouslyRegisteredInAStaticInitializer() throws BSFException {
-		assertNull(interpreter.objectInContext("Color"));
+		assertNull(interpreter.getObjectInContext("Color"));
 		Contract4J.getInstance().registerGlobalContextObject("Color", Color.class);
 		interpreter.findReferencedObjectsAndLoad("c4jX.foo Color.BLUE", new NullTestContext());
-		assertNull(interpreter.objectInContext("Color"));
+		assertNull(interpreter.getObjectInContext("Color"));
 	}
 }

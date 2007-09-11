@@ -1,5 +1,7 @@
 package org.contract4j5.interpreter.test;
 
+import junit.framework.TestCase;
+
 import org.contract4j5.configurator.Configurator;
 import org.contract4j5.configurator.test.ConfiguratorForTesting;
 import org.contract4j5.context.TestContext;
@@ -7,14 +9,10 @@ import org.contract4j5.context.TestContextImpl;
 import org.contract4j5.contract.Contract;
 import org.contract4j5.contract.Post;
 import org.contract4j5.contract.Pre;
-import org.contract4j5.errors.ContractError;
-import org.contract4j5.errors.TestSpecificationError;
 import org.contract4j5.instance.Instance;
 import org.contract4j5.interpreter.ExpressionInterpreterHelper;
 import org.contract4j5.interpreter.TestResult;
-import org.contract4j5.interpreter.bsf.groovy.GroovyBSFExpressionInterpreter;
-
-import junit.framework.TestCase;
+import org.contract4j5.interpreter.groovy.GroovyExpressionInterpreter;
 
 /**
  * Tests that you can reference other objects and class-static fields and methods in test expressions.
@@ -45,7 +43,7 @@ public class ExpressionsWithOtherObjectsTest extends TestCase {
 		super.setUp();
 		Configurator c = new ConfiguratorForTesting();
 		c.configure();
-		interpreter = new GroovyBSFExpressionInterpreter();
+		interpreter = new GroovyExpressionInterpreter();
 	}
 
 	public static class TestClass {

@@ -9,23 +9,7 @@
 # Notes:
 #  1) This currently has problems on Windows, running under cygwin. I
 #     don't think the conversion to/from windows path formats is correct
-#     (TBD). However, the build.bat script works fine.
-#
-#  Copyright 2005, 2006 Dean Wampler. All rights reserved.
-#  http://www.aspectprogramming.com
-# 
-#  Licensed under the Eclipse Public License - v 1.0; you may not use this
-#  software except in compliance with the License. You may obtain a copy of the 
-#  License at
-# 
-#      http://www.eclipse.org/legal/epl-v10.html
-# 
-#  A copy is also included with this distribution. See the "LICENSE" file.
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
+#     (TBD). Try the build.bat script.
 # 
 #  @author deanwampler <dean@aspectprogramming.com>
 
@@ -44,14 +28,15 @@ case "$osname" in
 		;;
 esac
 
-# Ignore the definitions for componens that you don't use.
+# Ignore the definitions for components that you don't use.
 
-: ${CONTRACT4J5_ROOT:=$HOME/src/java/contract4j5_070/trunk}
+: ${CONTRACT4J5_ROOT:=$HOME/src/java/contract4j5_080/trunk}
 : ${CONTRACT4J5_HOME:=$CONTRACT4J5_ROOT/contract4j5}
 : ${CONTRACT4J5_LIB:=$CONTRACT4J5_HOME/lib}
-: ${ANT_HOME:=$TOOL_HOME/Apache/apache-ant-1.6.2}
+: ${ANT_HOME:=$TOOL_HOME/Apache/apache-ant-1.6.5}
 : ${ASPECTJ_HOME:=$TOOL_HOME/aspectj1.5}
 : ${JAVA_HOME:=$TOOL_HOME/jdk$JDK_VERSION}
+: ${JRUBY_HOME:=$TOOL_HOME/jruby-1.0.1}
 : ${JUNIT_HOME:=$TOOL_HOME/junit3.8.1}
 : ${SPRING_HOME:=$TOOL_HOME/Spring/spring-framework-1.2.5}
 
@@ -67,6 +52,7 @@ case "$osname" in
 	ANT_HOME=`cygpath --windows --path "$ANT_HOME"`
 	ASPECTJ_HOME=`cygpath --windows --path "$ASPECTJ_HOME"`
 	JAVA_HOME=`cygpath --windows --path "$JAVA_HOME"`
+	JRUBY_HOME=`cygpath --windows --path "$JRUBY_HOME"`
 	JUNIT_HOME=`cygpath --windows --path "$JUNIT_HOME"`
 	SPRING_HOME=`cygpath --windows --path "$SPRING_HOME"`
 	CLASSPATH=`cygpath --windows --path "$CLASSPATH"`
@@ -86,6 +72,7 @@ export ASPECTJ_HOME
 export CONTRACT4J5_HOME
 export CONTRACT4J5_LIB
 export JAVA_HOME
+export JRUBY_HOME
 export JUNIT_HOME
 export SPRING_HOME
 export TOOL_HOME

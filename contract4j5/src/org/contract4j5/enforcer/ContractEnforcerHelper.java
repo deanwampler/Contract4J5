@@ -20,14 +20,13 @@
 
 package org.contract4j5.enforcer;
 
-import org.apache.bsf.BSFException;
 import org.contract4j5.context.TestContext;
 import org.contract4j5.errors.ContractError;
 import org.contract4j5.errors.TestSpecificationError;
 import org.contract4j5.instance.Instance;
 import org.contract4j5.interpreter.ExpressionInterpreter;
 import org.contract4j5.interpreter.TestResult;
-import org.contract4j5.interpreter.bsf.BSFExpressionInterpreterAdapter;
+import org.contract4j5.interpreter.groovy.GroovyExpressionInterpreter;
 import org.contract4j5.reporter.Reporter;
 import org.contract4j5.reporter.Severity;
 import org.contract4j5.utils.StringUtils;
@@ -44,11 +43,7 @@ public abstract class ContractEnforcerHelper implements ContractEnforcer {
 	
 	public ExpressionInterpreter getExpressionInterpreter() {
 		if (expressionInterpreter == null) {
-			try {
-				expressionInterpreter = new BSFExpressionInterpreterAdapter("groovy");
-			} catch (BSFException e) {
-				throw new NullPointerException(e.toString());
-			}
+			expressionInterpreter = new GroovyExpressionInterpreter();
 		}
 		return expressionInterpreter;
 	}

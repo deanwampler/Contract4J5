@@ -3,7 +3,7 @@
  */
 package org.contract4j5.aspects.constructor.test;
 
-import org.contract4j5.aspects.constructor.test.ConstructorBoundaryExpressionsWithObjectReferencesTest.Color;
+import org.contract4j5.aspects.constructor.test.ConstructorBoundaryGroovyExpressionsWithObjectReferencesTest.Color;
 
 class ColorValidator {
 	public boolean called = false;

@@ -5,6 +5,7 @@ import junit.framework.TestCase;
 import org.contract4j5.contract.Contract;
 import org.contract4j5.contract.Post;
 import org.contract4j5.errors.ContractError;
+import org.contract4j5.util.SystemUtils;
 import org.contract4j5.util.Valid;
 import org.contract4j5.util.Validatable;
 
@@ -38,6 +39,11 @@ public class ConstructorPostconditionWithGenericsTest extends TestCase {
 	}
 	
 	public void testPostconditionAllowsConstructorCallWithValidParameter() {
-		new GenericTestClass<Valid>(new Valid("foo"));
+		try {
+			new GenericTestClass<Valid>(new Valid("foo"));
+			if (SystemUtils.isJexl()) fail();
+		} catch (ContractError ce) {
+			if (!SystemUtils.isJexl())  fail();
+		}
 	}
 }

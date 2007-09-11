@@ -35,7 +35,8 @@ import org.contract4j5.errors.ContractError;
 import org.contract4j5.errors.TestSpecificationError;
 import org.contract4j5.interpreter.ExpressionInterpreter;
 import org.contract4j5.interpreter.bsf.BSFExpressionInterpreterAdapter;
-import org.contract4j5.interpreter.bsf.jexl.JexlBSFExpressionInterpreter;
+import org.contract4j5.interpreter.groovy.GroovyExpressionInterpreter;
+import org.contract4j5.interpreter.jexl.JexlExpressionInterpreter;
 import org.contract4j5.reporter.Reporter;
 import org.contract4j5.reporter.Severity;
 import org.contract4j5.reporter.WriterReporter;
@@ -72,11 +73,11 @@ public class DefaultContractEnforcerTest extends TestCase {
 	public void testConstructor2() {
 		ContractEnforcer ce = new DefaultContractEnforcer();
 		assertFalse(ce.getIncludeStackTrace());
-		assertTrue(BSFExpressionInterpreterAdapter.class == ce.getExpressionInterpreter().getClass());
+		assertTrue(GroovyExpressionInterpreter.class == ce.getExpressionInterpreter().getClass());
 	}
 
 	public void testSetGetExpressionInterpreter() throws BSFException {
-		ExpressionInterpreter ei = new JexlBSFExpressionInterpreter();
+		ExpressionInterpreter ei = new JexlExpressionInterpreter();
 		contractEnforcer.setExpressionInterpreter(ei);
 		assertSame(ei, contractEnforcer.getExpressionInterpreter());
 	}
