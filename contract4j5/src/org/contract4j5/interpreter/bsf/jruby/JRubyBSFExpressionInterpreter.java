@@ -78,11 +78,11 @@ public class JRubyBSFExpressionInterpreter extends BSFExpressionInterpreterAdapt
 		setAllowUnrecognizedKeywords(true);
 	}
 
-		public static void main(String args[]) {
-				try {
-						new JRubyBSFExpressionInterpreter();
-				} catch (Throwable th) {
-						th.printStackTrace();
-				}
+	public static void main(String args[]) {
+		try {
+			new JRubyBSFExpressionInterpreter();
+		} catch (Throwable th) {
+			th.printStackTrace();
 		}
+	}
 }
