@@ -32,7 +32,6 @@
 	<dirname property="imported.basedir" file="${ant.file.imported}"/>
 	<property environment="environ"/>
 	<property name="ant.home"         value="${environ.ANT_HOME}"/>
-	<property name="jruby.home"       value="${environ.JRUBY_HOME}"/>
 	<property name="aspectj.home"     value="${environ.ASPECTJ_HOME}"/>
 	<property name="contract4j5.home" value="${environ.CONTRACT4J5_HOME}"/>
 	<property name="contract4j5.lib"  value="${environ.CONTRACT4J5_LIB}"/>
@@ -48,6 +47,5 @@
 	<property name="test.classes.reldir" value="test-classes"/>
 	<property name="bin.reldir"          value="bin"/>
 	<property name="javadocs.reldir"     value="doc/api"/>
-	<property name="jruby.reldir"        value="../contract4j5_jruby"/>
 	<property name="spring.example.reldir" value="../Contract4J5WithSpring"/>
 </project>

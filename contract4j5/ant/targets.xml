@@ -83,12 +83,6 @@
 		</fileset>
 	</path>
 
-	<!-- <path id="jruby.classpath">
-		<fileset dir="${jruby.home}/lib">
-			<include name="jruby-complete-1.0.1.jar"/>
-		</fileset>
-	</path> -->
-	
 	<path id="ant.classpath">
 		<fileset dir="${ant.home}/lib">
 			<include name="**/*.jar"/>
@@ -102,15 +96,12 @@
 	</path>
 	
 	<path id="project.classpath">
-		<!-- <path refid="jruby.classpath" /> -->
 		<path refid="junit.classpath" />
 		<path refid="aspectj.classpath" />
 		<path refid="lib.classpath" />
 		<path refid="extra.classpath" />
 	</path>
 	<path id="jruby.project.classpath">
-		<!-- <path refid="junit.classpath" />
-		<path refid="jruby.classpath" /> -->
 		<path refid="project.classpath" />
 	</path>
 	<path id="groovy.project.classpath">
@@ -283,6 +274,7 @@
 		<echo></echo>
 		<echo>  Test start time:      ${start}</echo>
 		<echo>  Interpreter Language: ${interpreter.lang}</echo>
+		<mkdir dir="junit_reports" />
 	</target>
 
 	<target name="_junitTemplate">
@@ -406,6 +398,7 @@
 		<delete dir="${bin.reldir}" />  <!-- Eclipse output dir, not tools... -->
 		<delete dir="${src.classes.reldir}" />
 		<delete dir="${test.classes.reldir}" />
+		<delete dir="junit_reports" />
 		<delete>
 			<fileset file="${project.test.jar}" />
 			<fileset dir="." includes="TEST-*.txt" />

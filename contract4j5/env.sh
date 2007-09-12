@@ -36,7 +36,6 @@ esac
 : ${ANT_HOME:=$TOOL_HOME/Apache/apache-ant-1.6.5}
 : ${ASPECTJ_HOME:=$TOOL_HOME/aspectj1.5}
 : ${JAVA_HOME:=$TOOL_HOME/jdk$JDK_VERSION}
-: ${JRUBY_HOME:=$TOOL_HOME/jruby-1.0.1}
 : ${JUNIT_HOME:=$TOOL_HOME/junit3.8.1}
 : ${SPRING_HOME:=$TOOL_HOME/Spring/spring-framework-1.2.5}
 
@@ -52,18 +51,18 @@ case "$osname" in
 	ANT_HOME=`cygpath --windows --path "$ANT_HOME"`
 	ASPECTJ_HOME=`cygpath --windows --path "$ASPECTJ_HOME"`
 	JAVA_HOME=`cygpath --windows --path "$JAVA_HOME"`
-	JRUBY_HOME=`cygpath --windows --path "$JRUBY_HOME"`
 	JUNIT_HOME=`cygpath --windows --path "$JUNIT_HOME"`
 	SPRING_HOME=`cygpath --windows --path "$SPRING_HOME"`
 	CLASSPATH=`cygpath --windows --path "$CLASSPATH"`
-	CLASSPATH="$ANT_HOME\\lib\\ant.jar;$ASPECTJ_HOME\\lib\\aspectjrt.jar;$ASPECTJ_HOME\\lib\\aspectjtools.jar;$JUNIT_HOME\\junit.jar;$SPRING_HOME\\dist\\spring.jar;$CLASSPATH"
-#$CONTRACT4J5_LIB\\commons-logging.jar;$CONTRACT4J5_LIB\\commons-jexl-1.0.jar;
+	CLASSPATH="$ANT_HOME\\lib\\ant.jar;$ASPECTJ_HOME\\lib\\aspectjrt.jar;$ASPECTJ_HOME\\lib\\aspectjtools.jar;$JUNIT_HOME\\junit.jar;$CLASSPATH
+	#;$SPRING_HOME\\dist\\spring.jar"
+	#$CONTRACT4J5_LIB\\commons-logging.jar;$CONTRACT4J5_LIB\\commons-jexl-1.0.jar;
 
 	;;
     *)
 	PATH=$JAVA_HOME/bin:$ASPECTJ_HOME/bin:$ANT_HOME/bin:$PATH
 	CLASSPATH=$ANT_HOME/lib/ant.jar:$ASPECTJ_HOME/lib/aspectjrt.jar:$ASPECTJ_HOME/lib/aspectjtools.jar:$JUNIT_HOME/junit.jar:$CLASSPATH
-#:$SPRING_HOME/dist/spring.jar:$CONTRACT4J5_LIB/commons-logging.jar:$CONTRACT4J5_LIB/commons-jexl-1.0.jar:
+	#:$SPRING_HOME/dist/spring.jar:$CONTRACT4J5_LIB/commons-logging.jar:$CONTRACT4J5_LIB/commons-jexl-1.0.jar:
 	;;
 esac
 
@@ -72,7 +71,6 @@ export ASPECTJ_HOME
 export CONTRACT4J5_HOME
 export CONTRACT4J5_LIB
 export JAVA_HOME
-export JRUBY_HOME
 export JUNIT_HOME
 export SPRING_HOME
 export TOOL_HOME
