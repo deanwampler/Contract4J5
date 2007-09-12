@@ -62,8 +62,7 @@ public class ConfiguratorForTesting extends AbstractConfigurator {
 		c4j.setContractEnforcer(ce);
 		try {
 			if (whichInterpreter == null || whichInterpreter.length() == 0)
-				throw new ConfigurationFailedException("no interpreter specified");
-//				expressionInterpreter = new GroovyExpressionInterpreter();
+				expressionInterpreter = new GroovyExpressionInterpreter();
 			else if (whichInterpreter.equalsIgnoreCase("groovy")) 
 				expressionInterpreter = new GroovyExpressionInterpreter();
 			else if (whichInterpreter.equalsIgnoreCase("jexl"))
