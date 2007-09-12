@@ -30,6 +30,7 @@ import org.contract4j5.interpreter.bsf.BSFExpressionInterpreterAdapter;
 /**
  * A JRuby subclass of {@link BSFExpressionInterpreterAdapter} that registers the 
  * engine with the bean scripting framework, which we do with a static initializer. 
+ * @deprecated
  */
 public class JRubyBSFExpressionInterpreter extends BSFExpressionInterpreterAdapter {
 
