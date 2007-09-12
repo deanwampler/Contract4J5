@@ -295,7 +295,7 @@
 				<pathelement location="${project.jar}"/>
 				<path refid="${interpreter.lang}.project.classpath"/>
 			</classpath>
-			<batchtest>
+			<batchtest todir="junit_reports">
 				<fileset refid="test.fileset" />
 			</batchtest>
 		</junit>
@@ -318,7 +318,7 @@
 				<path refid="project.classpath"/>
 				<path refid="aspectj.weaver.classpath"/>
 			</classpath>
-			<batchtest>
+			<batchtest todir="junit_reports">
 				<fileset refid="test.fileset" />
 			</batchtest>
 		</junit>
