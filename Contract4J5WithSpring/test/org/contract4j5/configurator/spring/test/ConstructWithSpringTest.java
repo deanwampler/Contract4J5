@@ -9,7 +9,7 @@ import org.contract4j5.controller.Contract4J;
 import org.contract4j5.enforcer.ContractEnforcer;
 import org.contract4j5.enforcer.defaultimpl.DefaultContractEnforcer;
 import org.contract4j5.interpreter.ExpressionInterpreter;
-import org.contract4j5.interpreter.bsf.groovy.GroovyBSFExpressionInterpreter;
+import org.contract4j5.interpreter.groovy.GroovyExpressionInterpreter;
 import org.contract4j5.reporter.Reporter;
 import org.contract4j5.reporter.Severity;
 import org.contract4j5.reporter.WriterReporter;
@@ -59,7 +59,7 @@ public class ConstructWithSpringTest extends TestCase {
 		assertFalse(contractEnforcer.getIncludeStackTrace());
 		
 		ExpressionInterpreter expressionInterpreter = (ExpressionInterpreter) applicationContext.getBean("expressionInterpreter");
-		assertEquals(GroovyBSFExpressionInterpreter.class, expressionInterpreter.getClass());
+		assertEquals(GroovyExpressionInterpreter.class, expressionInterpreter.getClass());
 		assertFalse(expressionInterpreter.getTreatEmptyTestExpressionAsValidTest());
 		Map<String, String> map = expressionInterpreter.getOptionalKeywordSubstitutions();
 		assertEquals(2, map.size());

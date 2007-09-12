@@ -67,7 +67,7 @@
 			value="${org.contract4j5.ContractEnforcerIncludeStackTrace}" />
 	</bean>
 	<bean id="expressionInterpreter"
-		class="org.contract4j5.interpreter.bsf.groovy.GroovyBSFExpressionInterpreter">
+		class="org.contract4j5.interpreter.groovy.GroovyExpressionInterpreter">
 		<constructor-arg type="boolean"><value>false</value></constructor-arg> <!-- treatEmptyTestExpressionAsValidTest" -->
 		<constructor-arg type="java.util.Map">
 			<map>
@@ -83,9 +83,15 @@
 		</constructor-arg>
 	</bean>
 		
-	<!-- Use Jexl interpreter instead
+	<!-- Use Jexl instead
 	<bean id="expressionInterpreter"
-		class="org.contract4j5.interpreter.bsf.jexl.JexlBSFExpressionInterpreter">
+		class="org.contract4j5.interpreter.jexl.JexlExpressionInterpreter">
+		<constructor-arg type="boolean"><value>false</value></constructor-arg> 
+	</bean>
+	-->
+	<!-- Use JRuby instead
+	<bean id="expressionInterpreter"
+		class="org.contract4j5.interpreter.jruby.JRubyExpressionInterpreter">
 		<constructor-arg type="boolean"><value>false</value></constructor-arg> 
 	</bean>
 	-->
