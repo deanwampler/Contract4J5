@@ -25,14 +25,13 @@ import java.util.Map;
 import org.apache.bsf.BSFException;
 import org.apache.bsf.BSFManager;
 import org.contract4j5.interpreter.bsf.BSFEngineAdapter;
-import org.contract4j5.interpreter.bsf.jexl.JexlBSFEngine;
 
 public abstract class StubBSFEngine extends BSFEngineAdapter {
 
 	public static void registerWithBSF() {
 		BSFManager.registerScriptingEngine(
 				"stub", 
-				JexlBSFEngine.class.getName(),
+				StubBSFEngine.class.getName(),
 				new String[] { "stub" }
 			);
 	}
