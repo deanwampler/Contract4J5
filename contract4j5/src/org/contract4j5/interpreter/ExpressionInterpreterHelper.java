@@ -382,12 +382,17 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 
 	}
 	
+	private boolean cacheTestExpressionValidations = true;
+	public void setCacheTestExpressionValidations(boolean b) { cacheTestExpressionValidations = b; }
+	
 	private TestResult getTestCacheEntry(String testExpression, TestContext context) {
 		TestResult result = getTestCache().get(new TestCacheEntry(testExpression, context));
 		return result;
 	}
 
 	private void putTestCacheEntry(String testExpression, TestContext context, TestResult testResult) {
+		if (cacheTestExpressionValidations == false)
+			return;
 		getTestCache().put(new TestCacheEntry(testExpression, context), testResult);
 	}
 
