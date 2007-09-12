@@ -25,13 +25,14 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.contract4j5.configurator.test.ConfiguratorForTesting;
 import org.contract4j5.context.TestContext;
 import org.contract4j5.context.TestContextImpl;
+import org.contract4j5.controller.Contract4J;
 import org.contract4j5.errors.TestSpecificationError;
 import org.contract4j5.instance.Instance;
 import org.contract4j5.interpreter.ExpressionInterpreterHelper;
 import org.contract4j5.interpreter.TestResult;
+import org.contract4j5.util.SystemUtils;
 
 public class ExpressionInterpreterAdapterExpressionEvalTest extends TestCase {
 	public static class Foo {
@@ -52,21 +53,21 @@ public class ExpressionInterpreterAdapterExpressionEvalTest extends TestCase {
 	}
 
 	private ExpressionInterpreterHelper interpreter = null;
-	private boolean isGroovy;
-	private boolean isJexl;
-	private boolean isJRuby;
 	
 	protected void setUp() throws Exception {
 		super.setUp();
-		ConfiguratorForTesting c = new ConfiguratorForTesting();
-		c.configure();
-		interpreter = c.expressionInterpreter;
-		assertNotNull(interpreter);
-		isGroovy= interpreter.getScriptingEngineName().equals("groovy");
-		isJexl  = interpreter.getScriptingEngineName().equals("jexl");
-		isJRuby = interpreter.getScriptingEngineName().equals("jruby");
+//		ConfiguratorForTesting c = new ConfiguratorForTesting();
+//		c.configure();
+//		interpreter = c.expressionInterpreter;
+		interpreter = (ExpressionInterpreterHelper) Contract4J.getInstance().getContractEnforcer().getExpressionInterpreter();
+		interpreter.setCacheTestExpressionValidations(false);
 	}
 
+	protected void tearDown() throws Exception {
+		super.tearDown();
+		interpreter.setCacheTestExpressionValidations(true);
+	}
+	
 	public void testExpandKeywordsWithValidExpressionsReplacesDollarKeywordsWithC4JKeywords() {
 		doTestExpandKeywords ("c4jThis.foo",  "foo");
 		doTestExpandKeywords ("bar",          "bar");
@@ -112,207 +113,259 @@ public class ExpressionInterpreterAdapterExpressionEvalTest extends TestCase {
 		assertEquals (e, a);
 	}
 	
-	String[] msgs = new String[] {
-		"property",
-		"did not return a boolean", 
-		"undefined (local variable or )?method",
-		"\"\\$this\" present, but the \"instance\" is null",
-		"\"\\$target\" present, but the \"target\" is null",
-		"\"\\$return\" present, but the \"result\" is null",
-		"\"\\$args\" present, but the \"args\" array is null or empty",
-		"The \"\\$old\\(..\\)\" keyword 'function' requires a",
-		"The \"\\$old\\(..\\)\" keyword argument is empty or contains an invalid value",
-		"One or more \"\\$old\\(..\\)\" strings remain in test expression",
-		"Test Expression contains unrecognized \"\\$\" keywords",
-		"Test Expression contains whitespace between \"\\$\" and one or more keywords",
-		"failed to evaluate"
-	};
-	
-	public enum WhenFails { WARN_VALIDATE, ERROR_VALIDATE, WARN_INVOKE_TEST, ERROR_INVOKE_TEST, PASS };
-	static final WhenFails[] whenFails = new WhenFails[] {
-		WhenFails.ERROR_INVOKE_TEST, 
-		WhenFails.ERROR_INVOKE_TEST, 
-		WhenFails.ERROR_INVOKE_TEST, 
-		WhenFails.ERROR_VALIDATE, 
-		WhenFails.ERROR_VALIDATE, 
-		WhenFails.ERROR_VALIDATE, 
-		WhenFails.ERROR_VALIDATE,
-		WhenFails.ERROR_VALIDATE, 
-		WhenFails.ERROR_VALIDATE, 
-		WhenFails.ERROR_VALIDATE, 
-		WhenFails.ERROR_VALIDATE, 
-		WhenFails.ERROR_VALIDATE,
-		WhenFails.ERROR_VALIDATE
-	};
-
-//	private int whichMessageIndexToExpect() {
-//		int whichMsg = 0;
-//		if (isJexl)
-//			whichMsg = 12;
-//		else if (isJRuby)
-//			whichMsg = 2;
-//		return whichMsg;
-//	}
-
-	public void testExpressionInvalidWithNoData() {
+	public void testExpressionConsideredValidWithNoData() {
 		TestContext context = new TestContextImpl("value1", null, null, null, null, null, null, -1);
-		TestResult testResult = interpreter.validateTestExpression("value1", context); 
-		assertTrue(testResult.isPassed());
+		doTestExpressionValidWithItemName(context);
 	}
-	
-	public void testExpressionInvalidWithItemNameButNoData() {
+	public void testExpressionConsideredValidWithItemNameButNoData() {
 		TestContext context = new TestContextImpl("value1", "value1", null, null, null, null, null, -1);
+		doTestExpressionValidWithItemName(context);
+	}
+	public void testExpressionConsideredValidWithItemNameObject() {
+		TestContext context = new TestContextImpl("value1", "value1", makeTestFooObject(), null, null, null, null, -1);
+		doTestExpressionValidWithItemName(context);
+	}
+	public void testExpressionConsideredValidWithItemNameObjectTarget() {
+		TestContext context = new TestContextImpl("value1", "value1", makeTestFooObject(), makeTestTarget(), null, null, null, -1);
+		doTestExpressionValidWithItemName(context);
+	}
+	public void testExpressionConsideredValidWithItemNameObjectTargetArgs() {
+		TestContext context = new TestContextImpl("value1", "value1", makeTestFooObject(), makeTestTarget(), makeTestArgs(), null, null, -1);
+		doTestExpressionValidWithItemName(context);
+	}
+	public void testExpressionConsideredValidWithItemNameObjectTargetArgsResult() {
+		TestContext context = new TestContextImpl("value1", "value1", makeTestFooObject(), makeTestTarget(), makeTestArgs(), makeTestResult(), null, -1);
+		doTestExpressionValidWithItemName(context);
+	}
+	public void doTestExpressionValidWithItemName(TestContext context) {
 		TestResult testResult = interpreter.validateTestExpression("value1", context); 
-		assertTrue(testResult.isPassed());
-	}
-
-	public void testExpressionInvalidWithItemNameObject() {
-		doTest1 (1, "value1", "value1", makeTestFooObject(), null, null, null);
-	}
-	public void testExpressionInvalidWithItemNameObjectTarget() {
-		doTest1 (1, "value1", "value1", makeTestFooObject(), makeTestTarget(), null, null);
-	}
-	public void testExpressionInvalidWithItemNameObjectTargetArgs() {
-		doTest1 (1, "value1", "value1", makeTestFooObject(), makeTestTarget(), makeTestArgs(), null);
-	}
-	public void testExpressionInvalidWithItemNameObjectTargetArgsResult() {
-		doTest1 (1, "value1", "value1", makeTestFooObject(), makeTestTarget(), makeTestArgs(), makeTestResult());
+		assertTestPassed(testResult);
 	}
 	
 	public void testExpressionInvalidWithDollarThisAndNoData() {
-		doTest1 (3, "$this",   null, null, null, null, null);
+		TestContext context = new TestContextImpl("$this", null, null, null, null, null, null, -1);
+		doTestExpressionInvalidWithDollarThis(context);
 	}
 	public void testExpressionInvalidWithDollarThisAndItemName() {
-		doTest1 (3, "$this", "value1", null, null, null, null);
+		TestContext context = new TestContextImpl("$this", "value1", null, null, null, null, null, -1);
+		doTestExpressionInvalidWithDollarThis(context);
 	}
 	public void testExpressionInvalidWithDollarThisItemNameObject() {
-		doTest1 (1, "$this", "value1", makeTestFooObject(), null, null, null);
+		TestContext context = new TestContextImpl("$this", "value1", makeTestFooObject(), null, null, null, null, -1);
+		doTestExpressionValidWithDollarThis(context);
 	}
 	public void testExpressionInvalidWithDollarThisItemNameObjectTarget() {
-		doTest1 (1, "$this", "value1", makeTestFooObject(), makeTestTarget(), null, null);
+		TestContext context = new TestContextImpl("$this", "value1", makeTestFooObject(), makeTestTarget(), null, null, null, -1);
+		doTestExpressionValidWithDollarThis(context);
 	}
 	public void testExpressionInvalidWithDollarThisItemNameObjectTargetArgs() {
-		doTest1 (1, "$this", "value1", makeTestFooObject(), makeTestTarget(), makeTestArgs(), null);
+		TestContext context = new TestContextImpl("$this", "value1", makeTestFooObject(), makeTestTarget(), makeTestArgs(), null, null, -1);
+		doTestExpressionValidWithDollarThis(context);
 	}
 	public void testExpressionInvalidWithDollarThisItemNameObjectTargetArgsResult() {
-		doTest1 (1, "$this", "value1", makeTestFooObject(), makeTestTarget(), makeTestArgs(), makeTestResult());
+		TestContext context = new TestContextImpl("$this", "value1", makeTestFooObject(), makeTestTarget(), makeTestArgs(), makeTestResult(), null, -1);
+		doTestExpressionValidWithDollarThis(context);
+	}
+	public void doTestExpressionInvalidWithDollarThis(TestContext context) {
+		TestResult testResult = interpreter.validateTestExpression("$this", context); 
+		assertTestFailed(testResult, "\"$this\" present, but the \"instance\" is null");
+	}
+	public void doTestExpressionValidWithDollarThis(TestContext context) {
+		TestResult testResult = interpreter.validateTestExpression("$this", context); 
+		assertTestPassed(testResult);
 	}
 	
 	public void testExpressionInvalidWithDollarTargetAndNoData() {
-		doTest1 (4, "$target",   null, null, null, null, null);
+		TestContext context = new TestContextImpl("$target", null, null, null, null, null, null, -1);
+		doTestExpressionInvalidWithDollarTarget(context);
 	}
 	public void testExpressionInvalidWithDollarTargetAndItemName() {
-		doTest1 (4, "$target", "target", null, null, null, null);
+		TestContext context = new TestContextImpl("$target", "value1", null, null, null, null, null, -1);
+		doTestExpressionInvalidWithDollarTarget(context);
 	}
 	public void testExpressionInvalidWithDollarTargetItemNameObject() {
-		doTest1 (4, "$target", "target", makeTestFooObject(), null, null, null);
+		TestContext context = new TestContextImpl("$target", "value1", makeTestFooObject(), null, null, null, null, -1);
+		doTestExpressionInvalidWithDollarTarget(context);
 	}
-	public void testExpressionInvalidWithDollarTargetItemNameObjectTarget() {
-		doTest1 (1, "$target", "target", makeTestFooObject(), makeTestTarget(), null, null);
+	public void testExpressionValidWithDollarTargetItemNameObjectTarget() {
+		TestContext context = new TestContextImpl("$target", "value1", makeTestFooObject(), makeTestTarget(), null, null, null, -1);
+		doTestExpressionValidWithDollarTarget(context);
 	}
-	public void testExpressionInvalidWithDollarTargetItemNameObjectTargetArgs() {
-		doTest1 (1, "$target", "target", makeTestFooObject(), makeTestTarget(), makeTestArgs(), null);
+	public void testExpressionValidWithDollarTargetItemNameObjectTargetArgs() {
+		TestContext context = new TestContextImpl("$target", "value1", makeTestFooObject(), makeTestTarget(), makeTestArgs(), null, null, -1);
+		doTestExpressionValidWithDollarTarget(context);
 	}
-	public void testExpressionInvalidWithDollarTargetItemNameObjectTargetArgsResult() {
-		doTest1 (1, "$target", "target", makeTestFooObject(), makeTestTarget(), makeTestArgs(), makeTestResult());
+	public void testExpressionValidWithDollarTargetItemNameObjectTargetArgsResult() {
+		TestContext context = new TestContextImpl("$target", "value1", makeTestFooObject(), makeTestTarget(), makeTestArgs(), makeTestResult(), null, -1);
+		doTestExpressionValidWithDollarTarget(context);
+	}
+	public void doTestExpressionInvalidWithDollarTarget(TestContext context) {
+		TestResult testResult = interpreter.validateTestExpression("$target", context); 
+		assertTestFailed(testResult, "\"$target\" present, but the \"target\" (field) is null");
+	}
+	public void doTestExpressionValidWithDollarTarget(TestContext context) {
+		TestResult testResult = interpreter.validateTestExpression("$target", context); 
+		assertTestPassed(testResult);
 	}
 	
 	public void testExpressionInvalidWithDollarReturnAndNoData() {
-		doTest1 (5, "$return",   null, null, null, null, null);
+		TestContext context = new TestContextImpl("$return", null, null, null, null, null, null, -1);
+		doTestExpressionInvalidWithDollarReturn(context);
 	}
 	public void testExpressionInvalidWithDollarReturnAndItemName() {
-		doTest1 (5, "$return", "return", null, null, null, null);
+		TestContext context = new TestContextImpl("$return", "return", null, null, null, null, null, -1);
+		doTestExpressionInvalidWithDollarReturn(context);
 	}
 	public void testExpressionInvalidWithDollarReturnItemNameObject() {
-		doTest1 (5, "$return", "return", makeTestFooObject(), null, null, null);
+		TestContext context = new TestContextImpl("$return", "return", makeTestFooObject(), null, null, null, null, -1);
+		doTestExpressionInvalidWithDollarReturn(context);
 	}
 	public void testExpressionInvalidWithDollarReturnItemNameObjectTarget() {
-		doTest1 (5, "$return", "return", makeTestFooObject(), makeTestTarget(), null, null);
+		TestContext context = new TestContextImpl("$return", "return", makeTestFooObject(), makeTestTarget(), null, null, null, -1);
+		doTestExpressionInvalidWithDollarReturn(context);
 	}
 	public void testExpressionInvalidWithDollarReturnItemNameObjectTargetArgs() {
-		doTest1 (5, "$return", "return", makeTestFooObject(), makeTestTarget(), makeTestArgs(), null);
+		TestContext context = new TestContextImpl("$return", "return", makeTestFooObject(), makeTestTarget(), makeTestArgs(), null, null, -1);
+		doTestExpressionInvalidWithDollarReturn(context);
 	}
 	public void testExpressionInvalidWithDollarReturnItemNameObjectTargetArgsResult() {
-		doTest1 (1, "$return", "return", makeTestFooObject(), makeTestTarget(), makeTestArgs(), makeTestResult());
+		TestContext context = new TestContextImpl("$return", "return", makeTestFooObject(), makeTestTarget(), makeTestArgs(), makeTestResult(), null, -1);
+		doTestExpressionValidWithDollarReturn(context);
+	}
+	public void doTestExpressionInvalidWithDollarReturn(TestContext context) {
+		TestResult testResult = interpreter.validateTestExpression("$return", context); 
+		assertTestFailed(testResult, "\"$return\" present, but the \"result\" is null");
+	}
+	public void doTestExpressionValidWithDollarReturn(TestContext context) {
+		TestResult testResult = interpreter.validateTestExpression("$return", context); 
+		assertTestPassed(testResult);
 	}
 	
 	public void testExpressionInvalidWithMispelledDollarArg0AndNoData() {
-		doTest1 (10, "$arg[0]",   null, null, null, null, null);
+		TestContext context = new TestContextImpl("$arg[0]", null, null, null, null, null, null, -1);
+		doTestExpressionInvalidWithDollarArgs(context);
 	}
 	public void testExpressionInvalidWithDollarArg0AndNoData() {
-		doTest1 (6, "$args[0]",   null, null, null, null, null);
+		TestContext context = new TestContextImpl("$args[0]", null, null, null, null, null, null, -1);
+		doTestExpressionInvalidWithDollarArgs(context);
 	}
 	public void testExpressionInvalidWithDollarArg0AndItemName() {
-		doTest1 (6, "$args[0]", "args[0]", null, null, null, null);
+		TestContext context = new TestContextImpl("$args[0]", "$args[0]", null, null, null, null, null, -1);
+		doTestExpressionInvalidWithDollarArgs(context);
 	}
 	public void testExpressionInvalidWithDollarArg0ItemNameObject() {
-		doTest1 (6, "$args[0]", "args[0]", makeTestFooObject(), null, null, null);
+		TestContext context = new TestContextImpl("$args[0]", "$args[0]", makeTestFooObject(), null, null, null, null, -1);
+		doTestExpressionInvalidWithDollarArgs(context);
 	}
 	public void testExpressionInvalidWithDollarArg0ItemNameObjectTarget() {
-		doTest1 (6, "$args[0]", "args[0]", makeTestFooObject(), makeTestTarget(), null, null);
+		TestContext context = new TestContextImpl("$args[0]", "$args[0]", makeTestFooObject(), makeTestTarget(), null, null, null, -1);
+		doTestExpressionInvalidWithDollarArgs(context);
 	}
 	public void testExpressionInvalidWithDollarArg0ItemNameObjectTargetArgs() {
-		doTest1 (1, "$args[0]", "args[0]", makeTestFooObject(), makeTestTarget(), makeTestArgs(), null);
+		TestContext context = new TestContextImpl("$args[0]", "$args[0]", makeTestFooObject(), makeTestTarget(), makeTestArgs(), null, null, -1);
+		doTestExpressionValidWithDollarArgs(context);
 	}
 	public void testExpressionInvalidWithDollarArg0ItemNameObjectTargetArgsResult() {
-		doTest1 (1, "$args[0]", "args[0]", makeTestFooObject(), makeTestTarget(), makeTestArgs(), makeTestResult());
+		TestContext context = new TestContextImpl("$args[0]", "$args[0]", makeTestFooObject(), makeTestTarget(), makeTestArgs(), makeTestResult(), null, -1);
+		doTestExpressionValidWithDollarArgs(context);
+	}
+	public void doTestExpressionInvalidWithDollarArgs(TestContext context) {
+		TestResult testResult = interpreter.validateTestExpression("$args[0]", context); 
+		assertTestFailed(testResult, "\"$args\" present, but the \"args\" array is null or empty");
+	}
+	public void doTestExpressionValidWithDollarArgs(TestContext context) {
+		TestResult testResult = interpreter.validateTestExpression("$args[0]", context); 
+		assertTestPassed(testResult);
 	}
 	
 	public void testExpressionInvalidWithDollarOldWithoutParens() {
-		doTest1 (7, "$old", "old", makeTestFooObject(), makeTestTarget(), makeTestArgs(), makeTestResult());
+		TestContext context = new TestContextImpl("$old", "old", makeTestFooObject(), makeTestTarget(), makeTestArgs(), makeTestResult(), null, -1);
+		TestResult testResult = interpreter.validateTestExpression("$old", context); 
+		assertTestFailed(testResult, "The \"$old(..)\" keyword 'function' requires a");
 	}
 	public void testExpressionInvalidWithDollarOldWithEmptyParens() {
-		doTest1 (8, "$old()", "old()", makeTestFooObject(), makeTestTarget(), makeTestArgs(), makeTestResult());
+		TestContext context = new TestContextImpl("$old()", "old()", makeTestFooObject(), makeTestTarget(), makeTestArgs(), makeTestResult(), null, -1);
+		TestResult testResult = interpreter.validateTestExpression("$old()", context); 
+		assertTestFailed(testResult, "The \"$old(..)\" keyword argument is empty or contains an invalid value");
 	}
 	public void testExpressionInvalidWithDollarOldWithDollarThisInsideParens() {
-		doTest1 (1, "$old($this)", "old($this)", makeTestFooObject(), makeTestTarget(), makeTestArgs(), makeTestResult());
+		TestContext context = new TestContextImpl("$old($this)", "$old($this)", makeTestFooObject(), makeTestTarget(), makeTestArgs(), makeTestResult(), null, -1);
+		TestResult testResult = interpreter.validateTestExpression("$old($this)", context); 
+		assertTestPassed(testResult);
 	}
 	public void testExpressionInvalidWithDollarOldWithDollarTargetInsideParens() {
-		doTest1 (1, "$old($target)", "old($target)", makeTestFooObject(), makeTestTarget(), makeTestArgs(), makeTestResult());
+		TestContext context = new TestContextImpl("$old($target)", "$old($target)", makeTestFooObject(), makeTestTarget(), makeTestArgs(), makeTestResult(), null, -1);
+		TestResult testResult = interpreter.validateTestExpression("$old($target)", context); 
+		assertTestPassed(testResult);
 	}
 
 	public void testExpressionInvalidWithSpacesBetweenDollarAndThis() {
-		doTest1 (11, "$ this",   null, null, null, null, null);
+		doTestExpressionInvalidWithSpacesAfterTheDollar("$ this");
 	}
 	public void testExpressionInvalidWithSpacesBetweenDollarAndTarget() {
-		doTest1 (11, "$ target",   null, null, null, null, null);
+		doTestExpressionInvalidWithSpacesAfterTheDollar("$ target");
 	}
 	public void testExpressionInvalidWithSpacesBetweenDollarAndReturn() {
-		doTest1 (11, "$ return",   null, null, null, null, null);
+		doTestExpressionInvalidWithSpacesAfterTheDollar("$ return");
 	}
 	public void testExpressionInvalidWithSpacesBetweenDollarAndArgs() {
-		doTest1 (11, "$ args[0]",   null, null, null, null, null);
+		doTestExpressionInvalidWithSpacesAfterTheDollar("$ args[0]");
 	}
 	public void testExpressionInvalidWithSpacesBetweenDollarAndOld() {
-		doTest1 (11, "$ old",   null, null, null, null, null);
+		doTestExpressionInvalidWithSpacesAfterTheDollar("$ old");
 	}
 	public void testExpressionInvalidWithSpacesBetweenDollarAndOldAndThis() {
-		doTest1 (11, "$ old ( $ this )",   null, null, null, null, null);
+		doTestExpressionInvalidWithSpacesAfterTheDollar("$ old ( $ this )");
 	}
-	
+	private void doTestExpressionInvalidWithSpacesAfterTheDollar(String testExpression) {
+		TestContext context = new TestContextImpl(testExpression, null, null, null, null, null, null, -1);
+		TestResult testResult = interpreter.validateTestExpression(testExpression, context); 
+		assertTestFailed(testResult, "Test Expression contains whitespace between \"$\" and one or more keywords");
+	}
+
 	public void testExpressionInvalidWithDollarAndUnknownKeywordFoo() {
-		doTest1 (10, "$foo",   null, null, null, null, null);
+		doTestExpressionInvalidWithUnknownKeywords("$foo");
 	}
 	public void testExpressionInvalidWithDollarAndUnknownKeywordObject() {
-		doTest1 (10, "$object",   null, null, null, null, null);
+		doTestExpressionInvalidWithUnknownKeywords("$object");
 	}
 	public void testExpressionInvalidWithDollarAndMisspelledKeywordThis() {
-		doTest1 (10, "$thisx",   null, null, null, null, null);
+		doTestExpressionInvalidWithUnknownKeywords("$thisx");
 	}
 	public void testExpressionInvalidWithDollarAndMisspelledKeywordTarget() {
-		doTest1 (10, "$targetx",   null, null, null, null, null);
+		doTestExpressionInvalidWithUnknownKeywords("$targetx");
 	}
 	public void testExpressionInvalidWithDollarAndMisspelledKeywordArgs() {
-		doTest1 (10, "$argsx",   null, null, null, null, null);
+		doTestExpressionInvalidWithUnknownKeywords("$argsx");
 	}
 	public void testExpressionInvalidWithDollarAndMisspelledKeywordReturns() {
-		doTest1 (10, "$returnsx",   null, null, null, null, null);
+		doTestExpressionInvalidWithUnknownKeywords("$returnsx");
 	}
 	public void testExpressionInvalidWithDollarAndUnknownKeywordResult() {
-		doTest1 (10, "$result",   null, null, null, null, null);
+		doTestExpressionInvalidWithUnknownKeywords("$result");
 	}
 	public void testExpressionInvalidWithDollarAndSeveralUnknownKeyword() {
-		doTest1 (10, "$foo $object $thisx $targetx $argsx $returnx $result",  null, null, null, null, null);
+		doTestExpressionInvalidWithUnknownKeywords("$foo $object $thisx $targetx $argsx $returnx $result");
+	}
+	private void doTestExpressionInvalidWithUnknownKeywords(String testExpression) {
+		TestContext context = new TestContextImpl(testExpression, null, null, null, null, null, null, -1);
+		TestResult testResult = interpreter.validateTestExpression(testExpression, context); 
+		if (SystemUtils.isJRuby()) {
+			assertTestPassed(testResult);
+		} else {
+			assertTestFailed(testResult, "Test Expression contains unrecognized \"$\" keywords");
+		}
+	}
+
+	private void assertTestFailed(TestResult testResult,
+			String expectedErrorMessage) {
+		assertFalse(testResult.isPassed());
+		assertTrue(testResult.getMessage(), testResult.getMessage().contains(expectedErrorMessage));
+	}
+
+	private void assertTestPassed(TestResult testResult) {
+		assertTrue(testResult.isPassed());
+		assertEquals("", testResult.getMessage());
 	}
 
 	
@@ -325,7 +378,7 @@ public class ExpressionInterpreterAdapterExpressionEvalTest extends TestCase {
 	}
 	
 	private Instance makeTestTarget() {
-		return new Instance ("target", String.class, "target");
+		return new Instance ("value1", String.class, "value1");
 	}
 	
 	private Instance[] makeTestArgs() {
@@ -340,41 +393,6 @@ public class ExpressionInterpreterAdapterExpressionEvalTest extends TestCase {
 		return new Instance ("result", String.class, "result");
 	}
 	
-	
-	private void doTest1 (int expectedErrMsgIndex, String testExpression, String itemName, 
-			Instance object, Instance target, Instance[] args, Instance result) {
-		String expectedErrMsg = msgs[expectedErrMsgIndex]; 
-		String expectedErrMsgRE = "^.*" + expectedErrMsg + ".*$";
-		TestContext context = new TestContextImpl(itemName, itemName, object, target, args, result, "", 0);
-		TestResult testResult = interpreter.validateTestExpression(testExpression, context); 
-		String msg = "Test expression: \""+testExpression+"\", result = \""+testResult.toString()+"\", expected to contain = \""+expectedErrMsg+"\".";
-		switch (whenFails[expectedErrMsgIndex]) {
-		case WARN_VALIDATE:
-			assertTrue  (msg, testResult.isPassed());
-			assertTrue  (msg, testResult.getMessage().matches(expectedErrMsgRE));
-			break;
-		case ERROR_VALIDATE:
-			assertFalse (msg, testResult.isPassed());
-			assertTrue  (msg, testResult.getMessage().matches(expectedErrMsgRE));
-			break;
-		default:
-			assertTrue  (msg, testResult.isPassed());	
-			break;
-		}
-		testResult = interpreter.invokeTest(testExpression, context); 
-		msg = "Test expression: \""+testExpression+"\", result = \""+testResult.getMessage()+"\", expected to contain = \""+expectedErrMsg+"\".";
-		assertFalse  (msg, testResult.isPassed());  // all tests should fail!
-		switch (whenFails[expectedErrMsgIndex]) {
-		case WARN_INVOKE_TEST:
-			assertTrue  (msg, testResult.getMessage().matches(expectedErrMsgRE));
-			break;
-		case ERROR_INVOKE_TEST:
-			assertTrue  (msg, testResult.getMessage().matches(expectedErrMsgRE));
-			break;
-		default:
-			break;
-		}
-	}
 	
 	public void testArithmeticAndBooleanExpressionPasses() {
 		doTest2 (true, "1+1 == 2", null, null, null, null, null);
@@ -434,7 +452,7 @@ public class ExpressionInterpreterAdapterExpressionEvalTest extends TestCase {
 	public void testUseOfReflectionInTests() {
 		Instance fooInstance    = new Instance("foo", Foo.class, new Foo());
 		doTest2 (true, "$this.getClass().getSimpleName().equals(\"Foo\")", null, fooInstance, null, null, null);
-		if (!isJRuby) {
+		if (!SystemUtils.isJRuby()) {
 			doTest2 (true, "$this.class.simpleName.equals(\"Foo\")",  null, fooInstance, null, null, null);
 		}
 	}
@@ -477,9 +495,9 @@ public class ExpressionInterpreterAdapterExpressionEvalTest extends TestCase {
 	public void testOutOfBoundsArgsCauseTestsToFail() {
 		Instance[] args = makeTestArgs();
 		// Jexl doesn't fail; it probably should, because the array only has 3 args. On
-		// the other hand, in a sense, the 4 rag. is null...
-		doTest2 ((isJexl ? true : false), "$args[3] == null",  null, null, null, args, null);
-		doTest2 ((isJexl ? true : false), "fourthArg == null", null, null, null, args, null);
+		// the other hand, in a sense, the 4th arg. is null...
+		doTest2 ((SystemUtils.isJexl() ? true : false), "$args[3] == null",  null, null, null, args, null);
+		doTest2 ((SystemUtils.isJexl() ? true : false), "fourthArg == null", null, null, null, args, null);
 	}
 	
 	public void testBareFieldReferencesFailWithoutThis() {
@@ -531,7 +549,7 @@ public class ExpressionInterpreterAdapterExpressionEvalTest extends TestCase {
 
 		// Only a public getter method will work:
 		Instance withAccInstance = new Instance ("withAccessor", Integer.TYPE, at.withAccessor);
-		boolean willPass = isGroovy; 
+		boolean willPass = SystemUtils.isGroovy(); 
 		doTest2(willPass, "$this.withAccessorDefault   > 5", "withAccessor", slaInstance, withAccInstance, null, null);
 		doTest2(willPass, "$this.withAccessorPrivate   > 5", "withAccessor", slaInstance, withAccInstance, null, null);
 		doTest2(willPass, "$this.withAccessorProtected > 5", "withAccessor", slaInstance, withAccInstance, null, null);
@@ -545,7 +563,8 @@ public class ExpressionInterpreterAdapterExpressionEvalTest extends TestCase {
 		Instance noAccInstanceProtected = new Instance ("withNoAccessorProtected", Integer.TYPE, at.withNoAccessorProtected);
 		doTest2(willPass, "$this.withNoAccessorProtected > 5", "withNoAccessorProtected", slaInstance, noAccInstanceProtected, null, null);
 		Instance noAccInstancePublic = new Instance ("withNoAccessorPublic", Integer.TYPE, at.withNoAccessorPublic);
-		doTest2(isGroovy || isJRuby, "$this.withNoAccessorPublic > 5", "withNoAccessorPublic", slaInstance, noAccInstancePublic, null, null);
+		doTest2(SystemUtils.isGroovy() || SystemUtils.isJRuby(), 
+				"$this.withNoAccessorPublic > 5", "withNoAccessorPublic", slaInstance, noAccInstancePublic, null, null);
 	}
 	
 	/*
@@ -586,7 +605,7 @@ public class ExpressionInterpreterAdapterExpressionEvalTest extends TestCase {
 	public void testCaptureOldValuesIgnoresOrFailsWithBogusField() {
 		try {
 			Map<String, Object> map = interpreter.determineOldValues("$old($this.bogus)", makeTestContextForCaptureOldValueTest());
-			if (!isJexl)
+			if (!SystemUtils.isJexl())
 				fail();		// Groovy more strict about parsing these values!
 			assertEquals  (1, map.size());
 			assertNull    (map.toString(), map.get("$this.bogus"));
@@ -600,7 +619,7 @@ public class ExpressionInterpreterAdapterExpressionEvalTest extends TestCase {
 			Map<String, Object> map = interpreter.determineOldValues("$old(bogus)", makeTestContextForCaptureOldValueTest());
 			assertEquals  (1, map.size());
 			assertNull    (map.toString(), map.get("bogus"));
-			if (!isJexl)
+			if (!SystemUtils.isJexl())
 				fail();		// Groovy more strict about parsing these values!
 		} catch (TestSpecificationError tse) {
 			// expected
@@ -611,7 +630,7 @@ public class ExpressionInterpreterAdapterExpressionEvalTest extends TestCase {
 	public void testCaptureOldValuesIgnoresForPrivateField() {
 		Map<String, Object> map = interpreter.determineOldValues("$old($this.number)", makeTestContextForCaptureOldValueTest());
 		assertEquals  (1, map.size());
-		if (isJexl)
+		if (SystemUtils.isJexl())
 			assertNull    (map.toString(), map.get("$this.number"));
 		else
 			assertNotNull (map.toString(), map.get("$this.number"));
@@ -620,7 +639,7 @@ public class ExpressionInterpreterAdapterExpressionEvalTest extends TestCase {
 	public void testCaptureOldValuesIgnoresForPrivateBareField() {
 		Map<String, Object> map = interpreter.determineOldValues("$old(number)", makeTestContextForCaptureOldValueTest());
 		assertEquals  (1, map.size());
-		if (isJexl)
+		if (SystemUtils.isJexl())
 			assertNull    (map.toString(), map.get("number"));
 		else
 			assertNotNull (map.toString(), map.get("number"));
@@ -630,7 +649,7 @@ public class ExpressionInterpreterAdapterExpressionEvalTest extends TestCase {
 		Map<String, Object> map = interpreter.determineOldValues("$old($this.setAndGetNumber(2))", makeTestContextForCaptureOldValueTest());
 		assertEquals  (1, map.size());
 		assertNotNull (map.toString(), map.get("$this.setAndGetNumber(2)"));
-		if (isJRuby)
+		if (SystemUtils.isJRuby())
 			assertEquals  (2L, map.get("$this.setAndGetNumber(2)"));
 		else
 			assertEquals  (2, map.get("$this.setAndGetNumber(2)"));
@@ -641,7 +660,7 @@ public class ExpressionInterpreterAdapterExpressionEvalTest extends TestCase {
 		Map<String, Object> map = interpreter.determineOldValues("$old(setAndGetNumber(2))", makeTestContextForCaptureOldValueTest());
 		assertEquals  (1, map.size());
 		assertNotNull (map.toString(), map.get("setAndGetNumber(2)"));
-		if (isJRuby)
+		if (SystemUtils.isJRuby())
 			assertEquals  (2L, map.get("setAndGetNumber(2)"));
 		else
 			assertEquals  (2, map.get("setAndGetNumber(2)"));
@@ -680,7 +699,7 @@ public class ExpressionInterpreterAdapterExpressionEvalTest extends TestCase {
 		"$old($this.value1) $old(value1) $old($this.setAndGetNumber(3)) $old(setAndGetNumber(4)) $this $target $return $args";
 		Map<String, Object> map = interpreter.determineOldValues(expr, makeTestContextForCaptureOldValueTest());
 		assertEquals  (8, map.size());
-		if (isJexl) {
+		if (SystemUtils.isJexl()) {
 			assertNull    (map.toString(), map.get("$this.number"));
 			assertNull    (map.toString(), map.get("number"));
 		} else {
@@ -697,7 +716,7 @@ public class ExpressionInterpreterAdapterExpressionEvalTest extends TestCase {
 		assertEquals  ("value1", map.get("getValue1()"));
 		assertEquals  ("value1", map.get("$this.value1"));
 		assertEquals  ("value1", map.get("value1"));
-		if (isJRuby) {
+		if (SystemUtils.isJRuby()) {
 			assertEquals  (3L, map.get("$this.setAndGetNumber(3)"));
 			assertEquals  (4L, map.get("setAndGetNumber(4)"));
 		} else {

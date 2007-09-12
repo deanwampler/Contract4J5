@@ -18,6 +18,8 @@ public class ConstructorBoundaryJRubyExpressionsWithObjectReferencesTest extends
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
+		if (!SystemUtils.isJRuby()) 
+			return;
 		new ConfiguratorForTesting().configure();
 		Validator.setCalled(false);
 	}
@@ -57,9 +59,6 @@ public class ConstructorBoundaryJRubyExpressionsWithObjectReferencesTest extends
 		public PreCtor2(String name) {}
 	}
 	
-	/** 
-	 * As for Jexl (but not Groovy), can use a fully-qualified name to a class with static methods.
-	 */
 	public void testJRubyConstructorPreconditionTestCanReferenceStaticMethodsOnOtherFullQualifiedClasses() {
 		if (!SystemUtils.isJRuby()) 
 			return;

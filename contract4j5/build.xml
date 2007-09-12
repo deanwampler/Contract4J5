@@ -115,7 +115,7 @@
 		</antcall>
 	</target>
 	
-	<target name="test" depends="test.jruby, test.groovy, test.jexl" />
+	<target name="test" depends="test.groovy, test.jexl, test.jruby" />
 
 	<target name="test.groovy" depends="test.setup">
 		<antcall target="junitTemplate">

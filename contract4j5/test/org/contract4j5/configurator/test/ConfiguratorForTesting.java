@@ -74,7 +74,7 @@ public class ConfiguratorForTesting extends AbstractConfigurator {
 			else
 				throw new BSFException("Unrecognized interpreter name: \""+whichInterpreter+"\".");
 		} catch (BSFException e) {
-			throw new ConfigurationFailedException("Could not configure with the Jexl BSF expression interpreter", e);
+			throw new ConfigurationFailedException("Could not configure with the JRuby BSF expression interpreter", e);
 		}
 		ce.setExpressionInterpreter(expressionInterpreter);
 

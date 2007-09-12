@@ -11,7 +11,7 @@ import org.contract4j5.util.Valid;
 import org.contract4j5.util.Validatable;
 
 /**
- * Jexl doesn't seem to support generics.
+ * Jexl and JRuby don't seem seem to support generics.
  */
 public class ConstructorInvariantWithGenericsTest extends TestCase {
 	@Contract 
@@ -28,10 +28,13 @@ public class ConstructorInvariantWithGenericsTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		new ConfiguratorForTesting().configure();
+		if (SystemUtils.isGroovy())
+			new ConfiguratorForTesting().configure();
 	}
 	
-	public void testInvariantCatchesConstructorCallWithNullParameter() {
+	public void testGroovyInvariantCatchesConstructorCallWithNullParameter() {
+		if (!SystemUtils.isGroovy())
+			return;
 		try {
 			new GenericTestClass<Valid>(null);
 			fail();
@@ -39,7 +42,9 @@ public class ConstructorInvariantWithGenericsTest extends TestCase {
 		}
 	}
 	
-	public void testInvariantCatchesConstructorCallWithEmptyParameter() {
+	public void testGroovyInvariantCatchesConstructorCallWithEmptyParameter() {
+		if (!SystemUtils.isGroovy())
+			return;
 		try {
 			new GenericTestClass<Valid>(new Valid(""));
 			fail();
@@ -47,8 +52,9 @@ public class ConstructorInvariantWithGenericsTest extends TestCase {
 		}
 	}
 	
-	public void testInvariantAllowsConstructorCallWithValidParameterExceptForJexl() {
-		if (!SystemUtils.isJexl())
-			new GenericTestClass<Valid>(new Valid("foo"));
+	public void testGroovyInvariantAllowsConstructorCallWithValidParameterOnlyForGroovy() {
+		if (!SystemUtils.isGroovy())
+			return;
+		new GenericTestClass<Valid>(new Valid("foo"));
 	}
 }
