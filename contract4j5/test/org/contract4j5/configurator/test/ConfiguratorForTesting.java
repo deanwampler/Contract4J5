@@ -27,6 +27,8 @@ import org.contract4j5.enforcer.defaultimpl.DefaultContractEnforcer;
 import org.contract4j5.interpreter.ExpressionInterpreterHelper;
 import org.contract4j5.interpreter.groovy.GroovyExpressionInterpreter;
 import org.contract4j5.interpreter.jexl.JexlExpressionInterpreter;
+import org.contract4j5.interpreter.bsf.groovy.GroovyBSFExpressionInterpreter;
+import org.contract4j5.interpreter.bsf.jexl.JexlBSFExpressionInterpreter;
 import org.contract4j5.interpreter.bsf.jruby.JRubyBSFExpressionInterpreter;
 import org.contract4j5.reporter.Reporter;
 import org.contract4j5.reporter.WriterReporter;
@@ -49,6 +51,7 @@ public class ConfiguratorForTesting extends AbstractConfigurator {
 		doConfigureWithInterpreter(System.getProperty("interpreter"));
 	}
 	
+	@SuppressWarnings("deprecation")
 	protected void doConfigureWithInterpreter(String whichInterpreter) {
 		Contract4J c4j = new Contract4J();  // Start with fresh singleton
 		c4j.setSystemConfigurator(this);
@@ -63,17 +66,21 @@ public class ConfiguratorForTesting extends AbstractConfigurator {
 		try {
 			if (whichInterpreter == null || whichInterpreter.length() == 0)
 				expressionInterpreter = new GroovyExpressionInterpreter();
+			else if (whichInterpreter.equalsIgnoreCase("groovybsf")) 
+				expressionInterpreter = new GroovyBSFExpressionInterpreter();
 			else if (whichInterpreter.equalsIgnoreCase("groovy")) 
 				expressionInterpreter = new GroovyExpressionInterpreter();
+			else if (whichInterpreter.equalsIgnoreCase("jexlbsf"))
+				expressionInterpreter = new JexlBSFExpressionInterpreter();
 			else if (whichInterpreter.equalsIgnoreCase("jexl"))
 				expressionInterpreter = new JexlExpressionInterpreter();
 			else if (whichInterpreter.equalsIgnoreCase("jruby")) {
 				expressionInterpreter = new JRubyBSFExpressionInterpreter();
 			}
 			else
-				throw new BSFException("Unrecognized interpreter name: \""+whichInterpreter+"\".");
+				throw new ConfigurationFailedException("Unrecognized interpreter name: \""+whichInterpreter+"\".");
 		} catch (BSFException e) {
-			throw new ConfigurationFailedException("Could not configure with the JRuby BSF expression interpreter", e);
+			throw new ConfigurationFailedException("Could not configure with the JRuby BSF expression interpreter for interpreter \""+whichInterpreter+"\".", e);
 		}
 		ce.setExpressionInterpreter(expressionInterpreter);
 

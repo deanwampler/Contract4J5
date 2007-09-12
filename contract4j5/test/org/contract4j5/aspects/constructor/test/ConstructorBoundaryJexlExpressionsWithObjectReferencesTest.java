@@ -44,6 +44,8 @@ public class ConstructorBoundaryJexlExpressionsWithObjectReferencesTest extends 
 	}
 	
 	public void testJexlConstructorPreconditionTestCanReferenceStaticMethodsOnOtherClassesThatAreRegistered() {
+		if (!SystemUtils.isJexl()) 
+			return;
 		Contract4J.getInstance().registerGlobalContextObject("Validator", Validator.class);
 		assertFalse(Validator.called);
 		new PreCtor1("foo");

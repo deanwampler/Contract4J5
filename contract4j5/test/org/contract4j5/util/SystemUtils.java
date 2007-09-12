@@ -17,6 +17,10 @@ public class SystemUtils {
 		return Contract4J.getInstance().getContractEnforcer().getExpressionInterpreter().getScriptingEngineName();
 	}
 	
+	public static boolean isBSF() {
+		return getScriptingEngineName().contains("bsf");
+	}
+
 	public static boolean isJexl() {
 		return getScriptingEngineName().contains("jexl");
 	}

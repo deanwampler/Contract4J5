@@ -117,6 +117,17 @@
 	
 	<target name="test" depends="test.groovy, test.jexl, test.jruby" />
 
+	<target name="profile-bsf" depends="profile-groovybsf, profile-jexlbsf" />
+	<target name="profile-groovybsf" depends="init, test.groovybsf, test.groovy" />
+	<target name="profile-jexlbsf" depends="init, test.jexlbsf, test.jexl" />
+
+	<target name="test.groovybsf" depends="test.setup">
+		<antcall target="junitTemplate">
+			<param name="test.jar"         value="${project.test.jar}" />
+			<param name="interpreter.lang" value="groovybsf" />
+		</antcall>
+	</target>
+
 	<target name="test.groovy" depends="test.setup">
 		<antcall target="junitTemplate">
 			<param name="test.jar"         value="${project.test.jar}" />
@@ -128,6 +139,13 @@
 		<antcall target="junitTemplate">
 			<param name="test.jar"         value="${project.test.jar}" />
 			<param name="interpreter.lang" value="jexl" />
+		</antcall>
+	</target>
+
+	<target name="test.jexlbsf" depends="test.setup">
+		<antcall target="junitTemplate">
+			<param name="test.jar"         value="${project.test.jar}" />
+			<param name="interpreter.lang" value="jexlbsf" />
 		</antcall>
 	</target>
 

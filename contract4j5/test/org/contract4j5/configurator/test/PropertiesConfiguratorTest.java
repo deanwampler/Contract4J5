@@ -92,6 +92,7 @@ public class PropertiesConfiguratorTest extends TestCase {
 		super.tearDown();
 		c4j.setSystemConfigurator(null); // reset
 		Contract4J.setInstance(null);  
+		new ConfiguratorForTesting().configure();
 	}
 	
 	public void testDefaultConfiguratorIsSet() {

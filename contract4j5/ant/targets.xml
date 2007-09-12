@@ -107,7 +107,13 @@
 	<path id="groovy.project.classpath">
 		<path refid="project.classpath" />
 	</path>
+	<path id="groovybsf.project.classpath">
+		<path refid="project.classpath" />
+	</path>
 	<path id="jexl.project.classpath">
+		<path refid="project.classpath" />
+	</path>
+	<path id="jexlbsf.project.classpath">
 		<path refid="project.classpath" />
 	</path>
 	
