@@ -42,7 +42,7 @@ public class DefaultTestExpressionMakerHelperTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		stub = new DefaultTestExpressionMakerStub();
-		context = TestContextImpl.EmptyTestContext;
+		context = TestContextImpl.emptyTestContext;
 		args = new Instance[] {
 				new Instance ("arg0", String.class,  new String("arg0")), 
 				new Instance ("one",  Integer.class, new Integer(1)), 

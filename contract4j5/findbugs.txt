@@ -5,13 +5,16 @@ How to run "findbugs" on Contract4J5.
 
 1) Install findbugs (http://findbugs.sourceforge.net).
 2) Run the "findbugs" command, which invokes its own GUI.
-3) Using the File menu, open the project file "contract4j5.fb".
-4) Click the "find bugs" button to generate a report.
+3) Edit the paths in the findbugs project file "contract4j5.fb" to match your environment.
+4) Using the File menu, open the project file "contract4j5.fb".
+5) Click the "find bugs" button to generate a report.
 
 Note that there is a few message about an unused field in an aspect. This 
 appears to be an internally generated field. Also, we ignore a few other
 warnings about exposing the internals of a class when a reference to an
-array field is accessed through a getter and setter.
+array field is accessed through a getter and setter. Finally, findbugs warns
+about "Reporter" objects not being initialized. This is actually handled
+through an aspect that initializes the value "on demand".
 
 Findbugs is quite useful. For example, it found a few cases where we had
 

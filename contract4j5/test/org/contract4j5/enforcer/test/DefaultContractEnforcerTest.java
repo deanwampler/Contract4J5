@@ -87,7 +87,7 @@ public class DefaultContractEnforcerTest extends TestCase {
 		try {
 			ContractError ce = new ContractError();
 			ce.fillInStackTrace();
-			contractEnforcer.fail("test", "Invar", "Stack Trace Included Test",	TestContextImpl.EmptyTestContext, ce);
+			contractEnforcer.fail("test", "Invar", "Stack Trace Included Test",	TestContextImpl.emptyTestContext, ce);
 			fail();
 		} catch (TestSpecificationError tse) {
 			fail();
@@ -103,7 +103,7 @@ public class DefaultContractEnforcerTest extends TestCase {
 		contractEnforcer.setIncludeStackTrace(false);
 		assertFalse(contractEnforcer.getIncludeStackTrace());
 		try {
-			contractEnforcer.fail("test", "Invar", "Stack Trace Not Included Test",	TestContextImpl.EmptyTestContext, new Throwable());
+			contractEnforcer.fail("test", "Invar", "Stack Trace Not Included Test",	TestContextImpl.emptyTestContext, new Throwable());
 			fail();
 		} catch (TestSpecificationError tse) {
 			fail();
@@ -117,7 +117,7 @@ public class DefaultContractEnforcerTest extends TestCase {
 
 	public void testHandleFailureStringThrowable() {
 		try {
-			contractEnforcer.fail("test", "Invar", "A message",	TestContextImpl.EmptyTestContext, new Throwable());
+			contractEnforcer.fail("test", "Invar", "A message",	TestContextImpl.emptyTestContext, new Throwable());
 			fail();
 		} catch (TestSpecificationError tse) {
 			fail();

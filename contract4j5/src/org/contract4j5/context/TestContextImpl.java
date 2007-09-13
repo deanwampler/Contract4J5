@@ -163,7 +163,7 @@ public class TestContextImpl implements TestContext {
 		return sb.toString();
 	}
 
-	public static TestContextImpl EmptyTestContext = 
+	public static final TestContextImpl emptyTestContext = 
 			new TestContextImpl("", "", null, null, new Instance[0], null, "", 0);
 
 }

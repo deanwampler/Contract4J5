@@ -56,20 +56,20 @@ public class BSFExpressionInterpreterAdapterSimpleTest extends TestCase {
 			}
 	}
 	public void testDetermineOldValue() {
-		Map<String,Object> map = interpreter.determineOldValues("$old(result)", TestContextImpl.EmptyTestContext);
+		Map<String,Object> map = interpreter.determineOldValues("$old(result)", TestContextImpl.emptyTestContext);
 		assertEquals(1, map.size());
 		assertEquals(bsfEngine.result, map.get(bsfEngine.result));
 	}
 	
 	public void testInvokeTestFailsWithNonBooleanTestExpression() {
-		assertFalse(interpreter.invokeTest("1+1", TestContextImpl.EmptyTestContext).isPassed());
+		assertFalse(interpreter.invokeTest("1+1", TestContextImpl.emptyTestContext).isPassed());
 	}
 	public void testInvokeTestPassesWithTrueBooleanTestExpression() {
-		TestResult result = interpreter.invokeTest("1+1==2", TestContextImpl.EmptyTestContext);
+		TestResult result = interpreter.invokeTest("1+1==2", TestContextImpl.emptyTestContext);
 		assertTrue(result.isPassed());
 	}
 	public void testInvokeTestFailsWithFalseBooleanTestExpression() {
-		TestResult result = interpreter.invokeTest("1+1!=2", TestContextImpl.EmptyTestContext);
+		TestResult result = interpreter.invokeTest("1+1!=2", TestContextImpl.emptyTestContext);
 		assertFalse(result.isPassed());
 	}
 }
