@@ -166,7 +166,8 @@
 		 WARNING: This target requires AspectJ 1.5.3 or later!
 	 -->
 	<target name="test.load.time.weaving" depends="test.ltw" /> <!-- old name -->
-	<target name="test.ltw" depends="test.ltw.groovy, test.ltw.jexl, test.ltw.jruby" />
+	<!-- "test.ltw.jruby" is no longer a dependent of this target, but it still exists... -->
+	<target name="test.ltw" depends="test.ltw.groovy, test.ltw.jexl" />
 
 	<target name="test.ltw.groovy" depends="compile-test, test.setup, project.unwoven.test.jar">
 		<antcall target="junitTemplate.ltw">
