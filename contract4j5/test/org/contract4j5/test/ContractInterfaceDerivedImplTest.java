@@ -24,10 +24,16 @@ import org.contract4j5.errors.ContractError;
 import org.contract4j5.errors.TestSpecificationError;
 import org.contract4j5.util.ExampleContractInterfaceDerivedImpl;
 import org.contract4j5.util.ExampleContractInterfaceImpl;
+import org.contract4j5.configurator.test.ConfiguratorForTesting;
 
 public class ContractInterfaceDerivedImplTest extends ContractInterfaceImplTest {
 	private ExampleContractInterfaceImpl obj2 = null;
-	
+
+	public ContractInterfaceDerivedImplTest() {
+		super();
+		new ConfiguratorForTesting().configure();
+	}
+
 	protected void setUp() throws Exception {
 		super.setUp();
 		// Override the parent test's object.
@@ -41,8 +47,7 @@ public class ContractInterfaceDerivedImplTest extends ContractInterfaceImplTest 
 	public void testClassImplContractInterface1() {
 		try {
 			obj2 = new ExampleContractInterfaceDerivedImpl(0);  // Fail class invariant
-			// TODO For some reason, this test fails under LTW, with Jexl or Groovy.
-			// fail();
+			fail();
 		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
