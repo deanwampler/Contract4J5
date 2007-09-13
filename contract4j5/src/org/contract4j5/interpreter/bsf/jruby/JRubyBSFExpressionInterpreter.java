@@ -36,7 +36,7 @@ public class JRubyBSFExpressionInterpreter extends BSFExpressionInterpreterAdapt
 
 	static {
 		BSFManager.registerScriptingEngine(
-				"jruby", 
+				"ruby", 
 				"org.jruby.javasupport.bsf.JRubyEngine", 
 				new String[] { "rb" }
 			);
@@ -74,15 +74,7 @@ public class JRubyBSFExpressionInterpreter extends BSFExpressionInterpreterAdapt
 	public JRubyBSFExpressionInterpreter(
 			Boolean treatEmptyTestExpressionAsValid, 
 			Map<String, String> optionalKeywordSubstitutions) throws BSFException {
-		super("jruby", treatEmptyTestExpressionAsValid, optionalKeywordSubstitutions);
+		super("ruby", treatEmptyTestExpressionAsValid, optionalKeywordSubstitutions);
 		setAllowUnrecognizedKeywords(true);
-	}
-
-	public static void main(String args[]) {
-		try {
-			new JRubyBSFExpressionInterpreter();
-		} catch (Throwable th) {
-			th.printStackTrace();
-		}
 	}
 }

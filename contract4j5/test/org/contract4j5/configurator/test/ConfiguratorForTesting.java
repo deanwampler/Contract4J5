@@ -74,7 +74,7 @@ public class ConfiguratorForTesting extends AbstractConfigurator {
 				expressionInterpreter = new JexlBSFExpressionInterpreter();
 			else if (whichInterpreter.equalsIgnoreCase("jexl"))
 				expressionInterpreter = new JexlExpressionInterpreter();
-			else if (whichInterpreter.equalsIgnoreCase("jruby")) {
+			else if (whichInterpreter.equalsIgnoreCase("jruby") || whichInterpreter.equalsIgnoreCase("ruby")) {
 				expressionInterpreter = new JRubyBSFExpressionInterpreter();
 			}
 			else

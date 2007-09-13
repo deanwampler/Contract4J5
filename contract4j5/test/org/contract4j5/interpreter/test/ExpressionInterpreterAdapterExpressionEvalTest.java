@@ -25,6 +25,7 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
+import org.contract4j5.configurator.test.ConfiguratorForTesting;
 import org.contract4j5.context.TestContext;
 import org.contract4j5.context.TestContextImpl;
 import org.contract4j5.controller.Contract4J;
@@ -52,13 +53,17 @@ public class ExpressionInterpreterAdapterExpressionEvalTest extends TestCase {
 		}
 	}
 
+	public ExpressionInterpreterAdapterExpressionEvalTest() {
+		super();
+		ConfiguratorForTesting c = new ConfiguratorForTesting();
+		c.configure();
+		interpreter = c.expressionInterpreter;
+	}
+	
 	private ExpressionInterpreterHelper interpreter = null;
 	
 	protected void setUp() throws Exception {
 		super.setUp();
-//		ConfiguratorForTesting c = new ConfiguratorForTesting();
-//		c.configure();
-//		interpreter = c.expressionInterpreter;
 		interpreter = (ExpressionInterpreterHelper) Contract4J.getInstance().getContractEnforcer().getExpressionInterpreter();
 		interpreter.setCacheTestExpressionValidations(false);
 	}
@@ -241,10 +246,6 @@ public class ExpressionInterpreterAdapterExpressionEvalTest extends TestCase {
 		assertTestPassed(testResult);
 	}
 	
-	public void testExpressionInvalidWithMispelledDollarArg0AndNoData() {
-		TestContext context = new TestContextImpl("$arg[0]", null, null, null, null, null, null, -1);
-		doTestExpressionInvalidWithDollarArgs(context);
-	}
 	public void testExpressionInvalidWithDollarArg0AndNoData() {
 		TestContext context = new TestContextImpl("$args[0]", null, null, null, null, null, null, -1);
 		doTestExpressionInvalidWithDollarArgs(context);
@@ -338,6 +339,9 @@ public class ExpressionInterpreterAdapterExpressionEvalTest extends TestCase {
 	public void testExpressionInvalidWithDollarAndMisspelledKeywordArgs() {
 		doTestExpressionInvalidWithUnknownKeywords("$argsx");
 	}
+	public void testExpressionInvalidWithDollarAndMisspelledKeywordArgs2() {
+		doTestExpressionInvalidWithUnknownKeywords("$arg[0]");
+	}
 	public void testExpressionInvalidWithDollarAndMisspelledKeywordReturns() {
 		doTestExpressionInvalidWithUnknownKeywords("$returnsx");
 	}
@@ -348,7 +352,10 @@ public class ExpressionInterpreterAdapterExpressionEvalTest extends TestCase {
 		doTestExpressionInvalidWithUnknownKeywords("$foo $object $thisx $targetx $argsx $returnx $result");
 	}
 	private void doTestExpressionInvalidWithUnknownKeywords(String testExpression) {
-		TestContext context = new TestContextImpl(testExpression, null, null, null, null, null, null, -1);
+		// We need to pass an args array, because JRuby won't care if the keyword is misspelled, but it will
+		// complain if the args Instance[] is empty!
+		Instance[] args = new Instance[] { new Instance("arg1", String.class, "arg1") };
+		TestContext context = new TestContextImpl(testExpression, null, null, null, args, null, null, -1);
 		TestResult testResult = interpreter.validateTestExpression(testExpression, context); 
 		if (SystemUtils.isJRuby()) {
 			assertTestPassed(testResult);
@@ -359,12 +366,12 @@ public class ExpressionInterpreterAdapterExpressionEvalTest extends TestCase {
 
 	private void assertTestFailed(TestResult testResult,
 			String expectedErrorMessage) {
-		assertFalse(testResult.isPassed());
-		assertTrue(testResult.getMessage(), testResult.getMessage().contains(expectedErrorMessage));
+		assertFalse(testResult.toString(), testResult.isPassed());
+		assertTrue(testResult.toString(), testResult.getMessage().contains(expectedErrorMessage));
 	}
 
 	private void assertTestPassed(TestResult testResult) {
-		assertTrue(testResult.isPassed());
+		assertTrue(testResult.toString(), testResult.isPassed());
 		assertEquals("", testResult.getMessage());
 	}
 

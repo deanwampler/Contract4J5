@@ -48,9 +48,9 @@ public class BSFExpressionInterpreterAdapterSimpleTest extends TestCase {
 		assertNotNull(interpreter.getBSFManager());
 	}
 	
-	public void testUnknownBSFEngineThrowsException() {
+	public void testGettingBSFEngineWhenItsUnknownThrowsException() {
 			try {
-				new BSFExpressionInterpreterAdapter ("unknownengine");
+				new BSFExpressionInterpreterAdapter ("unknownengine").getBSFEngine();
 				fail();
 			} catch (BSFException e) {
 			}

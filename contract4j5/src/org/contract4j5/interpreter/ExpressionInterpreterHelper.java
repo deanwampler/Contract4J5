@@ -239,29 +239,29 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 	}
 
 	private String checkForInvalidWhitespace(String expression, String errStr) {
-		if (expression.matches("\\$\\s+.*")) { // '$' followed by whitespace
+		if (containsKeyword(expression, "\\s+\\w*")) { // '$' followed by whitespace
 			errStr += InvalidTestExpression.INVALID_WHITESPACE_IN_KEYWORD.toString();			
 		}
 		return errStr;
 	}
 
 	private String checkDollarOld(String expression, String errStr) {
-		if (expression.contains("$old")) {
-			if (expression.matches("\\$old\\s*[^\\(]+")) {  // "$old ..." w/out "(..)"
+		if (containsKeyword(expression, "old")) { 
+			if (expression.matches("^.*\\$old\\s*[^\\(]+.*$")) {  // "$old ..." w/out "(..)"
 				errStr += InvalidTestExpression.OLD_KEYWORD_NO_ARGS.toString();			
-			} else if (expression.matches("\\$old\\s*$")) {  // "$old" w/out "(..)"
+			} else if (expression.matches("^.*\\$old\\s*$.*$")) {  // "$old" w/out "(..)"
 				errStr += InvalidTestExpression.OLD_KEYWORD_NO_ARGS.toString();			
 			} 
-			if (expression.matches("\\$old\\s*\\(\\s*\\)")) { // $old() (no arg)
+			if (expression.matches("^.*\\$old\\s*\\(\\s*\\).*$")) { // $old() (no arg)
 				errStr += InvalidTestExpression.OLD_KEYWORD_INVALID_ARGS.toString();			
 			} else { 
-				Pattern p = Pattern.compile("\\$old\\s*\\(\\s*[^\\(\\)]*(\\([^\\)]*\\))?[^\\(\\)]*\\)"); 
+				Pattern p = Pattern.compile("^.*(\\$old\\s*\\(\\s*[^\\(\\)]*(\\([^\\)]*\\))?[^\\(\\)]*\\)).*$"); 
 				Matcher m = p.matcher(expression);
 				while (m.find()) {
-					String s1 = m.group();
+					String s1 = m.group(1);
 					String expr = s1.substring(s1.indexOf('(')+1, s1.length()-1); // grab everything between '(' and ')'
 					expr = expr.trim();
-					if (expr.matches(".*[+\\-*/<>=~\\^|&%#@!,:;?{}].*")) { // $old(..) with nonvalid arg?
+					if (expr.matches("^.*[+\\-*/<>=~\\^|&%#@!,:;?{}].*$")) { // $old(..) with nonvalid arg?
 						errStr += InvalidTestExpression.OLD_KEYWORD_INVALID_ARGS.toString();
 						break;
 					}
@@ -274,7 +274,7 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 	private String checkDollarArgs(TestContext context, String expression,
 			String errStr) {
 		Object[] args = context.getMethodArgs();
-		if (expression.contains("$args") && (args == null || args.length == 0)) {
+		if (expression.matches("^.*\\$args.*$") && (args == null || args.length == 0)) {
 			errStr += InvalidTestExpression.ARGS_KEYWORD_WITH_NO_ARGS.toString();
 		}
 		return errStr;
@@ -282,7 +282,7 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 
 	private String checkDollarReturn(TestContext context, String expression,
 			String errStr) {
-		if (expression.contains("$return") && context.getMethodResult() == null) {
+		if (containsKeyword(expression, "return") && context.getMethodResult() == null) {
 			errStr += InvalidTestExpression.RETURN_KEYWORD_WITH_NO_RETURN.toString();
 		}
 		return errStr;
@@ -298,7 +298,7 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 
 	private String checkDollarTarget(TestContext context, String expression,
 			String errStr) {
-		if (expression.contains("$target")) {
+		if (containsKeyword(expression, "target")) {
 			Instance i = context.getField();
 			if (i == null) {
 				errStr += InvalidTestExpression.TARGET_KEYWORD_WITH_NO_TARGET.toString();
@@ -309,7 +309,7 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 
 	private String checkDollarThis(TestContext context, String expression,
 			String errStr) {
-		if (expression.contains("$this")) {
+		if (containsKeyword(expression, "this")) {
 			Instance i = context.getInstance();
 			if (i == null) {
 				errStr += InvalidTestExpression.THIS_KEYWORD_WITH_NO_INSTANCE.toString();
@@ -318,6 +318,10 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 		return errStr;
 	}
 
+	private boolean containsKeyword(String expression, String keyword) {
+		return expression.matches("^.*\\$"+keyword+"\\b.*$");
+	}
+	
 	protected TestResult handleEmptyTestExpression() {
 		String warnStr = "";
 		String errStr  = InvalidTestExpression.EMPTY_EXPRESSION_ERROR.toString();
@@ -526,7 +530,7 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 		}
 		
 		// There *should* be no $old(..) expressions remaining!!
-		if (expression.contains ("$old")) {
+		if (containsKeyword(expression, "old")) {
 			getReporter().report(Severity.WARN, ExpressionInterpreterHelper.class, 
 					"One or more \"$old(..)\" strings remain in test expression \"" +
 					expression +

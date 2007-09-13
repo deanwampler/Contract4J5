@@ -30,7 +30,7 @@ public class SystemUtils {
 	}
 
 	public static boolean isJRuby() {
-		return getScriptingEngineName().contains("jruby");
+		return getScriptingEngineName().contains("ruby");
 	}
 
 }

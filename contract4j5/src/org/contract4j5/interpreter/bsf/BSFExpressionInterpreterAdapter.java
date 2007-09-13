@@ -37,7 +37,11 @@ public class BSFExpressionInterpreterAdapter extends
 
 	private BSFEngine  bsfEngine;
 	private BSFManager bsfManager;
-	public BSFEngine  getBSFEngine()  { return bsfEngine;  }
+	public BSFEngine  getBSFEngine() throws BSFException  { 
+		if (bsfEngine == null)
+			bsfEngine  = getBSFManager().loadScriptingEngine(getScriptingEngineName());
+		return bsfEngine;  
+	}
 	public BSFManager getBSFManager() { return bsfManager; }
 	
 	public BSFExpressionInterpreterAdapter(String whichScriptingEngine) throws BSFException {
@@ -63,7 +67,6 @@ public class BSFExpressionInterpreterAdapter extends
 	private void init(String whichScriptingEngine) throws BSFException {
 		this.scriptingEngineName = whichScriptingEngine;
 		this.bsfManager = new BSFManager();
-		this.bsfEngine  = this.bsfManager.loadScriptingEngine(whichScriptingEngine);
 	}
 
 	@Override

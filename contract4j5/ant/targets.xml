@@ -286,7 +286,7 @@
 	<target name="_junitTemplate">
 		<junit printsummary="yes" haltonfailure="yes" showoutput="true" fork="yes">
 			<formatter type="brief" usefile="true"/>
-			<jvmarg value="-ea"/>
+			<jvmarg value="${enable.asserts.flag}"/>
 			<jvmarg value="-Dinterpreter=${interpreter.lang}"/>
 			<classpath>
 				<pathelement location="${test.jar}"/>
@@ -308,7 +308,7 @@
 			<jvmarg value="-Xms500m"/>
 			<jvmarg value="-Xmx1000m"/>
 			<jvmarg value="-Dinterpreter=${interpreter.lang}"/>
-			<jvmarg value="-ea"/>
+			<jvmarg value="${enable.asserts.flag}"/>
 			<jvmarg value="-javaagent:${aspectj.home}/lib/aspectjweaver.jar"/>
 			<classpath>
 				<pathelement location="${test.jar}"/>

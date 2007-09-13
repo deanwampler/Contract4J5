@@ -63,7 +63,7 @@ public class TestOld extends TestCase {
 		try {
 			p.moveX(10);
 		} catch (ContractError ce) {
-			fail();
+			fail(ce.toString());
 		}
 		assertEquals(10, p.getX());
 		assertEquals(0,  p.getY());
@@ -75,7 +75,7 @@ public class TestOld extends TestCase {
 		try {
 			p.moveY(20);
 		} catch (ContractError ce) {
-			fail();
+			fail(ce.toString());
 		}
 		assertEquals(0,  p.getX());
 		assertEquals(20, p.getY());

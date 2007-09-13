@@ -125,6 +125,7 @@
 		<antcall target="junitTemplate">
 			<param name="test.jar"         value="${project.test.jar}" />
 			<param name="interpreter.lang" value="groovybsf" />
+			<param name="enable.asserts.flag" value="-ea" />
 		</antcall>
 	</target>
 
@@ -132,6 +133,7 @@
 		<antcall target="junitTemplate">
 			<param name="test.jar"         value="${project.test.jar}" />
 			<param name="interpreter.lang" value="groovy" />
+			<param name="enable.asserts.flag" value="-ea" />
 		</antcall>
 	</target>
 
@@ -139,6 +141,7 @@
 		<antcall target="junitTemplate">
 			<param name="test.jar"         value="${project.test.jar}" />
 			<param name="interpreter.lang" value="jexl" />
+			<param name="enable.asserts.flag" value="-ea" />
 		</antcall>
 	</target>
 
@@ -146,6 +149,7 @@
 		<antcall target="junitTemplate">
 			<param name="test.jar"         value="${project.test.jar}" />
 			<param name="interpreter.lang" value="jexlbsf" />
+			<param name="enable.asserts.flag" value="-ea" />
 		</antcall>
 	</target>
 
@@ -153,6 +157,7 @@
 		<antcall target="junitTemplate">
 			<param name="test.jar"         value="${project.test.jar}" />
 			<param name="interpreter.lang" value="jruby" />
+			<param name="enable.asserts.flag" value="-da:org.apache.dsf" />
 		</antcall>
 	</target>
 
@@ -168,6 +173,7 @@
 			<param name="test.jar"    value="unwoven-${project.test.jar}" />
 			<param name="aspectpath"  value="${project.jar}" />
 			<param name="interpreter.lang" value="groovy" />
+			<param name="enable.asserts.flag" value="-ea" />
 		</antcall>
 	</target>
 	
@@ -176,6 +182,7 @@
 			<param name="test.jar"    value="unwoven-${project.test.jar}" />
 			<param name="aspectpath"  value="${project.jar}" />
 			<param name="interpreter.lang" value="jexl" />
+			<param name="enable.asserts.flag" value="-ea" />
 		</antcall>
 	</target>
 	
@@ -184,6 +191,7 @@
 			<param name="test.jar"    value="unwoven-${project.test.jar}" />
 			<param name="aspectpath"  value="${project.jar}" />
 			<param name="interpreter.lang" value="jruby" />
+			<param name="enable.asserts.flag" value="" />
 		</antcall>
 	</target>
 		

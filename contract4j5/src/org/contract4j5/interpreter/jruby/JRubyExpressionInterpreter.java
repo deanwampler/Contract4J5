@@ -36,7 +36,7 @@ public class JRubyExpressionInterpreter extends ExpressionInterpreterHelper {
 	public JRubyExpressionInterpreter(
 			boolean treatEmptyTestExpressionAsValid, 
 			Map<String, String> optionalKeywordSubstitutions) {
-		super("jruby", treatEmptyTestExpressionAsValid, optionalKeywordSubstitutions);
+		super("ruby", treatEmptyTestExpressionAsValid, optionalKeywordSubstitutions);
 		setAllowUnrecognizedKeywords(true);
 	}
 
