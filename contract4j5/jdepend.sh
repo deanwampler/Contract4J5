@@ -86,7 +86,7 @@ fi
 DOT=`which dot`
 if [ $? = 1 ] ; then
 		DOT="$GRAPHVIZ_HOME/bin/dot"
-		if [ ! -x "$DOT" = "" ] ; then
+		if [ ! -x "$DOT" ] ; then
 				echo "Graphviz must be installed and either 'dot' must be on the path."
 				echo "or GRAPHVIZ_HOME must be a defined environment variable that"
 				echo "points to the installation directory."
