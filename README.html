@@ -38,7 +38,7 @@
           <h3>History</h3>
 <table>
 	<tr><th colspan='2' align="left">Contract4J5 (Annotation Form)</th></tr>
-	<tr><td><a href="#v0800">v0.8.0.0</a></td><td>September 14, 2007</td></tr>                                    
+	<tr><td><a href="#v0800">v0.8.0.0</a></td><td>September 13, 2007</td></tr>                                    
 	<tr><td><a href="#v0710">v0.7.1.0</a></td><td>January 21, 2007</td></tr>                                    
 	<tr><td><a href="#v0700">v0.7.0.0</a></td><td>December 31, 2006</td></tr>
 	<tr><td><a href="#v0600">v0.6.0.0</a></td><td>September 21, 2006</td></tr>
@@ -363,29 +363,30 @@ the best performance (about 2 times faster than Groovy, when running the test su
 so we may continue supporting it, even though Jexl doesn't appear to be as 
 full-featured as Groovy (<i>e.g.,</i> tests for generic classes don't seem to work).</p>
 
-<p>The V0.8 release does continue support JRuby, but it will be removed in the V0.9 release.
+<p>The V0.8 release does continue support for JRuby, but it will be removed in the V0.9 release.
 While there is great interest in JRuby and Java interoperability, JRuby is not a good choice
 for a DbC tool, because of the fine-grained interactions between the Java runtime and the
-scripting environment, which is something of a torture test for the scripting environment.
+scripting environment, which is something of a torture test for the scripting environment and
+not the way a scripting environment would normally be used in an application.
 The performance of JRuby and its limitations with regards to Contract4J's needs make it a
 less suitable choice for Contract4J.</p>
 
-<p>Here are some performance numbers, from the V0.7 release, for running the unit test suite
-the different scripting engines. The numbers compare the performance of load-time
+<p>Here are some performance numbers, from the V0.7 release, for the different scripting engines. 
+(The numbers are a little bigger for V0.8, due to the increase in the number of tests in that release.) 
+The numbers compare the performance of load-time
 weaving (LTW) vs. binary weaving and also the performance of the JVMs in JDK 5 <i>vs.</i> JDK 6.</p>
-TODO: V0.8 NUMBERS! Discuss BSF overhead.
 <table border="1">
 	<tr><th colspan="6">JDK 5 (sec.)</th><th colspan="6">JDK 6 (sec.)</th></tr>
 	<tr><th colspan="2">Jexl</th><th colspan="2">Goovy</th><th colspan="2">JRuby</th><th colspan="2">Jexl</th><th colspan="2">Goovy</th><th colspan="2">JRuby</th></tr>
 	<tr><th>Binary</th><th>LTW</th><th>Binary</th><th>LTW</th><th>Binary</th><th>LTW</th><th>Binary</th><th>LTW</th><th>Binary</th><th>LTW</th><th>Binary</th><th>LTW</th></tr>
 	<tr><td>21.7</td><td>98.6</td><td>54.9</td><td>324.4</td><td>79.6</td><td>189.4</td><td>17.7</td><td>62.9</td><td>44.8</td><td>133.5</td><td>63.2</td><td>108.4</td></tr>
 </table>
-<p>These times are rough "user times", averaged over a few runs, measured on a ThinkPad T42 running Ubuntu Linux.
+<p>These times are approximate "user times", averaged over a few runs, measured using the "time" shell command on a ThinkPad T42 running Ubuntu Linux.
 There are slightly different build activities and I/O overhead involved in the LTW numbers,
-adding a few percentage points to the numbers. The tests do some different manipulations depending on which interpreter is used. Hence, the results are rough, at best. Most likely, the numbers reflect the relative amounts of overhead to load the interpreters and to set up the "environments" for evaluating the scripts. Since the scripts are always very small, evaluation is probably not a large percentage of the execution time. (However, this is speculation!) Your mileage may vary...</p>
+adding a few percentage points to the numbers. The tests do some different manipulations depending on which interpreter is used. Hence, the results are rough, at best. Most likely, the numbers reflect the relative amounts of overhead to load the interpreters and to set up the "environments" for evaluating the scripts. Your mileage may vary...</p>
 <p>Note that the JDK 6 performance is significantly better. The code was compiled
 with the JDK 5 <code>javac</code> and executed using the JDK 6 JVM. Ironically, we saw
-slightly slower performance when we compiled with JDK 6 (not reflected in the numbers). </p>
+slightly slower performance when we compiled with JDK 6 (not shown in the table). </p>
 <p>The Jexl test
 runs are roughly twice as fast as the Groovy and JRuby runs, probably because Jexl is a 
 more "minimalist" environment, incurring less startup and execution overhead. </p>
@@ -404,8 +405,10 @@ long for your needs, then binary weaving of compiled code provides better perfor
 only a modest change in the build process.</p>
 <p>You can select which interpreter to use at runtime by passing one of the following flags to the JVM:
 <ul> 
-  <li><code>-Dinterpreter=jexl</code></li>
   <li><code>-Dinterpreter=groovy</code> (the default)</li>
+  <li><code>-Dinterpreter=groovybsf</code> (Groovy using BSF - see below)</li>
+  <li><code>-Dinterpreter=jexl</code></li>
+  <li><code>-Dinterpreter=jexlbsf</code> (Jexl using BSF - see below)</li>
   <li><code>-Dinterpreter=jruby</code></li>
 </ul>
 If you use the <code>PropertiesConfigurator</code>, you can use the following property:<br/>
@@ -1377,12 +1380,16 @@ some of the substitutions that are made.</li>
 The heavy lifting of expression evaluation is done in 
 <code>org.contract4j5.interpreter.ExpressionInterpreterHelper.java</code>
 and its subclasses for Groovy, Jexl, and JRuby, respectively;
-<code>org.contract4j5.interpreter.groovy.GroovyExpressionInterpreter</code>,
-<code>org.contract4j5.interpreter.jexl.JexlExpressionInterpreter</code>, and
+<code>org.contract4j5.interpreter.groovy.GroovyExpressionInterpreter</code> (default),
+<code>org.contract4j5.interpreter.bsf.groovy.GroovyBSFExpressionInterpreter</code> (through BSF),
+<code>org.contract4j5.interpreter.jexl.JexlExpressionInterpreter</code>, 
+<code>org.contract4j5.interpreter.bsf.jexl.JexlBSFExpressionInterpreter</code> (through BSF), and
 <code>org.contract4j5.interpreter.bsf.jruby.JRubyBSFExpressionInterpreter</code>.</li>
-	<li>Note that JRuby is the only language that continues to use the <a href="http://jakarta.apache.org/bsf/">Bean Scripting Framework</a>, as of V0.8. We discovered a significant performance penalty when BSF is used, so it was removed from the Jexl and Groovy integration.</li>
-	<li>If you want to use a different language, you have to create your own subclass of 
-<code>ExpressionInterpreterHelper</code>. See <code>GroovyExpressionInterpreter</code> as an example.</li>
+	<li>As of V0.8, the <a href="http://jakarta.apache.org/bsf/">Bean Scripting Framework</a> (BSF) is an option for Jexl and Groovy and remains the only option for JRuby. There is no noticeable performance penalty when BSF is used, compared to the
+	rest of the Contract4J overhead, although there appears to be a noticeable overhead over invoking an "empty" script through BSF <i>vs.</i> invoking it directly with the scripting engine, when using test applications separate from Contract4J. By default, Jexl and Groovy don't use BSF.</li>
+	<li>If you want to use a different language, the easiest approach is to create a subclass of 
+<code>BSFExpressionInterpreterAdapter</code>. See <i>e.g.,</i> <code>GroovyBSFExpressionInterpreter</code>.</li>
+	<li>To select a different language option, see the <a href="#config">Configuration</a> section. 
 </ul>
 
 <a name="config"></a>
@@ -1404,6 +1411,25 @@ meet your needs, you have several options.
 
 <p>Here are some API examples.</p>
 
+<h6>Select a Different Scripting Language</h6>
+
+<p>Set a property when invoking the JVM:</p>
+<pre>
+	java -Dinterpreter=<i>lang</i> ...
+</pre>
+where <code><i>lang</i></code> is one of:
+<table border="1">
+	<tr bgcolor="lightgrey"><td><i>lang</i></td><td>Which language?</td></tr>
+	<tr><td><code>groovy</code></td><td>Groovy without BSF (default)</td></tr>
+	<tr><td><code>groovybsf</code></td><td>Groovy with BSF</td></tr>
+	<tr><td><code>jexl</code></td><td>Jexl without BSF</td></tr>
+	<tr><td><code>jexlbsf</code></td><td>Jexl with BSF</td></tr>
+	<tr><td><code>jruby</code></td><td>JRuby <i>with</i> BSF</td></tr>
+	<tr><td><code><i>other</i></code></td><td>Any other language for which you have implemented an integration with Contract4J, as discussed elsewhere in these notes.</td></tr>
+</table>
+
+<p>You can also specify the language using Spring configuration, as discussed above.</p>
+	
 <h6>Enable or Disable Test Types</h6>
 
 <pre>
@@ -1445,13 +1471,17 @@ classes:
  <tr><td><code>org.contract4j5.interpreter.ExpressionInterpreterHelper:</code><br/>
   An abstract helper class that provides a partial implementation. Subclass this class to support the actual interpreters.</td></tr>
  <tr><td><code>org.contract4j5.interpreter.bsf.BSFExpressionInterpreterAdapter:</code><br/>
-  (Deprecated) Adapts the Bean Scripting Framework (BSF) for use by Contract4J5. Due to performance problems, it is being removed (Groovy and Jexl support no long use it.)</td></tr>
+  Adapts the Bean Scripting Framework (BSF) for use by Contract4J5. (As of V0.8, Groovy and Jexl no longer use it, by default, although the BSF integration is still in the code base.)</td></tr>
  <tr><td><code>org.contract4j5.interpreter.groovy.GroovyExpressionInterpreter:</code><br/>
 The Groovy subclass of the "helper" class.</td></tr>
+ <tr><td><code>org.contract4j5.interpreter.bsf.groovy.GroovyBSFExpressionInterpreter:</code><br/>
+The Groovy BSF support class (optional).</td></tr>
  <tr><td><code>org.contract4j5.interpreter.jexl.JexlExpressionInterpreter:</code><br/>
 The Jexl subclass of the "helper" class.</td></tr>
+ <tr><td><code>org.contract4j5.interpreter.bsf.jexl.JexlBSFExpressionInterpreter:</code><br/>
+The Jexl BSF support class (optional).</td></tr>
  <tr><td><code>org.contract4j5.interpreter.bsf.jruby.JRubyBSFExpressionInterpreter:</code><br/>
-(Deprecated) The JRuby wrapper of the BSF adapter.</td></tr>
+(Deprecated) The JRuby BSF support class.</td></tr>
   <tr><td><code>org.contract4j5.reporter.Reporter:</code><br/>
   The "reporter" interface that is a thin veneer for a logging abstraction.</td></tr>
   <tr><td><code>org.contract4j5.reporter.Severity:</code><br/>
@@ -1494,38 +1524,37 @@ compiles with AspectJ, weaves your precompiled jars or class files with
 <h4>TODO Items</h4>
 <p>
 Here is a brief list of the most important "TODO" items that we want to complete 
-before V1.0, roughly in order of importance. 
+before the V1.0 release, roughly in order of importance. 
 <ol>
-	<li>Drop support for JRuby and possibly Jexl. It's getting increasingly difficult to support three languages, as each has its own tool chains, idiosyncrasies, <i>etc.</i> Supporting three makes it harder to allocate the time to investigate that any one test failure is actually a limitation of the underlying scripting engine or a C4J bug. Would everyone be happy with Groovy as the officially-supported language with possibly some limited support for Jexl (when optimal performance is most important)?</li>
-	<li>Automatically enforce proper usage of method and constructor annotations in
+	<li>Drop support for JRuby and possibly Jexl. It's getting increasingly difficult to support three languages, as each has its own tool chains, idiosyncrasies, <i>etc.</i> Would everyone be happy with Groovy as the officially-supported language with possibly limited support for Jexl, when optimal performance is most important?</li>
+	<li>Find a way to automatically enforce proper usage of method and constructor annotations in
 subclasses when they aren't annotated.</li>
 	<li>Implement correct contravariant behavior of inherited precondition tests and covariant behavior of inherited postcondition tests.</li>
 	<li>Support end-user extensions with custom annotations and "behavior" handlers.</li>
 	<li>Support tests on static methods.</li>
 	<li>Improve performance.</li>
+	<li>Support Maven.</li>
 	<li>Mock out logging output so test runs don't generate so much output.</li>
 </ol>
 Here is a list of other possible enhancements.
 <ol>
 	<li>Extend <code>@Pre</code> and <code>@Post</code> to support class-level annotations that will apply to all protected and public instance and static methods. For example, <code>@Contract @Pre @Post public class Foo {...}</code> would require all such methods to take non-null arguments and return non-null values, consistent with the way <code>@Pre</code> and <code>@Post</code> work by default today on methods. Add optional configuration properties to each annotation to set the protection level for which the annotation applies (<i>e.g.</i>, also do private methods.) and whether or not to exclude static methods.</li>
-	<li>Support scripting languages using the native scripting support in Java 6.</li>
+	<li>Interface to scripting languages using the native scripting support in Java 6.</li>
 	<li>For the keywords:
 		<ul>
-			<li>Allow "this" without the '$'? </li>
 			<li>Provide a "$field" alias for "$target", since the latter isn't used for anything other than fields. Keep "$target" for backwards compatibility.</li>
-		</ul></li>
 </ol>
 
 <a name="notes"></a>
 <h3>Notes for Each Release</h3>
 
 <a name="v0800"></a>
-<h4>v0.8.0 September 8, 2007</h4>
-<h5>Deprecated JRuby and BSF, Bug Fixes in Test Expression Handling, and Robustness Improvements</h5>
+<h4>v0.8.0 September 13, 2007</h4>
+<h5>Deprecated JRuby and "partially" deprecated Jexl, made BSF optional, implemented bug fixes in test expression handling, <i>etc.</i></h5>
 
 <ol>
-	<li>Deprecated JRuby and raised the possibility of deprecating Jexl, in favor of Groovy.</li>
-	<li>Removed BSF as the mediator between Contract4J and Jexl and Groovy. This was done because of a substantial performance penalty imposed by BSF and because different versions of BSF are needed for JRuby vs. Jexl and Groovy. Since JRuby itself is also deprecated, it still uses BSF. BSF support may be removed completely in a future release. (Feedback welcome.)</li>
+	<li>Deprecated JRuby and raised the possibility of deprecating Jexl. Groovy is now the standard scripting language for Contract4J. (Load-time weaving with JRuby is no longer supported at all; the "test.ltw.jruby" target is still in the build, but isn't executed as part of the standard "test.ltw" target anymore...)</li>
+	<li>Made BSF optional as the mediator between Contract4J and Jexl and Groovy. This was done originally because of a perceived  performance penalty imposed by BSF and because different versions of BSF are needed for JRuby vs. Jexl and Groovy. The performance penalty turned out to be minimal, so the BSF integration was retained as an option. Since JRuby itself is also deprecated, it still uses BSF exclusively. (Feedback on the use of BSF is welcome.)</li>
 	<li>Fixed bugs that prevented tests from being applied for generic classes. (But it appears that only Groovy supports testing generics!)</li>
 	<li>Added support for referencing other objects and classes in test expressions, not just the class under test itself, which was not well supported previously. (See the <a href="#limits">Known Limitations</a> for details.)</li>
 	<li>Increased the number of tests by ~15%.</li>
@@ -1563,15 +1592,15 @@ in test expressions:
 </p>
 
 <p>
-All scripting engine calls now go through the Jakarta
-<a href="http://jakarta.apache.org/bsf/">Bean Scripting Framework</a> (BSF)
-to make it easier to plug and play almost any scripting engine.
-These changes introduce the following new library dependencies:
+New scripting engines can be integrated through the Jakarta
+<a href="http://jakarta.apache.org/bsf/">Bean Scripting Framework</a> (BSF). However,
+the integration with Groovy and Jexl no longer use BSF, be default, although the option is still there.
+Are the library dependencies:
 </p>
 <table border="1">
 <tr><th>Scripting Engine</th><th>Required Libraries</th></tr>
-<tr><td><i>All</i></td><td><code>bsf-2.4.X.jar</code>, <code>commons-logging.jar-1.0.X.jar</code></td></tr>
-<tr><td>Jexl</td><td><i>All</i> plus <code>commons-jexl-1.0.X.jar</code></td></tr>
+<tr><td><i>Several</i></td><td><code>bsf-2.4.X.jar</code>, <code>commons-logging.jar-1.0.X.jar</code></td></tr>
+<tr><td>Jexl</td><td><i>All</i> plus <code>commons-jexl-1.1.jar</code></td></tr>
 <tr><td>Groovy</td><td><i>All</i> plus <code>groovy-1.0.jar</code> (RC 1 or newer), <code>asm-2.2.jar</code>, and <code>antlr-2.7.5.jar</code></td></tr>
 <tr><td>JRuby</td><td><i>All</i> plus <code>jruby-1.0.jar</code> or later</td></tr>
 </table>
@@ -1609,7 +1638,7 @@ Jexl doesn't, such as closures.</p>
 	the issue will often be easier with Groovy. JRuby messages are descriptive as well.</li>
 </ol>
 <p>Search the class <code>BSFExpressionInterpreterAdapterExpressionEvalTest</code> for the variables
-<code>isJexl</code>, <code>isJRuby</code>, and <code>isGroovy</code> to see examples of tests where Jexl, JRuby, and Groovy behave differently.</p>
+<code>isJexl</code>, <code>isJRuby</code>, <code>isGroovy</code> and <code>isBSF</code> to see examples of tests where Jexl, JRuby, Groovy, and whether or not they are going through BSF, behave differently.</p>
 
 <h5>Configuration of Failure Handling</h5>
 <p>It is now easier to configure the behavior for what happens when a contract
