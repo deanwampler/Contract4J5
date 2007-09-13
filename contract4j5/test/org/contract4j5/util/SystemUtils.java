@@ -33,4 +33,13 @@ public class SystemUtils {
 		return getScriptingEngineName().contains("ruby");
 	}
 
+	public static String getAspectWeavingMode() {
+		String weavingMode = System.getProperty("weaving.mode");
+		return weavingMode == null ? "unknown" : weavingMode;
+	}
+	
+	public static boolean isLTW() {
+		return getAspectWeavingMode().contains("ltw");
+	}
+
 }
