@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+  build.xml - Top-level "ant" build file for Aspect Programming's "Contract4J5" library.
+  This file just has an "all" target and it delegates to the "all.plus.extras" target
+  in the "real" ant build.xml in the "contract4j5" directory. This ant file is mostly
+  used for cruisecontrol.
+
+  Copyright 2005-2007 Dean Wampler. All rights reserved.
+  http://www.aspectprogramming.com
+ 
+  Licensed under the Eclipse Public License - v 1.0; you may not use this
+  software except in compliance with the License. You may obtain a copy of the 
+  License at
+ 
+      http://www.eclipse.org/legal/epl-v10.html
+ 
+  A copy is also included with this distribution. See the "LICENSE" file.
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  @author Dean Wampler  dean@aspectprogramming.com
+-->
+
+<project name="Contract4J5" default="all" basedir=".">
+	<target name="all">
+		<ant dir="contract4j5" target="all.plus.extras" />
+	</target>
+</project>
