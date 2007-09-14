@@ -20,31 +20,37 @@ osname=`uname -s 2> /dev/null | /usr/bin/tr "[:upper:]" "[:lower:]" 2> /dev/null
 echo "Building on $osname"
 
 case "$osname" in
-    cygwin*)
-		: ${TOOL_HOME:=/cygdrive/c/tools/javatools}
+	cygwin*)
+		: ${TOOLS_HOME:=/cygdrive/c/tools/}
 		;;
-	*)
-		: ${TOOL_HOME:=$HOME/tools}
+	darwin*)
+		: ${TOOLS_HOME:=/Library/tools}
+		;;
+	linux*)
+		: ${TOOLS_HOME:=/opt/tools}
 		;;
 esac
 
 # Ignore the definitions for components that you don't use.
 
+: ${CRUISECONTROLRB_HOME:=$TOOLS_HOME/cruisecontrolrb-1.1.0}  # If you use CC.rb...
+: ${JAVA_TOOLS_HOME:=$TOOLS_HOME/java}
 : ${CONTRACT4J5_ROOT:=$HOME/src/java/contract4j5_080/trunk}
 : ${CONTRACT4J5_HOME:=$CONTRACT4J5_ROOT/contract4j5}
 : ${CONTRACT4J5_LIB:=$CONTRACT4J5_HOME/lib}
-: ${ANT_HOME:=$TOOL_HOME/Apache/apache-ant-1.6.5}
-: ${ASPECTJ_HOME:=$TOOL_HOME/aspectj1.5}
-: ${JAVA_HOME:=$TOOL_HOME/jdk$JDK_VERSION}
-: ${JUNIT_HOME:=$TOOL_HOME/junit3.8.1}
-: ${SPRING_HOME:=$TOOL_HOME/Spring/spring-framework-1.2.5}
+: ${ANT_HOME:=$TOOLS_HOME/Apache/apache-ant-1.6.5}
+: ${ASPECTJ_HOME:=$TOOLS_HOME/aspectj1.5}
+: ${JAVA_HOME:=$TOOLS_HOME/jdk$JDK_VERSION}
+: ${JUNIT_HOME:=$TOOLS_HOME/junit3.8.1}
+: ${SPRING_HOME:=$TOOLS_HOME/Spring/spring-framework-1.2.5}
 
 case "$osname" in
-    cygwin*)
-	#PATH=`cygpath --windows --path "$PATH"`
-	#PATH="$JAVA_HOME\\bin;$ASPECTJ_HOME\\bin;$ANT_HOME\\bin;$PATH"
+	cygwin*)
 	PATH="$JAVA_HOME/bin:$ASPECTJ_HOME/bin:$ANT_HOME/bin:$PATH"
 	HOME=`cygpath --windows --path "$HOME"`
+	TOOLS_HOME=`cygpath --windows --path "$TOOLS_HOME"`
+	CRUISECONTROLRB_HOME=`cygpath --windows --path "$CRUISECONTROLRB_HOME"`
+	JAVA_TOOLS_HOME=`cygpath --windows --path "$JAVA_TOOLS_HOME"`
 	CONTRACT4J5_ROOT=`cygpath --windows --path "$CONTRACT4J5_ROOT"`
 	CONTRACT4J5_HOME=`cygpath --windows --path "$CONTRACT4J5_HOME"`
 	CONTRACT4J5_LIB=`cygpath --windows --path "$CONTRACT4J5_LIB"`
@@ -55,17 +61,15 @@ case "$osname" in
 	SPRING_HOME=`cygpath --windows --path "$SPRING_HOME"`
 	CLASSPATH=`cygpath --windows --path "$CLASSPATH"`
 	CLASSPATH="$ANT_HOME\\lib\\ant.jar;$ASPECTJ_HOME\\lib\\aspectjrt.jar;$ASPECTJ_HOME\\lib\\aspectjtools.jar;$JUNIT_HOME\\junit.jar;$CLASSPATH
-	#;$SPRING_HOME\\dist\\spring.jar"
-	#$CONTRACT4J5_LIB\\commons-logging.jar;$CONTRACT4J5_LIB\\commons-jexl-1.0.jar;
-
 	;;
-    *)
+	*)
 	PATH=$JAVA_HOME/bin:$ASPECTJ_HOME/bin:$ANT_HOME/bin:$PATH
 	CLASSPATH=$ANT_HOME/lib/ant.jar:$ASPECTJ_HOME/lib/aspectjrt.jar:$ASPECTJ_HOME/lib/aspectjtools.jar:$JUNIT_HOME/junit.jar:$CLASSPATH
-	#:$SPRING_HOME/dist/spring.jar:$CONTRACT4J5_LIB/commons-logging.jar:$CONTRACT4J5_LIB/commons-jexl-1.0.jar:
 	;;
 esac
 
+export TOOLS_HOME
+export JAVA_TOOLS_HOME
 export ANT_HOME
 export ASPECTJ_HOME
 export CONTRACT4J5_HOME
@@ -73,6 +77,6 @@ export CONTRACT4J5_LIB
 export JAVA_HOME
 export JUNIT_HOME
 export SPRING_HOME
-export TOOL_HOME
+export TOOLS_HOME
 export CLASSPATH
 export PATH
