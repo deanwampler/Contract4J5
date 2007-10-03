@@ -1,5 +1,5 @@
 /*
- * Copyright 2005, 2006 Dean Wampler. All rights reserved.
+ * Copyright 2005-2007 Contract4J Maintainers. All rights reserved.
  * http://www.contract4j.org
  *
  * Licensed under the Eclipse Public License - v 1.0; you may not use this
