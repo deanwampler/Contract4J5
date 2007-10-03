@@ -44,7 +44,7 @@ import org.contract4j5.instance.Instance;
  * ParentTestExpressionFinder} to locate a parent's test expression because 
  * fields aren't overridden by derived classes. The tests only need to be 
  * defined in the class once and the inheritance issues with type and method
- * tests aren't an issue here.
+ * tests aren't a problem here.
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
 public aspect InvariantFieldConditions extends AbstractConditions {
