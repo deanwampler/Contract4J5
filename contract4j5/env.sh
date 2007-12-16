@@ -60,7 +60,7 @@ case "$osname" in
 	JUNIT_HOME=`cygpath --windows --path "$JUNIT_HOME"`
 	SPRING_HOME=`cygpath --windows --path "$SPRING_HOME"`
 	CLASSPATH=`cygpath --windows --path "$CLASSPATH"`
-	CLASSPATH="$ANT_HOME\\lib\\ant.jar;$ASPECTJ_HOME\\lib\\aspectjrt.jar;$ASPECTJ_HOME\\lib\\aspectjtools.jar;$JUNIT_HOME\\junit.jar;$CLASSPATH
+	CLASSPATH="$ANT_HOME\\lib\\ant.jar;$ASPECTJ_HOME\\lib\\aspectjrt.jar;$ASPECTJ_HOME\\lib\\aspectjtools.jar;$JUNIT_HOME\\junit.jar;$CLASSPATH"
 	;;
 	*)
 	PATH=$JAVA_HOME/bin:$ASPECTJ_HOME/bin:$ANT_HOME/bin:$PATH
