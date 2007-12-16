@@ -67,7 +67,7 @@ public class CompositeReporter extends ReporterHelper {
 	 */
 	public CompositeReporter(List<Reporter> listOfReporters) {
 		super(determineMinThreshold(listOfReporters));
-		setReporters(listOfReporters);
+		this.reporters = listOfReporters;
 	}
 
 	/**
@@ -82,8 +82,9 @@ public class CompositeReporter extends ReporterHelper {
 	 */
 	public CompositeReporter(Severity threshold, List<Reporter> listOfReporters) {
 		super(threshold);
-		setReporters(listOfReporters);
+		this.reporters = listOfReporters;
 	}
+
 	/**
 	 * See {@link #CompositeReporter(Severity, List)} for information on threshold
 	 * handling.

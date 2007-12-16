@@ -83,11 +83,11 @@ public class BSFExpressionInterpreterAdapter extends
 		TestResult result = null;
 		try {
 			Object o = evaluateScript(testExpression, context);
-			if (!(o instanceof Boolean)) {
+			if (o instanceof Boolean) {
+				result = new TestResult ((Boolean) o);
+			} else {
 				String ostr = o != null ? o.getClass().getName() : "null object";
 				result = new TestResult (false, "Test returned \""+ostr+"\", instead of boolean for test expression \""+testExpression+"\".");
-			} else {
-				result = new TestResult ((Boolean) o);
 			}
 		} catch (BSFException e) {
 			String msg = "BSF evaluation of test expression \""+testExpression+"\" failed: " + makeBSFExceptionMessage(e);
@@ -99,7 +99,8 @@ public class BSFExpressionInterpreterAdapter extends
 				result = new TestResult (false, msg, target);
 			else if (cause != null)
 				result = new TestResult (false, msg, cause);
-			result = new TestResult (false, msg);
+			else
+				result = new TestResult (false, msg);
 		}
 		return result;
 	}

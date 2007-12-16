@@ -424,4 +424,32 @@ public class MethodBoundaryTest extends TestCase {
 			fail(ce.toString());
 		}
 	}
+
+	@Contract
+	class ClassWithBadMethodBoundaryContractExpressions {
+		@Pre(" > 0")
+		public void do1(int i) {}
+		@Post(" > 0.0f")
+		public void do2(float f) {}
+	}
+	
+	// May fail with either a TestSpecificationError or ContractError, depending on the interpreter used!
+	public void testBadPreconditionContractExpressionsFail() {
+		ClassWithBadMethodBoundaryContractExpressions obj = new ClassWithBadMethodBoundaryContractExpressions();
+		try {
+			obj.do1(1);
+			fail();  
+		} catch (ContractError ce) {
+		}		
+	}
+	
+	public void testBadPostconditionContractExpressionsFail() {
+		ClassWithBadMethodBoundaryContractExpressions obj = new ClassWithBadMethodBoundaryContractExpressions();
+		try {
+			obj.do2(1.0f);
+			fail();  
+		} catch (ContractError ce) {
+		}		
+	}
+
 }

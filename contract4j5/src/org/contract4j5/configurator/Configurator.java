@@ -29,5 +29,4 @@ public interface Configurator {
 	}
 	
 	void configure() throws ConfigurationFailedException;
-	void configureWithInterpreter(String whichInterpreter) throws ConfigurationFailedException;
 }

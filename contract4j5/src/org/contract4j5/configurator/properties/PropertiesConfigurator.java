@@ -117,12 +117,6 @@ public class PropertiesConfigurator extends AbstractConfigurator {
 		}
 	}
 
-	@Override
-	protected void doConfigureWithInterpreter(String whichInterpreter)
-			throws ConfigurationFailedException {
-		expressionInterpreterAlreadySet = true;
-		instantiateExpressionInterpreter(whichInterpreter);
-	}
 	
 	private Reporter globalReporter = null;
 	private Severity globalReporterThreshold = null;

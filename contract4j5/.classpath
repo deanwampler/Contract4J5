@@ -12,5 +12,6 @@
 	<classpathentry kind="lib" path="lib/commons-jexl-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/groovy-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/jruby-complete-1.0.1.jar"/>
+	<classpathentry kind="var" path="AGITAR_TEST_LIB"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

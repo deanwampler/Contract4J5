@@ -162,4 +162,19 @@ public class ConstructorInvarTest extends TestCase {
 			fail();
 		}
 	}
+
+	@Contract
+	class ClassWithBadInvariantContractExpressions {
+		@Invar(" > 0")
+		public ClassWithBadInvariantContractExpressions(int i) {}
+	}
+	
+	// May fail with either a TestSpecificationError or ContractError, depending on the interpreter used!
+	public void testBadInvariantContractExpressionsFail() {
+		try {
+			new ClassWithBadInvariantContractExpressions(1);
+			fail();  
+		} catch (ContractError ce) {
+		}		
+	}
 }

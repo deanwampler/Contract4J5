@@ -58,36 +58,6 @@ public class InstanceUtils {
 	
 	/**
 	 * @param instances
-	 * @return a String array of the instance names.
-	 */
-	static public String[] getInstanceNames(Instance[] instances) {
-		if (instances == null) {
-			return new String[0];
-		}
-		String[] s = new String[instances.length];
-		for (int i=0; i<instances.length; i++) {
-			s[i] = instances[i].getItemName();
-		}
-		return s;
-	}
-
-	/**
-	 * @param instances
-	 * @return a Class array of the instance classes.
-	 */
-	static public Class[] getInstanceClasses(Instance[] instances) {
-		if (instances == null) {
-			return new Class[0];
-		}
-		Class[] c = new Class[instances.length];
-		for (int i=0; i<instances.length; i++) {
-			c[i] = instances[i].getClass();
-		}
-		return c;
-	}
-	
-	/**
-	 * @param instances
 	 * @return an Object array of the instance values.
 	 */
 	static public Object[] getInstanceValues(Instance[] instances) {

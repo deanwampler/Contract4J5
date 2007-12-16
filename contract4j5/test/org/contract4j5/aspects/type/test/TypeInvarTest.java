@@ -201,4 +201,17 @@ public class TypeInvarTest extends TestCase {
 		} catch (ContractError ce) {
 		}
 	}
+	
+	@Contract
+	@Invar(" == bar")
+	class ClassWithInvalidInvarContract {}
+	
+	// May fail with either a TestSpecificationError or ContractError, depending on the interpreter used!
+	public void testInvalidTypeInvarExpressionFails() {
+		try {
+			new ClassWithInvalidInvarContract();
+			fail();
+		} catch (ContractError ce) {
+		}
+	}
 }

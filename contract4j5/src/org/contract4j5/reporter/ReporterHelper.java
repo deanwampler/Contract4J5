@@ -27,7 +27,7 @@ public abstract class ReporterHelper implements Reporter {
 
 	public void report(Severity level, Class clazz, String message) {
 		Severity threshold = getThreshold();
-		if (threshold == Severity.OFF || level.compareTo(threshold) < 0) {
+		if (threshold.equals(Severity.OFF) || level.compareTo(threshold) < 0) {
 			return;
 		}
 		reportSupport (level, clazz, (message == null ? "" : message));

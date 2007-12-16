@@ -207,9 +207,8 @@ public abstract class ContractEnforcerHelper implements ContractEnforcer {
 		String name = thiz != null ? thiz.getItemName() : "";
 		if (name.length() == 0) {
 			name = "<unknown>";
-			if (context != null) {
-				if (context.getField() != null)
-					name = context.getField().getItemName();
+			if (context != null && context.getField() != null) {
+				name = context.getField().getItemName();
 			}
 		}
 		msg.append("\" for \"").append(name).append("\" failed. ");

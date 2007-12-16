@@ -17,7 +17,7 @@
  *
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
  */
-package org.contract4j5.util.reporter;
+package org.contract4j5.reporter.test;
 
 import org.contract4j5.reporter.Severity;
 

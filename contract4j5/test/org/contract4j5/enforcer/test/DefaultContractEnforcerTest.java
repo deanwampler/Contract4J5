@@ -73,7 +73,7 @@ public class DefaultContractEnforcerTest extends TestCase {
 	public void testConstructor2() {
 		ContractEnforcer ce = new DefaultContractEnforcer();
 		assertFalse(ce.getIncludeStackTrace());
-		assertTrue(GroovyExpressionInterpreter.class == ce.getExpressionInterpreter().getClass());
+		assertEquals(GroovyExpressionInterpreter.class, ce.getExpressionInterpreter().getClass());
 	}
 
 	public void testSetGetExpressionInterpreter() throws BSFException {

@@ -52,7 +52,6 @@ public class ConstructorBoundaryTest extends TestCase {
 		public int i = 0;
 		public int getI() { return i; }
 		
-		//@Pre ("$args[0] != null && $args[1] > 0")
 		@Pre ("name2 != null && i2 > 0")
 		@Post ("$this.name.length() > 0 && $this.i > 1")
 		public ConstructorBoundaryWithDefinedExpr (String name2, int i2) {

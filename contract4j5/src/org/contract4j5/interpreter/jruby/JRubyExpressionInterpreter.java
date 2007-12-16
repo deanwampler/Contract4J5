@@ -1,11 +1,13 @@
 package org.contract4j5.interpreter.jruby;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.contract4j5.context.TestContext;
 import org.contract4j5.interpreter.ExpressionInterpreterHelper;
 import org.contract4j5.interpreter.TestResult;
+import org.contract4j5.utils.StringUtils;
 import org.jruby.Ruby;
 import org.jruby.javasupport.JavaEmbedUtils;
 import org.jruby.javasupport.JavaUtil;
@@ -58,17 +60,19 @@ public class JRubyExpressionInterpreter extends ExpressionInterpreterHelper {
         if (newObject instanceof Class) {
         	if (requiredJava == false) {
         		requiredJava = true;
-        		IRubyObject result = runtime.evalScript("require \"java\"\n");
+        		IRubyObject result = runtime.evalScript("require \"java\"" + newline());
         		System.err.println("requiring java, result: "+result);
         	}
     		Class<?> clazz = (Class<?>) newObject;
-			IRubyObject result = runtime.evalScript("include_class \""+clazz.getName()+"\"\n");
+			IRubyObject result = runtime.evalScript("include_class \""+clazz.getName()+"\""+newline());
 			System.err.println("including class:" +clazz.getName()+", result: "+result);
         } else {
         	IRubyObject rubyObject = JavaUtil.convertJavaToRuby(runtime, newObject);
         	runtime.defineVariable(new GlobalVariable(runtime, newSymbolName, rubyObject));
         }
 	}
+	
+	protected String newline() { return StringUtils.newline(); }
 
 	@Override
 	protected void doRemoveContextChange(String oldSymbolName) {
@@ -84,7 +88,7 @@ public class JRubyExpressionInterpreter extends ExpressionInterpreterHelper {
 		} catch (ClassCastException e) {
 			return new TestResult(false, "Translated test expression \""+mungeTestExpression(testExpression)+"\" did not return a boolean!");
 		} catch (Throwable th) {
-			return new TestResult(false, "Exception "+th.toString()+" thrown while executing test expression \""+mungeTestExpression(testExpression)+"\"\n"+th.getStackTrace().toString());
+			return new TestResult(false, "Exception "+th.toString()+" thrown while executing test expression \""+mungeTestExpression(testExpression)+"\""+newline()+Arrays.toString(th.getStackTrace()));
 		}
 	}
 

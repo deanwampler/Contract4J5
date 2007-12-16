@@ -256,15 +256,26 @@ public class ObjectFieldInvarTest extends TestCase {
 		createObjects();
 		FieldInvarWithDefinedExpr t = 
 			new FieldInvarWithDefinedExpr (names[1]);
+		trySetNameWithNull(t);
+		trySetNameWithBad(t);
+	}
+
+	// I extracted these expressions in separate methods because when an
+	// exception is thrown, it messes up Emma's code coverage results.
+	private void trySetNameWithBad(FieldInvarWithDefinedExpr t) {
 		try {
-			t.setName(null);
+			t.setName("bad");
 			fail();
 		} catch (TestSpecificationError tse) {
 			fail();
 		} catch (ContractError ce) {
 		}
+	}
+
+	// See comment for trySetNameWithBad
+	private void trySetNameWithNull(FieldInvarWithDefinedExpr t) {
 		try {
-			t.setName("bad");
+			t.setName(null);
 			fail();
 		} catch (TestSpecificationError tse) {
 			fail();

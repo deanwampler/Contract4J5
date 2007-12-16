@@ -38,19 +38,19 @@ import org.apache.commons.jexl.ExpressionFactory;
 public class MethodPropertyExample extends TestCase {
 	public static class Foo
 	{
-		public static String FOO_STRING = "This is from getFoo()";
+		public static final String FOO_STRING = "This is from getFoo()";
 	    public String getFoo()
 	    {
 	        return FOO_STRING;
 	    }
 	
-	    public static String GET_PREFIX = "This is the property ";
+	    public static final String GET_PREFIX = "This is the property ";
 	    public String get(String arg)
 	    {
 	        return GET_PREFIX + arg;
 	    }
 	
-	    public static String LONG_PREFIX = "The value is : ";
+	    public static final String LONG_PREFIX = "The value is : ";
 	    public String convert(long i)
 	    {
 	        return LONG_PREFIX + i;

@@ -290,9 +290,6 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 
 	private String checkFieldName(TestContext context, String expression,
 			String errStr) {
-		// TODO: The following is too restrictive.
-//		if (!empty(context.getItemName()) && (context.getField() == null || context.getInstance() == null))
-//			errStr += InvalidTestExpression.FIELD_NAME_WITH_NO_FIELD.toString();
 		return errStr;
 	}
 
@@ -572,9 +569,7 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 	    Matcher matcher = pattern.matcher(expression);
 	    while (matcher.find()) {
 	    	String bareItem = matcher.group(1);
-	    	if (bareItem.startsWith("c4j"))
-	    		continue;
-	    	if (resolveItem(bareItem, context) == false)
+	    	if (bareItem.startsWith("c4j") == false && resolveItem(bareItem, context) == false)
 	    		message += bareItem + ", ";
         }
 	    if (message.length() > 0) {
@@ -604,23 +599,9 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 			return true;
 		Instance instance = context.getInstance();
 		Class<?>  clazz  = null;
-//		Object object = null;
 		if (instance != null) {
 			clazz = instance.getClazz();
-//			object = instance.getValue();
 		}
-// Code that attempted to find static fields (which it does successfully), but can't
-// load the field itself. This requires the user to prefix the field with $this in
-// test expressions.
-//		try {
-//			Field field = clazz.getField(name);
-//			System.err.println("  field: "+name+", object: "+object);
-//			Object ofield = field.get(object);
-//			System.err.println("  ofield: "+ofield);
-//			registerContextObject(name, field.get(object));
-//			context.setTestExpression(context.getTestExpression().replaceAll(name, "c4jThis."+name));
-//			return true;
-//		} catch (Exception e) {}
 		if (clazz != null && (clazz.getName().equals(name) || clazz.getSimpleName().equals(name))) {
 			registerContextObject(name, clazz);
 			return true;
