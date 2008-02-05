@@ -33,7 +33,7 @@ public class DefaultPostTestExpressionMaker extends DefaultTestExpressionMakerHe
 	 */
 	public String makeDefaultTestExpression(TestContext context) {
 		Object r = context.getMethodResult();
-		Class clazz = r != null ? r.getClass() : null;
+		Class<?> clazz = r != null ? r.getClass() : null;
 		return isNotPrimitive(clazz) ?
 				"$return != null" : "";
 	}

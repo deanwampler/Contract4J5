@@ -96,9 +96,9 @@ public interface ParentTestExpressionFinder {
 	 * for constructors.
 	 */
 	TestResult findParentConstructorTestExpression(
-			Annotation  whichAnnotationType, 
-			Constructor constructor,
-			TestContext context);
+			Annotation     whichAnnotationType, 
+			Constructor<?> constructor,
+			TestContext    context);
 
 	/**
 	 * If the input test expression is empty, then call
@@ -107,10 +107,10 @@ public interface ParentTestExpressionFinder {
 	 * then return it inside the {@link TestResult}.
 	 */
 	TestResult findParentConstructorTestExpressionIfEmpty(
-			String      testExpression,
-			Annotation  whichAnnotationType, 
-			Constructor constructor,
-			TestContext context);
+			String         testExpression,
+			Annotation     whichAnnotationType, 
+			Constructor<?> constructor,
+			TestContext    context);
 
 	/**
 	 * Search for an invariant annotation on the parent "types" (class, 
@@ -135,7 +135,7 @@ public interface ParentTestExpressionFinder {
 	 * parent expressions. Keep performance in mind.
 	 */
 	TestResult findParentTypeInvarTestExpression (
-			Class       clazz,
+			Class<?>    clazz,
 			TestContext context);
 
 	/**
@@ -146,7 +146,7 @@ public interface ParentTestExpressionFinder {
 	 */
 	TestResult findParentTypeInvarTestExpressionIfEmpty (
 			String      testExpression,
-			Class       clazz,
+			Class<?>    clazz,
 			TestContext context);
 
 }

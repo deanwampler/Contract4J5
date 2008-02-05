@@ -51,7 +51,7 @@ abstract public class DefaultTestExpressionMakerHelper implements
 		if (args != null && args.length > 0) {
 			boolean first = true;
 			for (int i=0; i<args.length; i++) {
-				Class argClass = args[i] != null ? args[i].getClass() : null;
+				Class<?> argClass = args[i] != null ? args[i].getClass() : null;
 				if (isNotPrimitive (argClass)) {
 					if (first) { 
 						first = false; 
@@ -69,7 +69,7 @@ abstract public class DefaultTestExpressionMakerHelper implements
 	/* (non-Javadoc)
 	 * @see org.contract4j5.testexpression.DefaultTestExpressionMaker#isNotPrimitive(java.lang.Class)
 	 */
-	public boolean isNotPrimitive (Class clazz) {
+	public boolean isNotPrimitive (Class<?> clazz) {
 		return (clazz == null || clazz.isPrimitive() == false) ?
 				true: false;
 	}

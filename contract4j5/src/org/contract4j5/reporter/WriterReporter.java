@@ -35,7 +35,7 @@ import org.contract4j5.utils.StringUtils;
  * the example here.
  */
 public class WriterReporter extends ReporterHelper {
-	protected void reportSupport (Severity level, Class clazz, String message) {
+	protected void reportSupport (Severity level, Class<?> clazz, String message) {
 		try {
 			StringBuffer buff = new StringBuffer(256);
 			buff.append("[").append(level).append("] ");

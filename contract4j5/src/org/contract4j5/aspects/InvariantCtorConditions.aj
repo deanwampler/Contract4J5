@@ -59,9 +59,9 @@ public aspect InvariantCtorConditions extends AbstractConditions {
 
 	after (Invar invar, Object obj) returning : invarCtor (invar, obj) {
 		ConstructorSignature cs = (ConstructorSignature) thisJoinPointStaticPart.getSignature();
-		Class       clazz     = obj.getClass();
+		Class<?>    clazz     = obj.getClass();
 		String[]    argNames  = cs.getParameterNames();
-		Class[]     argTypes  = cs.getParameterTypes();
+		Class<?>[]  argTypes  = cs.getParameterTypes();
 		Object[]    argValues = thisJoinPoint.getArgs();
 		Instance[]  args      = InstanceUtils.makeInstanceArray(argNames, argTypes, argValues);
 		SourceLocation loc    = thisJoinPointStaticPart.getSourceLocation(); 

@@ -123,13 +123,13 @@ public aspect InvariantFieldConditions extends AbstractConditions {
 		Signature sig = thisJoinPoint.getSignature();
 		assert (sig instanceof FieldSignature);
 		String fieldName     = sig.getName();
-		Class  clazz         = sig.getDeclaringType();
+		Class<?> clazz       = sig.getDeclaringType();
 		SourceLocation loc   = thisJoinPoint.getSourceLocation(); 
 		// Get the "old" value of the field. We need it now, even though we
 		// don't test with it, so that the default test expression can be
 		// constructed properly.
 		Field  field        = ((FieldSignature) sig).getField();
-		Class  fieldClass   = field.getType();
+		Class<?> fieldClass = field.getType();
 		Instance instance   = new Instance(clazz.getName(), clazz, obj);
 		Instance fieldInstance = new Instance(fieldName, fieldClass, fieldValue);
 		TestContext context = new TestContextImpl(annoTestExpr, fieldName,

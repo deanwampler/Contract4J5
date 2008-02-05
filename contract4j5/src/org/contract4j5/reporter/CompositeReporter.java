@@ -50,7 +50,7 @@ public class CompositeReporter extends ReporterHelper {
 	}
 
 	@Override
-	protected void reportSupport(Severity level, Class clazz, String message) {
+	protected void reportSupport(Severity level, Class<?> clazz, String message) {
 		for (Reporter reporter: reporters) {
 			reporter.report(level, clazz, message);
 		}

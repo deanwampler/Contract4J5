@@ -35,7 +35,7 @@ public aspect ReportThrows {
 		call (* org.contract4j..*.*(..)) && 
 		!within (ReportThrows) &&
 		this(o) {
-		Class clazz = o != null ? o.getClass() : null;
+		Class<?> clazz = o != null ? o.getClass() : null;
 		Reporter r = getReporter();
 		if (r != null) {
 			r.report(Severity.ERROR, clazz, th.toString());

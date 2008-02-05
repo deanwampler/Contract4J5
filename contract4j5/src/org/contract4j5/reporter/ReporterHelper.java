@@ -25,7 +25,7 @@ package org.contract4j5.reporter;
  */
 public abstract class ReporterHelper implements Reporter {
 
-	public void report(Severity level, Class clazz, String message) {
+	public void report(Severity level, Class<?> clazz, String message) {
 		Severity threshold = getThreshold();
 		if (threshold.equals(Severity.OFF) || level.compareTo(threshold) < 0) {
 			return;
@@ -42,7 +42,7 @@ public abstract class ReporterHelper implements Reporter {
 	 * @param level the {@link Severity} of severity.
 	 * @param message a non-null message.
 	 */
-	protected abstract void reportSupport(Severity level, Class clazz, String message);
+	protected abstract void reportSupport(Severity level, Class<?> clazz, String message);
 
 	private Severity threshold;
 	

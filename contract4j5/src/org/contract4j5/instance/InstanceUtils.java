@@ -39,7 +39,7 @@ public class InstanceUtils {
 	 * @return null on error, other wise an Instance array of length equal to the input arrays
 	 * with the values assigned in order.
 	 */
-	static public Instance[] makeInstanceArray(String[] argNames, Class[] argTypes, Object[] argValues) {
+	static public Instance[] makeInstanceArray(String[] argNames, Class<?>[] argTypes, Object[] argValues) {
 		int nlen = argNames  != null ? argNames.length  : 0;
 		int clen = argTypes  != null ? argTypes.length  : 0;
 		int vlen = argValues != null ? argValues.length : 0;
@@ -48,10 +48,10 @@ public class InstanceUtils {
 		if (vlen > len) { len = vlen; }
 		Instance[] instances = new Instance[len];
 		for (int i=0; i<len; i++) {
-			String name  = i < nlen ? argNames[i]  : "";
-			Class  clazz = i < clen ? argTypes[i]  : null;
-			Object value = i < vlen ? argValues[i] : null;
-			instances[i] = new Instance (name, clazz, value);
+			String   name  = i < nlen ? argNames[i]  : "";
+			Class<?> clazz = i < clen ? argTypes[i]  : null;
+			Object   value = i < vlen ? argValues[i] : null;
+			instances[i]   = new Instance (name, clazz, value);
 		}
 		return instances;
 	}

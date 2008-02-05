@@ -72,5 +72,5 @@ public interface DefaultTestExpressionMaker {
 	 * @return true if the input class does not represent a primitive. If null, we assume this
 	 * is true. If not null, we return the value of {@link Class#isPrimitive()}.
 	 */
-	boolean isNotPrimitive (Class clazz);
+	boolean isNotPrimitive (Class<?> clazz);
 }

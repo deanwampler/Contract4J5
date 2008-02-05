@@ -29,7 +29,7 @@ package org.contract4j5.reporter;
  */
 public class NullReporter implements Reporter {
 
-	public void report(Severity level, Class clazz, String message) {}
+	public void report(Severity level, Class<?> clazz, String message) {}
 	public Severity getThreshold() {
 		return Severity.OFF;
 	}

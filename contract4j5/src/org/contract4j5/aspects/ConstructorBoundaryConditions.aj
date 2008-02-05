@@ -123,10 +123,10 @@ public aspect ConstructorBoundaryConditions extends AbstractConditions {
 		Signature   signature = thisJoinPoint.getSignature();
 		ConstructorSignature cs = (ConstructorSignature) signature;
 		String[]    argNames  = cs.getParameterNames();
-		Class[]     argTypes  = cs.getParameterTypes();
+		Class<?>[]  argTypes  = cs.getParameterTypes();
 		Object[]    argValues = thisJoinPoint.getArgs();
 		Instance[]  args      = InstanceUtils.makeInstanceArray(argNames, argTypes, argValues);
-		Class       clazz     = signature.getDeclaringType();
+		Class<?>    clazz     = signature.getDeclaringType();
 		SourceLocation loc    = thisJoinPoint.getSourceLocation(); 
 		Instance    instance  = new Instance (clazz.getName(), clazz, obj);
 		TestContext context   = 

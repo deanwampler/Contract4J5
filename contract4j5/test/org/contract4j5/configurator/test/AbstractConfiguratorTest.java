@@ -89,12 +89,12 @@ public class AbstractConfiguratorTest extends TestCase {
 		private Contract4J c4j;
 		public TestResult findParentAdviceTestExpression(Annotation whichAnnotationType, Method advice, TestContext context) { return null;	}
 		public TestResult findParentAdviceTestExpressionIfEmpty(String testExpression, Annotation whichAnnotationType, Method advice, TestContext context) { return null; }
-		public TestResult findParentConstructorTestExpression(Annotation whichAnnotationType, Constructor constructor, TestContext context) { return null; }
-		public TestResult findParentConstructorTestExpressionIfEmpty(String testExpression, Annotation whichAnnotationType, Constructor constructor, TestContext context) {	return null; }
+		public TestResult findParentConstructorTestExpression(Annotation whichAnnotationType, Constructor<?> constructor, TestContext context) { return null; }
+		public TestResult findParentConstructorTestExpressionIfEmpty(String testExpression, Annotation whichAnnotationType, Constructor<?> constructor, TestContext context) {	return null; }
 		public TestResult findParentMethodTestExpression(Annotation whichAnnotationType, Method method, TestContext context) { return null; }
 		public TestResult findParentMethodTestExpressionIfEmpty(String testExpression, Annotation whichAnnotationType, Method advice, TestContext context) { return null; }
-		public TestResult findParentTypeInvarTestExpression(Class clazz, TestContext context) {	return null; }
-		public TestResult findParentTypeInvarTestExpressionIfEmpty(String testExpression, Class clazz, TestContext context) { return null; }
+		public TestResult findParentTypeInvarTestExpression(Class<?> clazz, TestContext context) {	return null; }
+		public TestResult findParentTypeInvarTestExpressionIfEmpty(String testExpression, Class<?> clazz, TestContext context) { return null; }
 		public Reporter getReporter() { return c4j.getReporter(); }
 		public StubTestExpressionFinder(Contract4J c4j) { this.c4j = c4j; }
 	}

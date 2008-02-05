@@ -161,9 +161,9 @@ public aspect MethodBoundaryConditions extends AbstractConditions {
 		Signature   signature  = thisJoinPoint.getSignature();
 		MethodSignature ms     = (MethodSignature) signature;
 		String      methodName = signature.getName();
-		Class       clazz      = signature.getDeclaringType();
+		Class<?>    clazz      = signature.getDeclaringType();
 		String[]    argNames   = ms.getParameterNames();
-		Class[]     argTypes   = ms.getParameterTypes();
+		Class<?>[]  argTypes   = ms.getParameterTypes();
 		Object[]    argValues  = thisJoinPoint.getArgs();
 		Instance[]  args       = InstanceUtils.makeInstanceArray(argNames, argTypes, argValues);
 		SourceLocation loc     = thisJoinPoint.getSourceLocation(); 

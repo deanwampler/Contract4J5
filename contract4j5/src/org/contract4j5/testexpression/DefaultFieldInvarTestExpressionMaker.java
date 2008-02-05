@@ -34,7 +34,7 @@ public class DefaultFieldInvarTestExpressionMaker extends DefaultTestExpressionM
 	 */
 	public String makeDefaultTestExpression(TestContext context) {
 		Instance i = context.getField();
-		Class clazz = i != null ? i.getClazz() : null;
+		Class<?> clazz = i != null ? i.getClazz() : null;
 		return isNotPrimitive(clazz) ?
 				"$target != null" : "";
 	}

@@ -71,9 +71,9 @@ public aspect InvariantMethodConditions extends AbstractConditions {
 		Signature  signature  = thisJoinPointStaticPart.getSignature();
 		MethodSignature ms    = (MethodSignature) signature;
 		String     methodName = signature.getName();
-		Class      clazz      = obj.getClass();
+		Class<?>   clazz      = obj.getClass();
 		String[]   argNames   = ms.getParameterNames();
-		Class[]    argTypes   = ms.getParameterTypes();
+		Class<?>[] argTypes   = ms.getParameterTypes();
 		Object[]   argValues  = thisJoinPoint.getArgs();
 		Instance[] args       = InstanceUtils.makeInstanceArray(argNames, argTypes, argValues);
 		SourceLocation loc    = thisJoinPointStaticPart.getSourceLocation(); 

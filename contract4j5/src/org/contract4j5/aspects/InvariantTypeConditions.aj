@@ -109,9 +109,9 @@ public aspect InvariantTypeConditions extends AbstractConditions {
 	Object around (Invar invar, Object obj) : 
 			invarTypeMethod (invar, obj) || invarTypeGetSet (invar, obj) {
 		MethodSignature ms   = (MethodSignature) thisJoinPointStaticPart.getSignature();
-		Class      clazz     = obj.getClass();
+		Class<?>   clazz     = obj.getClass();
 		String[]   argNames  = ms.getParameterNames();
-		Class[]    argTypes  = ms.getParameterTypes();
+		Class<?>[] argTypes  = ms.getParameterTypes();
 		Object[]   argValues = thisJoinPoint.getArgs();
 		Instance[] args      = InstanceUtils.makeInstanceArray(argNames, argTypes, argValues);
 		SourceLocation loc   = thisJoinPointStaticPart.getSourceLocation(); 
@@ -134,9 +134,9 @@ public aspect InvariantTypeConditions extends AbstractConditions {
 	after(Invar invar, Object obj) returning () : invarTypeCtor (invar, obj) {
 		ConstructorSignature cs = 
 			(ConstructorSignature) thisJoinPointStaticPart.getSignature();
-		Class      clazz     = obj.getClass();
+		Class<?>   clazz     = obj.getClass();
 		String[]   argNames  = cs.getParameterNames();
-		Class[]    argTypes  = cs.getParameterTypes();
+		Class<?>[] argTypes  = cs.getParameterTypes();
 		Object[]   argValues = thisJoinPoint.getArgs();
 		Instance[] args      = InstanceUtils.makeInstanceArray(argNames, argTypes, argValues);
 		SourceLocation loc   = thisJoinPointStaticPart.getSourceLocation(); 
@@ -153,7 +153,7 @@ public aspect InvariantTypeConditions extends AbstractConditions {
 		getContractEnforcer().invokeTest(testExpr, "Invar", invar.message(), context);
 	}
 
-	private TestResult handleParentExpression(Invar invar, Class clazz, TestContext context) {
+	private TestResult handleParentExpression(Invar invar, Class<?> clazz, TestContext context) {
 		TestResult result = 
 			getParentTestExpressionFinder().findParentTypeInvarTestExpressionIfEmpty(
 			invar.value(), clazz, context);

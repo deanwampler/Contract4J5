@@ -33,16 +33,16 @@ public class Instance {
 	public  String getItemName () { return itemName; }
 	public  void   setItemName (String itemName) { this.itemName = itemName; };
 	
-	Class  clazz = null;
-	public  Class  getClazz() { return clazz; }
-	public  void   setClazz(Class clazz) { this.clazz = clazz; }
+	Class<?> clazz = null;
+	public  Class<?> getClazz() { return clazz; }
+	public  void     setClazz(Class<?> clazz) { this.clazz = clazz; }
 
 	Object value = null;
 	public  Object getValue() { return value; }
 	public  void   setValue(Object value) { this.value = value; }
 	
 	public Instance() {}
-	public Instance(String itemName, Class clazz, Object value) {
+	public Instance(String itemName, Class<?> clazz, Object value) {
 		this.itemName = itemName;
 		this.clazz = clazz;
 		this.value = value;

@@ -45,14 +45,14 @@ public class ParentTestExpressionFinderImpl implements
 	 * Utility for determining the next name to use for lookup.
 	 */
 	static interface NameDeterminator {
-		String getName (Class clazz, String oldName);
+		String getName (Class<?> clazz, String oldName);
 	}
 	/**
 	 * Default name determinator, useful for most cases, just
 	 * returns the input name. 
 	 */
 	static class DefaultNameDeterminator implements NameDeterminator {
-		public String getName(Class clazz, String oldName) {
+		public String getName(Class<?> clazz, String oldName) {
 			return oldName;
 		}
 	}
@@ -61,7 +61,7 @@ public class ParentTestExpressionFinderImpl implements
 	 * name.
 	 */
 	static class CtorNameDeterminator implements NameDeterminator {
-		public String getName(Class clazz, String oldName) {
+		public String getName(Class<?> clazz, String oldName) {
 			return clazz.getSimpleName();
 		}
 	}
@@ -100,7 +100,7 @@ public class ParentTestExpressionFinderImpl implements
 			Annotation  whichAnnotationType, 
 			Method      method,
 			TestContext context) {
-		Class       clazz = method.getDeclaringClass();
+		Class<?>    clazz = method.getDeclaringClass();
 		String methodName = method.getName();
 		Class<?>[] methodArgsTypes = method.getParameterTypes();
 		return findParentMethodTestExpressionSupport(
@@ -125,10 +125,10 @@ public class ParentTestExpressionFinderImpl implements
 	 * @see org.contract4j5.testexpression.ParentTestExpressionFinder#findParentConstructorTestExpression(java.lang.annotation.Annotation, java.lang.reflect.Constructor, org.contract4j5.TestContext)
 	 */
 	public TestResult findParentConstructorTestExpression(
-			Annotation  whichAnnotationType, 
-			Constructor constructor,
-			TestContext context) {
-		Class       clazz = constructor.getDeclaringClass();
+			Annotation     whichAnnotationType, 
+			Constructor<?> constructor,
+			TestContext    context) {
+		Class<?>    clazz = constructor.getDeclaringClass();
 		String methodName = clazz.getSimpleName();
 		Class<?>[] methodArgsTypes = constructor.getParameterTypes();
 		return findParentMethodTestExpressionSupport(
@@ -139,10 +139,10 @@ public class ParentTestExpressionFinderImpl implements
 	 * @see org.contract4j5.testexpression.ParentTestExpressionFinder#findParentConstructorTestExpressionIfEmpty(java.lang.String, java.lang.annotation.Annotation, java.lang.reflect.Method, org.contract4j5.TestContext)
 	 */
 	public TestResult findParentConstructorTestExpressionIfEmpty(
-			String      testExpression, 
-			Annotation  whichAnnotationType, 
-			Constructor constructor, 
-			TestContext context) {
+			String         testExpression, 
+			Annotation     whichAnnotationType, 
+			Constructor<?> constructor, 
+			TestContext    context) {
 		if (! empty(testExpression)) {
 			return makeTestResult(true, testExpression);
 		}
@@ -161,13 +161,13 @@ public class ParentTestExpressionFinderImpl implements
 	 * @return a {@link TestResult} object with the the parent test's expression.
 	 */
 	protected TestResult findParentMethodTestExpressionSupport (
-			Class classOfThisObject,
-			String methodName,
+			Class<?>   classOfThisObject,
+			String     methodName,
 			Class<?>[] methodArgsTypes,
 			boolean    isConstructor,
 			Annotation whichAnnotationType,
 			NameDeterminator nameDeterminator) {
-		Class clazz = classOfThisObject;
+		Class<?> clazz = classOfThisObject;
 		String whichMethod = methodName;
 		while (!clazz.equals(Object.class)) {
 			// Somewhat superfluous on the first iteration, because
@@ -184,9 +184,9 @@ public class ParentTestExpressionFinderImpl implements
 			// Note that for ctor annotations, nothing will be found on interfaces!
 			Type[] interfaces = clazz.getGenericInterfaces();
 			for (Type t: interfaces) {
-                Class tClass = (t instanceof ParameterizedType)
-                ? (Class) ((ParameterizedType) t).getRawType()
-                : (Class) t;
+                Class<?> tClass = (t instanceof ParameterizedType)
+                ? (Class<?>) ((ParameterizedType) t).getRawType()
+                : (Class<?>) t;
 
 				result = findParentMethodAnnoTestExpression (
 					tClass,
@@ -199,22 +199,22 @@ public class ParentTestExpressionFinderImpl implements
 				}	
 			}
 			Type parent = clazz.getGenericSuperclass();
-			clazz = (Class) parent;
+			clazz = (Class<?>) parent;
 			whichMethod = nameDeterminator.getName(clazz, whichMethod);
 		}
 		return makeEmptyTestResult();
 	}
 	
 	protected TestResult findParentMethodAnnoTestExpression(
-			Class      clazz,
+			Class<?>   clazz,
 			String     methodName,
-			Class[]    methodArgsTypes,
+			Class<?>[] methodArgsTypes,
 			boolean    isConstructor,
 			Annotation whichAnnotationType) {
 		try {
 			Annotation[] annos  = null;
 			if (isConstructor) {
-				Constructor ctor = clazz.getConstructor(methodArgsTypes);
+				Constructor<?> ctor = clazz.getConstructor(methodArgsTypes);
 				annos = ctor.getAnnotations();
 			} else {
 				Method method = clazz.getMethod(methodName, methodArgsTypes);
@@ -235,7 +235,7 @@ public class ParentTestExpressionFinderImpl implements
 			// Somewhat expensive setup for output, so don't do it unless we know we'll log...
 			if (getReporter().getThreshold().compareTo(Severity.INFO) >= 0) {
 				StringBuffer args = new StringBuffer(256);
-				for (Class a: methodArgsTypes) {
+				for (Class<?> a: methodArgsTypes) {
 					args.append(a.toString());
 					args.append(",");
 				}
@@ -249,7 +249,7 @@ public class ParentTestExpressionFinderImpl implements
 	/* (non-Javadoc)
 	 * @see org.contract4j5.testexpression.ParentTestExpressionFinder#findParentTypeInvarTestExpression(java.lang.Class, org.contract4j5.TestContext)
 	 */
-	public TestResult findParentTypeInvarTestExpression(Class clazz, TestContext context) {
+	public TestResult findParentTypeInvarTestExpression(Class<?> clazz, TestContext context) {
 		TestResult result = makeEmptyTestResult();
 		if (clazz == null) {
 			return result;
@@ -267,7 +267,7 @@ public class ParentTestExpressionFinderImpl implements
 				}
 			}
 			Type t = clazz.getGenericSuperclass();
-			TestResult result2 = findParentTypeInvarTestExpression ((Class) t, context);
+			TestResult result2 = findParentTypeInvarTestExpression ((Class<?>) t, context);
 			result = setExpr(result2.getMessage(), result);
 			if (result.isPassed() == false) {
 				return result;
@@ -275,7 +275,7 @@ public class ParentTestExpressionFinderImpl implements
 		}
 		Type[] ts = clazz.getGenericInterfaces();
 		for (Type i: ts) {
-			TestResult result2 = findParentTypeInvarTestExpression ((Class) i, context);
+			TestResult result2 = findParentTypeInvarTestExpression ((Class<?>) i, context);
 			result = setExpr(result2.getMessage(), result);
 			if (result.isPassed() == false) {
 				return result;
@@ -289,7 +289,7 @@ public class ParentTestExpressionFinderImpl implements
 	 */
 	public TestResult findParentTypeInvarTestExpressionIfEmpty(
 			String      testExpression, 
-			Class       clazz,
+			Class<?>    clazz,
 			TestContext context) {
 		if (! empty(testExpression)) {
 			return makeTestResult(true, testExpression);

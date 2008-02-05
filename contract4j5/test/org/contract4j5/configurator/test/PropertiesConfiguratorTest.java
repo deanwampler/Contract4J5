@@ -66,7 +66,7 @@ public class PropertiesConfiguratorTest extends TestCase {
 		public Severity getThreshold() {
 			return null;
 		}
-		public void report(Severity level, Class clazz, String message) {
+		public void report(Severity level, Class<?> clazz, String message) {
 		}
 
 		public void setThreshold(Severity level) {
@@ -323,7 +323,7 @@ public class PropertiesConfiguratorTest extends TestCase {
 	}
 	
 	public static class StubDefaultTestExpressionMaker implements DefaultTestExpressionMaker {
-		public boolean isNotPrimitive(Class clazz) {
+		public boolean isNotPrimitive(Class<?> clazz) {
 			return false;
 		}
 		public String makeArgsNotNullExpression(TestContext context) {
@@ -345,10 +345,10 @@ public class PropertiesConfiguratorTest extends TestCase {
 		public TestResult findParentAdviceTestExpressionIfEmpty(String testExpression, Annotation whichAnnotationType, Method advice, TestContext context) {
 			return null;
 		}
-		public TestResult findParentConstructorTestExpression(Annotation whichAnnotationType, Constructor constructor, TestContext context) {
+		public TestResult findParentConstructorTestExpression(Annotation whichAnnotationType, Constructor<?> constructor, TestContext context) {
 			return null;
 		}
-		public TestResult findParentConstructorTestExpressionIfEmpty(String testExpression, Annotation whichAnnotationType, Constructor constructor, TestContext context) {
+		public TestResult findParentConstructorTestExpressionIfEmpty(String testExpression, Annotation whichAnnotationType, Constructor<?> constructor, TestContext context) {
 			return null;
 		}
 		public TestResult findParentMethodTestExpression(Annotation whichAnnotationType, Method method, TestContext context) {
@@ -357,10 +357,10 @@ public class PropertiesConfiguratorTest extends TestCase {
 		public TestResult findParentMethodTestExpressionIfEmpty(String testExpression, Annotation whichAnnotationType, Method advice, TestContext context) {
 			return null;
 		}
-		public TestResult findParentTypeInvarTestExpression(Class clazz, TestContext context) {
+		public TestResult findParentTypeInvarTestExpression(Class<?> clazz, TestContext context) {
 			return null;
 		}
-		public TestResult findParentTypeInvarTestExpressionIfEmpty(String testExpression, Class clazz, TestContext context) {
+		public TestResult findParentTypeInvarTestExpressionIfEmpty(String testExpression, Class<?> clazz, TestContext context) {
 			return null;
 		}
 		public Reporter getReporter() {
