@@ -28,6 +28,7 @@ import org.aspectj.lang.reflect.ConstructorSignature;
 import org.aspectj.lang.reflect.SourceLocation;
 import org.contract4j5.context.TestContext;
 import org.contract4j5.context.TestContextImpl;
+import org.contract4j5.contract.Contract;
 import org.contract4j5.contract.Post;
 import org.contract4j5.contract.Pre;
 import org.contract4j5.errors.TestSpecificationError;
@@ -76,24 +77,24 @@ public aspect ConstructorBoundaryConditions extends AbstractConditions {
 	 * Constructor precondition PCD.
 	 * @note We prevent recursion into the aspect itself.
 	 */
-	pointcut preCtor (Pre pre) :
-		preCommon() && !within(ConstructorBoundaryConditions) &&
+	pointcut preCtor (Contract contract, Pre pre) :
+		preCommon(contract, pre) && !within(ConstructorBoundaryConditions) &&
 		execution (@Pre new (..)) && 
-		@annotation(pre) && target(Object);
+		target(Object);
 
 	/**
 	 * Constructor postcondition PCD.
 	 * @note We prevent recursion into the aspect itself.
 	 */
-	pointcut postCtor (Post post, Object obj) : 
-		postCommon() && !within(ConstructorBoundaryConditions) &&
+	pointcut postCtor (Contract contract, Post post, Object obj) : 
+		postCommon(contract, post) && !within(ConstructorBoundaryConditions) &&
 		execution (@Post new (..)) &&
-		@annotation(post) && target(obj);
+		target(obj);
 
 	/**
 	 * Before advice for constructors.
 	 */
-	before (Pre pre): preCtor (pre) {
+	before (Contract contract, Pre pre): preCtor (contract, pre) {
 		doTest (thisJoinPoint, null, pre, "Pre", pre.value(), pre.message(),
 				getDefaultPreTestExpressionMaker());
 	}
@@ -101,7 +102,7 @@ public aspect ConstructorBoundaryConditions extends AbstractConditions {
 	/**
 	 * After advice for constructors.
 	 */
-	after (Post post, Object obj): postCtor (post, obj) { 
+	after (Contract contract, Post post, Object obj): postCtor (contract, post, obj) { 
 		doTest (thisJoinPoint, obj, post, "Post", post.value(), post.message(),
 				getDefaultPostReturningVoidTestExpressionMaker());
 	}

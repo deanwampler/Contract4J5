@@ -24,6 +24,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.aspectj.lang.reflect.SourceLocation;
 import org.contract4j5.context.TestContext;
 import org.contract4j5.context.TestContextImpl;
+import org.contract4j5.contract.Contract;
 import org.contract4j5.contract.Invar;
 import org.contract4j5.errors.TestSpecificationError;
 import org.contract4j5.interpreter.TestResult;
@@ -70,10 +71,11 @@ public aspect InvariantTypeConditions extends AbstractConditions {
 	 * These cases are handled separately.
 	 * @note We prevent recursion into the aspect itself.
 	 */
-	pointcut invarTypeMethod(Invar invar, Object obj) :
-		invarCommon() && !within (InvariantTypeConditions) &&
+	pointcut invarTypeMethod(Object obj) :
+		!within (InvariantTypeConditions) &&
 		invarTypeMethodUsingInvarAnno() &&
-		@this (invar) && this (obj);
+//		@this (invar) && 
+		this (obj);
 
 	
 	pointcut invarTypeGetSetUsingInvarAnno () :
@@ -86,10 +88,11 @@ public aspect InvariantTypeConditions extends AbstractConditions {
 	 * and are handled separately below.
 	 * @note We prevent recursion into the aspect itself.
 	 */
-	pointcut invarTypeGetSet (Invar invar, Object obj) :
-		invarCommon() && !within (InvariantTypeConditions) &&
+	pointcut invarTypeGetSet (Object obj) :
+		!within (InvariantTypeConditions) &&
 		invarTypeGetSetUsingInvarAnno() &&
-		@this (invar) && this (obj); 
+//		@this (invar) && 
+		this (obj); 
 
 	
 	pointcut invarTypeCtorUsingInvarAnno () : 
@@ -100,14 +103,15 @@ public aspect InvariantTypeConditions extends AbstractConditions {
 	 * c'tor execution.
 	 * @note We prevent recursion into the aspect itself.
 	 */
-	pointcut invarTypeCtor (Invar invar, Object obj) : 
-		invarCommon() && !within (InvariantTypeConditions) &&
+	pointcut invarTypeCtor (Object obj) : 
+		!within (InvariantTypeConditions) &&
 		invarTypeCtorUsingInvarAnno() &&
-		@this (invar) && this (obj);
+//		@this (invar) &&
+		this (obj);
 
 	
-	Object around (Invar invar, Object obj) : 
-			invarTypeMethod (invar, obj) || invarTypeGetSet (invar, obj) {
+	Object around (Contract contract, Invar invar, Object obj) : 
+		invarCommon(contract, invar) && (invarTypeMethod (obj) || invarTypeGetSet (obj)) {
 		MethodSignature ms   = (MethodSignature) thisJoinPointStaticPart.getSignature();
 		Class<?>   clazz     = obj.getClass();
 		String[]   argNames  = ms.getParameterNames();
@@ -125,13 +129,14 @@ public aspect InvariantTypeConditions extends AbstractConditions {
 			getDefaultTypeInvarTestExpressionMaker().makeDefaultTestExpressionIfEmpty(testExpr, context);
 		context.setOldValuesMap (determineOldValues (testExpr, context));
 		getContractEnforcer().invokeTest(testExpr, "Invar", invar.message(), context);
-		Object result2 = proceed(invar, obj);
+		Object result2 = proceed(contract, invar, obj);
 		context.setMethodResult (new Instance ("", ms.getReturnType(), result2));
 		getContractEnforcer().invokeTest(testExpr, "Invar", invar.message(), context);
 		return result2;
 	}
 	
-	after(Invar invar, Object obj) returning () : invarTypeCtor (invar, obj) {
+	after(Contract contract, Invar invar, Object obj) returning : 
+		invarCommon(contract, invar) && invarTypeCtor (obj) {
 		ConstructorSignature cs = 
 			(ConstructorSignature) thisJoinPointStaticPart.getSignature();
 		Class<?>   clazz     = obj.getClass();

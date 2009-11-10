@@ -26,6 +26,7 @@ package org.contract4j5.aspects;
  */
 public aspect DeclareContractPrecedence {
 	declare precedence :
+		RunOnceConditions,
 		ConstructorBoundaryConditions, 
 		MethodBoundaryConditions, 
 		InvariantCtorConditions,

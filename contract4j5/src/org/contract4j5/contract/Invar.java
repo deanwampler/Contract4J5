@@ -62,4 +62,9 @@ public @interface Invar {
      * fails.
      */
     String message() default "";
+
+	/**
+	 * When to run the contracts enclosed in this type.
+	 */
+	RunFlag run() default RunFlag.ALWAYS;
 }

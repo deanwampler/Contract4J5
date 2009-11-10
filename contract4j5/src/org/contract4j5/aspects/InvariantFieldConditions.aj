@@ -30,6 +30,7 @@ import org.contract4j5.testexpression.DefaultTestExpressionMaker;
 import org.contract4j5.testexpression.ParentTestExpressionFinder;
 import org.contract4j5.context.TestContext;
 import org.contract4j5.context.TestContextImpl;
+import org.contract4j5.contract.Contract;
 import org.contract4j5.contract.Invar;
 import org.contract4j5.instance.Instance;
 
@@ -68,25 +69,26 @@ public aspect InvariantFieldConditions extends AbstractConditions {
 	 * withincode(), because the constructor may call other methods.
 	 * @note We prevent recursion into the aspect itself.
 	 */
-	pointcut invarFieldCommon (Invar invar, Object obj) :
-		invarCommon() && ! cflowbelow (execution (*.new(..))) &&
+	pointcut invarFieldCommon (Contract contract, Invar invar, Object obj) :
+		invarCommon(contract, invar) && ! cflowbelow (execution (*.new(..))) &&
 		!within (InvariantFieldConditions) &&
-		@annotation (invar) && target (obj);
+		target (obj);
 	
-	pointcut invarSetField (Invar invar, Object obj, Object arg) :
-		invarFieldCommon (invar, obj) && set (@Invar * *.*) && args(arg); 
+	pointcut invarSetField (Contract contract, Invar invar, Object obj, Object arg) :
+		invarFieldCommon (contract, invar, obj) && set (@Invar * *.*) && args(arg); 
 
-	pointcut invarGetField (Invar invar, Object obj) :
-		invarFieldCommon (invar, obj) && get (@Invar * *.*); 
+	pointcut invarGetField (Contract contract, Invar invar, Object obj) :
+		invarFieldCommon (contract, invar, obj) && get (@Invar * *.*); 
 
-	void around (Invar invar, Object obj, Object arg) : invarSetField (invar, obj, arg) {
+	void around (Contract contract, Invar invar, Object obj, Object arg) : 
+		invarSetField (contract, invar, obj, arg) {
 		// Set up the context so we can retrieve any "old" values, before proceeding.
 		TestContext context = doBeforeTest (thisJoinPoint, 
 					obj, arg, "Invar", invar.value(), invar.message(),
 					getDefaultFieldInvarTestExpressionMaker());
 		String testExpr = getDefaultFieldInvarTestExpressionMaker().makeDefaultTestExpressionIfEmpty(context.getTestExpression(), context);
 		context.setOldValuesMap (determineOldValues (testExpr, context));
-		proceed (invar, obj, arg);
+		proceed (contract, invar, obj, arg);
 		getContractEnforcer().invokeTest(testExpr, "Invar", invar.message(), context);
 	}
 
@@ -98,13 +100,14 @@ public aspect InvariantFieldConditions extends AbstractConditions {
 	 * make much sense to write a test expression with "old" and new values
 	 * for this field, at least.
 	 */
-	Object around (Invar invar, Object obj) : invarGetField (invar, obj) {
+	Object around (Contract contract, Invar invar, Object obj) : 
+		invarGetField (contract, invar, obj) {
 		TestContext context = doBeforeTest (thisJoinPoint, 
 					obj, null, "Invar", invar.value(), invar.message(),
 					getDefaultFieldInvarTestExpressionMaker());
 		String testExpr = getDefaultFieldInvarTestExpressionMaker().makeDefaultTestExpressionIfEmpty(context.getTestExpression(), context);
 		context.setOldValuesMap (determineOldValues (testExpr, context));
-		Object fieldValue2 = proceed (invar, obj);
+		Object fieldValue2 = proceed (contract, invar, obj);
 		// Actually use the "new" value of the field for the test.
 		context.getField().setValue (fieldValue2);  // The field is the target...
 		context.setMethodResult (context.getField());  // ... and the return value!

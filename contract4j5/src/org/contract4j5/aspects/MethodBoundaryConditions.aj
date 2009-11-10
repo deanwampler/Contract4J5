@@ -28,6 +28,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.aspectj.lang.reflect.SourceLocation;
 import org.contract4j5.context.TestContext;
 import org.contract4j5.context.TestContextImpl;
+import org.contract4j5.contract.Contract;
 import org.contract4j5.contract.Post;
 import org.contract4j5.contract.Pre;
 import org.contract4j5.errors.TestSpecificationError;
@@ -88,34 +89,34 @@ public aspect MethodBoundaryConditions extends AbstractConditions {
 	 * Method precondition PCD. Ignores static methods!
 	 * @note We prevent recursion into the aspect itself.
 	 */
-	pointcut preMethod (Pre pre, Object obj) :
-		preCommon() && !within (MethodBoundaryConditions) &&
+	pointcut preMethod (Contract contract, Pre pre, Object obj) :
+		preCommon(contract, pre) && !within (MethodBoundaryConditions) &&
 		execution (@Pre !static * *.*(..)) &&
-		@annotation (pre) && this (obj);
+		this (obj);
 
 	/**
 	 * Method returning void w/ postcondition PCD. Ignores static methods!
 	 * @note We prevent recursion into the aspect itself.
 	 */
-	pointcut postVoidMethod (Post post, Object obj) :
-		postCommon() && !within (MethodBoundaryConditions) &&
+	pointcut postVoidMethod (Contract contract, Post post, Object obj) :
+		postCommon(contract, post) && !within (MethodBoundaryConditions) &&
 		execution (@Post !static void *.*(..)) &&
-		@annotation (post) && this (obj);
+		this (obj);
 
 	/**
 	 * Method postcondition PCD, excluding the void special case. Ignores
 	 * static methods!
 	 * @note We prevent recursion into the aspect itself.
 	 */
-	pointcut postMethod (Post post, Object obj) :
-		postCommon() && !within (MethodBoundaryConditions) &&
+	pointcut postMethod (Contract contract, Post post, Object obj) :
+		postCommon(contract, post) && !within (MethodBoundaryConditions) &&
 		execution (@Post !static !void *.*(..)) &&
-		@annotation (post) && this (obj);
+		this (obj);
 	
 	/**
 	 * Before advice for methods, including methods returning void.
 	 */
-	before (Pre pre, Object obj) : preMethod (pre, obj) {
+	before (Contract contract, Pre pre, Object obj) : preMethod (contract, pre, obj) {
 		TestContext context = doBeforeTest (thisJoinPoint, obj, pre, "Pre", pre.value(), pre.message(),
 				getDefaultPreTestExpressionMaker());
 		getContractEnforcer().invokeTest (context.getTestExpression(), "Pre", pre.message(), context);
@@ -124,11 +125,11 @@ public aspect MethodBoundaryConditions extends AbstractConditions {
 	/**
 	 * After advice for methods, excluding methods returning void.
 	 */
-	Object around (Post post, Object obj) : postMethod (post, obj) {
+	Object around (Contract contract, Post post, Object obj) : postMethod (contract, post, obj) {
 		TestContext context = doBeforeTest (thisJoinPoint, obj, post, "Post", post.value(), post.message(),
 				getDefaultPostTestExpressionMaker());
 		context.setOldValuesMap (determineOldValues (context.getTestExpression(), context));
-		Object result = proceed (post, obj);
+		Object result = proceed (contract, post, obj);
 		context.getMethodResult().setValue(result);
 		getContractEnforcer().invokeTest (context.getTestExpression(), "Post", post.message(), context);
 		return result;
@@ -137,11 +138,11 @@ public aspect MethodBoundaryConditions extends AbstractConditions {
 	/**
 	 * After advice for methods returning void.
 	 */
-	void around (Post post, Object obj) : postVoidMethod (post, obj) {
+	void around (Contract contract, Post post, Object obj) : postVoidMethod (contract, post, obj) {
 		TestContext context = doBeforeTest (thisJoinPoint, obj, post, "Post", post.value(), post.message(),
 				getDefaultPostReturningVoidTestExpressionMaker());
 		context.setOldValuesMap (determineOldValues (context.getTestExpression(), context));
-		proceed (post, obj);
+		proceed (contract, post, obj);
 		getContractEnforcer().invokeTest (context.getTestExpression(), "Post", post.message(), context);
 	}
 	

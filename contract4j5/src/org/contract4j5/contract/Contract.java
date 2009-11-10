@@ -38,4 +38,9 @@ import java.lang.annotation.Target;
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
-public @interface Contract {}
+public @interface Contract {
+	/**
+	 * When to run the contracts enclosed in this type.
+	 */
+	RunFlag run() default RunFlag.ALWAYS;
+}

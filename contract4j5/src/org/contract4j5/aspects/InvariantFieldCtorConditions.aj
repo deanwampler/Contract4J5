@@ -30,6 +30,7 @@ import org.contract4j5.testexpression.DefaultFieldInvarTestExpressionMaker;
 import org.contract4j5.testexpression.DefaultTestExpressionMaker;
 import org.contract4j5.context.TestContext;
 import org.contract4j5.context.TestContextImpl;
+import org.contract4j5.contract.Contract;
 import org.contract4j5.contract.Invar;
 import org.contract4j5.instance.Instance;
 
@@ -65,7 +66,8 @@ public aspect InvariantFieldCtorConditions {
 		defaultFieldInvarTestExpressionMaker = maker; 
 	}
 	
-	public static aspect InvariantFieldCtorConditionsPerCtor extends AbstractConditions percflow(invarFieldCtorCall (Object)) {
+	public static aspect InvariantFieldCtorConditionsPerCtor 
+		extends AbstractConditions percflow(invarFieldCtorCall (Contract, Invar, Object)) {
 
 		private static class ListElem {
 			public Invar    invar;
@@ -88,8 +90,8 @@ public aspect InvariantFieldCtorConditions {
 		 * The enclosing scope of a ctor call. 
 		 * @note We prevent recursion into the aspect itself.
 		 */
-		pointcut invarFieldCtorCall (Object obj) : 
-			invarCommon() && !within(InvariantFieldCtorConditions) &&
+		pointcut invarFieldCtorCall (Contract contract, Invar invar, Object obj) : 
+			invarCommon(contract, invar) && !within(InvariantFieldCtorConditions) &&
 			execution (*.new(..)) && target (obj);
 				
 		/**
@@ -99,18 +101,17 @@ public aspect InvariantFieldCtorConditions {
 		 * method calls within the c'tor will be ignored!
 		 * @note We prevent recursion into the aspect itself.
 		 */
-		pointcut invarFieldInCtor (Invar invar, Object obj, Object field) :
-			invarCommon() && !within(InvariantFieldCtorConditions) &&
-			cflowbelow (invarFieldCtorCall (Object)) && 
-			set (@Invar * *.*) &&
-			@annotation (invar) && target (obj) && args (field);
+		pointcut invarFieldInCtor (Contract contract, Invar invar, Object obj, Object field) :
+			!within(InvariantFieldCtorConditions) &&
+			cflowbelow (invarFieldCtorCall (contract, invar, obj)) && 
+			set (@Invar * *.*) && args (field);
 			
 		/**
 		 * Observe any annotated field sets within the c'tor and record the 
 		 * invariant specification.
 		 */
-		after (Invar invar, Object obj, Object newFieldValue) returning : 
-			invarFieldInCtor (invar, obj, newFieldValue) {
+		after (Contract contract, Invar invar, Object obj, Object newFieldValue) returning : 
+			invarFieldInCtor (contract, invar, obj, newFieldValue) {
 			if (listOfAnnosFound == null) {
 				listOfAnnosFound = new HashMap<String,ListElem>();
 			}
@@ -127,7 +128,7 @@ public aspect InvariantFieldCtorConditions {
 		 * After the c'tor completes, if there were any annotated fields set, 
 		 * then test them.
 		 */
-		after(Object obj) returning : invarFieldCtorCall(obj) {
+		after(Contract contract, Invar invar, Object obj) returning : invarFieldCtorCall(contract, invar, obj) {
 			if (listOfAnnosFound == null) {
 				return;
 			}

@@ -23,6 +23,7 @@ import org.aspectj.lang.reflect.ConstructorSignature;
 import org.aspectj.lang.reflect.SourceLocation;
 import org.contract4j5.context.TestContext;
 import org.contract4j5.context.TestContextImpl;
+import org.contract4j5.contract.Contract;
 import org.contract4j5.contract.Invar;
 import org.contract4j5.errors.TestSpecificationError;
 import org.contract4j5.interpreter.TestResult;
@@ -52,12 +53,12 @@ public aspect InvariantCtorConditions extends AbstractConditions {
 	 * Constructor invariant PCD.
 	 * @note We prevent recursion into the aspect itself.
 	 */
-	pointcut invarCtor (Invar invar, Object obj) : 
-		invarCommon() && !within (InvariantCtorConditions) &&
+	pointcut invarCtor (Contract contract, Invar invar, Object obj) : 
+		invarCommon(contract, invar) && !within (InvariantCtorConditions) &&
 		execution (@Invar *.new(..)) && 
-		@annotation (invar) && this (obj);
+		this (obj);
 
-	after (Invar invar, Object obj) returning : invarCtor (invar, obj) {
+	after (Contract contract, Invar invar, Object obj) returning : invarCtor (contract, invar, obj) {
 		ConstructorSignature cs = (ConstructorSignature) thisJoinPointStaticPart.getSignature();
 		Class<?>    clazz     = obj.getClass();
 		String[]    argNames  = cs.getParameterNames();

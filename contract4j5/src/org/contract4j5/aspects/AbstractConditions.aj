@@ -22,7 +22,11 @@ package org.contract4j5.aspects;
 import java.util.Map;
 
 import org.contract4j5.context.TestContext;
+import org.contract4j5.contract.RunFlag;
 import org.contract4j5.contract.Contract;
+import org.contract4j5.contract.Invar;
+import org.contract4j5.contract.Pre;
+import org.contract4j5.contract.Post;
 import org.contract4j5.controller.Contract4J;
 import org.contract4j5.enforcer.ContractEnforcer;
 import org.contract4j5.interpreter.ExpressionInterpreter;
@@ -85,31 +89,35 @@ abstract public aspect AbstractConditions {
 	 * call has tests, for example.
 	 * Note that we match only on types annotated with @Contract and their subclasses.
 	 */
-	pointcut commonC4J() : 
+	pointcut commonC4J(Contract contract) : 
 		within (@Contract *+) &&
+		@this(contract) && if (contract.run() != RunFlag.NEVER) &&
 		!cflow(execution (* ContractEnforcer+.*(..))) &&
 		!cflow(execution (ContractEnforcer+.new(..))); 
 	
 	/**
 	 * PCD common for all precondition tests.
 	 */
-	pointcut preCommon() : 
+	pointcut preCommon(Contract contract, Pre pre) : 
 		if (getContract4J().isEnabled(Contract4J.TestType.Pre)) &&
-		commonC4J();
+		@annotation(pre) && if (pre.run() != RunFlag.NEVER) &&
+		commonC4J(contract);
 	
 	/**
 	 * PCD common for all postcondition tests.
 	 */
-	pointcut postCommon() : 
+	pointcut postCommon(Contract contract, Post post) : 
 		if (getContract4J().isEnabled(Contract4J.TestType.Post)) &&
-		commonC4J();
+		@annotation(post) && if (post.run() != RunFlag.NEVER) &&
+		commonC4J(contract);
 	
 	/**
 	 * PCD common for all invariant tests.
 	 */
-	pointcut invarCommon() : 
+	pointcut invarCommon(Contract contract, Invar invar) : 
 		if (getContract4J().isEnabled(Contract4J.TestType.Invar)) &&
-		commonC4J();
+		@annotation(invar) && if (invar.run() != RunFlag.NEVER) &&
+		commonC4J(contract);
 	
 	/**
 	 * Find the "$old(..)" expressions in the test expression, determine the corresponding values

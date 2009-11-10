@@ -24,6 +24,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.aspectj.lang.reflect.SourceLocation;
 import org.contract4j5.context.TestContext;
 import org.contract4j5.context.TestContextImpl;
+import org.contract4j5.contract.Contract;
 import org.contract4j5.contract.Invar;
 import org.contract4j5.errors.TestSpecificationError;
 import org.contract4j5.interpreter.TestResult;
@@ -62,12 +63,12 @@ public aspect InvariantMethodConditions extends AbstractConditions {
 	 * Method invariant before and after PCD.
 	 * @note We prevent recursion into the aspect itself.
 	 */
-	pointcut invarMethod (Invar invar, Object obj) :
-		invarCommon() && !within (InvariantMethodConditions) &&
+	pointcut invarMethod (Contract contract, Invar invar, Object obj) :
+		invarCommon(contract, invar) && !within (InvariantMethodConditions) &&
 		execution (@Invar !static * *.*(..)) && 
-		@annotation (invar) && this (obj);
+		this (obj);
 
-	Object around (Invar invar, Object obj) : invarMethod (invar, obj) {
+	Object around (Contract contract, Invar invar, Object obj) : invarMethod (contract, invar, obj) {
 		Signature  signature  = thisJoinPointStaticPart.getSignature();
 		MethodSignature ms    = (MethodSignature) signature;
 		String     methodName = signature.getName();
@@ -93,7 +94,7 @@ public aspect InvariantMethodConditions extends AbstractConditions {
 			getDefaultMethodInvarTestExpressionMaker().makeDefaultTestExpressionIfEmpty(testExpr, context);
 		context.setOldValuesMap (determineOldValues (testExpr, context));
 		getContractEnforcer().invokeTest(testExpr, "Invar", invar.message(), context);
-		Object result2 = proceed (invar, obj);
+		Object result2 = proceed (contract, invar, obj);
 		// Use "ms.getReturnType()", not "result2.getClass()", since result2 might be null!
 		context.setMethodResult (new Instance ("", ms.getReturnType(), result2));
 		getContractEnforcer().invokeTest(testExpr, "Invar", invar.message(), context);

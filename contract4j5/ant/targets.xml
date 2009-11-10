@@ -239,6 +239,7 @@
 		<!-- We use an ajc.args.lst file to handle the ajc options that aren't yet 
 			 supported by the ant task.-->
 		<iajc
+			source="1.5"
 			inpath="${classes.reldir}"
 			outjar="${project.test.jar}"
 			aspectpath="${aspectpath}"  
@@ -246,8 +247,7 @@
 			debuglevel="${build.compiler.debuglevel}"
 			deprecation="true"
 			verbose="${build.compiler.verbose}"
-			inpathDirCopyFilter="**/.svn/*,**/*.java,**/*.aj,**/*.class"
-			argfiles="${contract4j5.home}/ant/ajc.args.lst">
+			inpathDirCopyFilter="**/.svn/*,**/*.java,**/*.aj,**/*.class">
 			<classpath>
 				<path refid="${classpath}"/>
 			</classpath>
