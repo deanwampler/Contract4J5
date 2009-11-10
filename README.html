@@ -38,6 +38,7 @@
           <h3>History</h3>
 <table>
 	<tr><th colspan='2' align="left">Contract4J5 (Annotation Form)</th></tr>
+	<tr><td><a href="#v0900">v0.9.0.0</a></td><td>November 13, 2009</td></tr>                                    
 	<tr><td><a href="#v0800">v0.8.0.0</a></td><td>September 13, 2007</td></tr>                                    
 	<tr><td><a href="#v0710">v0.7.1.0</a></td><td>January 21, 2007</td></tr>                                    
 	<tr><td><a href="#v0700">v0.7.0.0</a></td><td>December 31, 2006</td></tr>
@@ -56,7 +57,7 @@
 <p>
 Dean Wampler<br/> 
 <a href="http://www.contract4j.org">Contract4J5.org</a><br/>
-<a href="http://www.aspectprogramming.com">aspectprogramming.com</a><br/>
+<a href="http://www.polyglotprogramming.com">polyglotprogramming.com</a><br/>
 A project of <a href="http://www.aspectresearchassociates.com/">Aspect Research Associates</a>
 </p>
 
@@ -1548,6 +1549,17 @@ Here is a list of other possible enhancements.
 <a name="notes"></a>
 <h3>Notes for Each Release</h3>
 
+<a name="v0900"></a>
+<h4>v0.9.0 November 13, 2009</h4>
+<h5>Performance improvements and refactorings. 1.0 Release Candidate</h5>
+
+<p>I've been away from Contract4J for two years! This release focuses on performance-related enhancements, the most important area of work required before a 1.0 release. This release is considered a 1.0 release candidate.
+</p>
+<ol>
+  <li>Added a new field for the contract annotations. Using <code>run=NEVER</code> disables the test, for <code>@Pre</code>, <code>@Post</code>, <code>@Invariant</code> annotations, and disables all the tests in the type for <code>@Contract</code> annotations. The other allowed value is <code>run=ALWAYS</code>, which is the default. I used <code>ALWAYS</code> and <code>NEVER</code>, rather than <code>ON</code> and <code>OFF</code>, for example, to allow possible additional values. <code>ONCE</code>, as in run each test only once, is a logical and potentially-useful choice, although the implementation is somewhat challenging.
+  </li>
+</ol>
+
 <a name="v0800"></a>
 <h4>v0.8.0 September 13, 2007</h4>
 <h5>Deprecated JRuby and "partially" deprecated Jexl, made BSF optional, implemented bug fixes in test expression handling, <i>etc.</i></h5>
@@ -1884,7 +1896,7 @@ The AOSD.06 Conference in Bonn, Germany (March 19-24) featured
 a talk in the Industry Track on Contract4J5, specifically on the lessoned learned about
 writing generic, reusable aspects in AspectJ while implementing Contract4J5. 
 There was also a paper on aspect-oriented design patterns in
-Contract4J5 in the ACP4IS workshop. Both papers can be found <a href='http://www.aspectprogramming.com/papers'>here</a>.</p>
+Contract4J5 in the ACP4IS workshop. Both papers can be found <a href='http://www.polyglotprogramming.com/papers'>here</a>.</p>
 <p>
 The AOSD.07 Conference in Vancouver, British Columbia (March 12-16) featured
 a talk in the Industry Track on emerging principles of Aspect-Oriented Design, based on adaptations of well-known
