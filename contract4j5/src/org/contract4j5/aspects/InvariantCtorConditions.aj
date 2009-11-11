@@ -23,6 +23,7 @@ import org.aspectj.lang.reflect.ConstructorSignature;
 import org.aspectj.lang.reflect.SourceLocation;
 import org.contract4j5.context.TestContext;
 import org.contract4j5.context.TestContextImpl;
+import org.contract4j5.context.TestContextCache;
 import org.contract4j5.contract.Contract;
 import org.contract4j5.contract.Invar;
 import org.contract4j5.errors.TestSpecificationError;
@@ -59,30 +60,42 @@ public aspect InvariantCtorConditions extends AbstractConditions {
 		this (obj);
 
 	after (Contract contract, Invar invar, Object obj) returning : invarCtor (contract, invar, obj) {
-		ConstructorSignature cs = (ConstructorSignature) thisJoinPointStaticPart.getSignature();
-		Class<?>    clazz     = obj.getClass();
-		String[]    argNames  = cs.getParameterNames();
-		Class<?>[]  argTypes  = cs.getParameterTypes();
 		Object[]    argValues = thisJoinPoint.getArgs();
-		Instance[]  args      = InstanceUtils.makeInstanceArray(argNames, argTypes, argValues);
-		SourceLocation loc    = thisJoinPointStaticPart.getSourceLocation(); 
-		Instance    instance  = new Instance (clazz.getName(), clazz, obj);
-		TestContext context = 
-			new TestContextImpl (clazz.getSimpleName(), clazz.getSimpleName(), instance, null, args, null, null,
-					loc.getFileName(), loc.getLine());
-		TestResult result = 
-			getParentTestExpressionFinder().findParentConstructorTestExpressionIfEmpty(
-				invar.value(), invar, cs.getConstructor(), context);
-		if (result.isPassed() == false) {
-			getContractEnforcer().fail(invar.value(), "Invar", result.getMessage(),  
-					context, new TestSpecificationError());
+		TestContext context   = null;
+		String testExpr       = "";
+		SourceLocation loc    = thisJoinPointStaticPart.getSourceLocation();
+		String fileName = loc.getFileName();
+		int    lineNum  = loc.getLine();
+		TestContextCache.Key key = new TestContextCache.Key("Invar", fileName, lineNum);
+		TestContextCache.Entry entry = contextCache.get(key);
+		if (context != null) {
+			context = entry.testContext;
+			testExpr = entry.testExpression;
+			Instance[]  args = InstanceUtils.makeInstanceArray(entry.argNames, entry.argTypes, argValues);
+			context.setMethodArgs(args);
+		} else {
+			ConstructorSignature cs = (ConstructorSignature) thisJoinPointStaticPart.getSignature();
+			Class<?>    clazz     = obj.getClass();
+			String[]    argNames  = cs.getParameterNames();
+			Class<?>[]  argTypes  = cs.getParameterTypes();
+			Instance[]  args      = InstanceUtils.makeInstanceArray(argNames, argTypes, argValues);
+			Instance    instance  = new Instance (clazz.getName(), clazz, obj);
+			context = new TestContextImpl (clazz.getSimpleName(), clazz.getSimpleName(), 
+							instance, null, args, null, null, fileName, lineNum);
+			TestResult result = 
+				getParentTestExpressionFinder().findParentConstructorTestExpressionIfEmpty(
+					invar.value(), invar, cs.getConstructor(), context);
+			if (result.isPassed() == false) {
+				getContractEnforcer().fail(invar.value(), "Invar", result.getMessage(),  
+						context, new TestSpecificationError());
+			}
+			testExpr = 
+				getDefaultCtorInvarTestExpressionMaker().makeDefaultTestExpressionIfEmpty(result.getMessage(), context);
+			// Capture "old" data. There aren't any, but in case the expression uses "$old(..)" expressions
+			// we want to capture the "new" values as if old...
+			context.setOldValuesMap (determineOldValues (testExpr, context));
+			contextCache.put(key, new TestContextCache.Entry(context, testExpr, argNames, argTypes, null, null));
 		}
-		String testExpr = result.getMessage(); 
-		testExpr = 
-			getDefaultCtorInvarTestExpressionMaker().makeDefaultTestExpressionIfEmpty(testExpr, context);
-		// Capture "old" data. There aren't any, but in case the expression uses "$old(..)" expressions
-		// we want to capture the "new" values as if old...
-		context.setOldValuesMap (determineOldValues (testExpr, context));
 		getContractEnforcer().invokeTest(testExpr, "Invar", invar.message(), context);
 	}
 }

@@ -22,6 +22,7 @@ package org.contract4j5.aspects;
 import java.util.Map;
 
 import org.contract4j5.context.TestContext;
+import org.contract4j5.context.TestContextCache;
 import org.contract4j5.contract.RunFlag;
 import org.contract4j5.contract.Contract;
 import org.contract4j5.contract.Invar;
@@ -32,6 +33,7 @@ import org.contract4j5.enforcer.ContractEnforcer;
 import org.contract4j5.interpreter.ExpressionInterpreter;
 import org.contract4j5.testexpression.ParentTestExpressionFinder;
 import org.contract4j5.testexpression.ParentTestExpressionFinderImpl;
+import org.contract4j5.context.TestContextCache;
 
 /**
  * An abstract aspect that supports Design by Contract tests by advising classes,
@@ -129,4 +131,6 @@ abstract public aspect AbstractConditions {
 		return ce.getExpressionInterpreter().determineOldValues(testExpression, context);
 	}
 
+	TestContextCache contextCache = new TestContextCache();
+	
 }

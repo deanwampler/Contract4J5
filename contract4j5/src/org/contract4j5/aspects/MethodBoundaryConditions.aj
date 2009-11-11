@@ -27,6 +27,7 @@ import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.aspectj.lang.reflect.SourceLocation;
 import org.contract4j5.context.TestContext;
+import org.contract4j5.context.TestContextCache;
 import org.contract4j5.context.TestContextImpl;
 import org.contract4j5.contract.Contract;
 import org.contract4j5.contract.Post;
@@ -113,25 +114,36 @@ public aspect MethodBoundaryConditions extends AbstractConditions {
 		execution (@Post !static !void *.*(..)) &&
 		this (obj);
 	
+	static protected class Bucket {
+		public String testExpr;
+		public TestContext context;
+		public Bucket(String expr, TestContext context) {
+			this.testExpr = expr;
+			this.context = context;
+		}
+	}
+	
 	/**
 	 * Before advice for methods, including methods returning void.
 	 */
 	before (Contract contract, Pre pre, Object obj) : preMethod (contract, pre, obj) {
-		TestContext context = doBeforeTest (thisJoinPoint, obj, pre, "Pre", pre.value(), pre.message(),
+		Bucket bucket = doBeforeTest (thisJoinPoint, obj, pre, "Pre", pre.value(), pre.message(),
 				getDefaultPreTestExpressionMaker());
-		getContractEnforcer().invokeTest (context.getTestExpression(), "Pre", pre.message(), context);
+		TestContext context = bucket.context;
+		getContractEnforcer().invokeTest (bucket.testExpr, "Pre", pre.message(), context);
 	}
 
 	/**
 	 * After advice for methods, excluding methods returning void.
 	 */
 	Object around (Contract contract, Post post, Object obj) : postMethod (contract, post, obj) {
-		TestContext context = doBeforeTest (thisJoinPoint, obj, post, "Post", post.value(), post.message(),
+		Bucket bucket = doBeforeTest (thisJoinPoint, obj, post, "Post", post.value(), post.message(),
 				getDefaultPostTestExpressionMaker());
+		TestContext context = bucket.context;
 		context.setOldValuesMap (determineOldValues (context.getTestExpression(), context));
 		Object result = proceed (contract, post, obj);
 		context.getMethodResult().setValue(result);
-		getContractEnforcer().invokeTest (context.getTestExpression(), "Post", post.message(), context);
+		getContractEnforcer().invokeTest (bucket.testExpr, "Post", post.message(), context);
 		return result;
 	}
 
@@ -139,11 +151,12 @@ public aspect MethodBoundaryConditions extends AbstractConditions {
 	 * After advice for methods returning void.
 	 */
 	void around (Contract contract, Post post, Object obj) : postVoidMethod (contract, post, obj) {
-		TestContext context = doBeforeTest (thisJoinPoint, obj, post, "Post", post.value(), post.message(),
+		Bucket bucket = doBeforeTest (thisJoinPoint, obj, post, "Post", post.value(), post.message(),
 				getDefaultPostReturningVoidTestExpressionMaker());
+		TestContext context = bucket.context;
 		context.setOldValuesMap (determineOldValues (context.getTestExpression(), context));
 		proceed (contract, post, obj);
-		getContractEnforcer().invokeTest (context.getTestExpression(), "Post", post.message(), context);
+		getContractEnforcer().invokeTest (bucket.testExpr, "Post", post.message(), context);
 	}
 	
 	/**
@@ -151,7 +164,7 @@ public aspect MethodBoundaryConditions extends AbstractConditions {
 	 * Java won't let us have our annotations implement an interface with these fields, nor any common
 	 * interface, so we have to pass everything in.
 	 */
-	protected TestContext doBeforeTest (
+	protected Bucket doBeforeTest (
 			JoinPoint   thisJoinPoint, 
 			Object      obj,
 			Annotation  anno,
@@ -161,29 +174,44 @@ public aspect MethodBoundaryConditions extends AbstractConditions {
 			DefaultTestExpressionMaker maker) {
 		Signature   signature  = thisJoinPoint.getSignature();
 		MethodSignature ms     = (MethodSignature) signature;
-		String      methodName = signature.getName();
-		Class<?>    clazz      = signature.getDeclaringType();
-		String[]    argNames   = ms.getParameterNames();
-		Class<?>[]  argTypes   = ms.getParameterTypes();
-		Object[]    argValues  = thisJoinPoint.getArgs();
-		Instance[]  args       = InstanceUtils.makeInstanceArray(argNames, argTypes, argValues);
-		SourceLocation loc     = thisJoinPoint.getSourceLocation(); 
-		Instance    instance   = new Instance (methodName, clazz, obj);
-		// The returned value is set in the advice for post tests for 
-		// functions not returning void.
-		Instance    returnz    = new Instance ("", ms.getReturnType(), null);
-		TestResult result = 
-			getParentTestExpressionFinder().findParentMethodTestExpressionIfEmpty(
-				annoTestExpr, anno, ms.getMethod(), null);
-		TestContext context    = new TestContextImpl(annoTestExpr, methodName,
-				instance, null, args, returnz, loc.getFileName(), loc.getLine());
-		if (result.isPassed() == false) {
-			getContractEnforcer().fail(annoTestExpr, testTypeName, result.getMessage(),  
-					context, new TestSpecificationError());
+		
+		TestContext context   = null;
+		String testExpr       = "";
+		SourceLocation loc    = thisJoinPoint.getSourceLocation();
+		String fileName = loc.getFileName();
+		int    lineNum  = loc.getLine();
+		TestContextCache.Key key = new TestContextCache.Key("Invar", fileName, lineNum);
+		TestContextCache.Entry entry = contextCache.get(key);
+		if (context != null) {
+			context = entry.testContext;
+			testExpr = entry.testExpression;
+			Object[]    argValues  = thisJoinPoint.getArgs();
+			Instance[]  args       = InstanceUtils.makeInstanceArray(entry.argNames, entry.argTypes, argValues);
+			context.setMethodArgs(args);
+		} else {
+			String      methodName = signature.getName();
+			Class<?>    clazz      = signature.getDeclaringType();
+			String[]    argNames   = ms.getParameterNames();
+			Class<?>[]  argTypes   = ms.getParameterTypes();
+			Object[]    argValues  = thisJoinPoint.getArgs();
+			Instance[]  args       = InstanceUtils.makeInstanceArray(argNames, argTypes, argValues);
+			Instance    instance   = new Instance (methodName, clazz, obj);
+			// The returned value is set in the advice for post tests for 
+			// functions not returning void.
+			Instance    returnz    = new Instance ("", ms.getReturnType(), null);
+			TestResult result = 
+				getParentTestExpressionFinder().findParentMethodTestExpressionIfEmpty(
+					annoTestExpr, anno, ms.getMethod(), null);
+			context = new TestContextImpl(annoTestExpr, methodName, instance, 
+								null, args, returnz, fileName, lineNum);
+			if (result.isPassed() == false) {
+				getContractEnforcer().fail(annoTestExpr, testTypeName, result.getMessage(),  
+						context, new TestSpecificationError());
+			}
+			testExpr = maker.makeDefaultTestExpressionIfEmpty(result.getMessage(), context);
+			context.setTestExpression(testExpr);
+			contextCache.put(key, new TestContextCache.Entry(context, testExpr, argNames, argTypes, null, null));
 		}
-		String testExpr = result.getMessage(); 
-		testExpr = maker.makeDefaultTestExpressionIfEmpty(testExpr, context);
-		context.setTestExpression(testExpr);
-		return context;
+		return new Bucket(testExpr, context);
 	}
 }

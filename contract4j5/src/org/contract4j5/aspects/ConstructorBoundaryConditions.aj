@@ -28,6 +28,7 @@ import org.aspectj.lang.reflect.ConstructorSignature;
 import org.aspectj.lang.reflect.SourceLocation;
 import org.contract4j5.context.TestContext;
 import org.contract4j5.context.TestContextImpl;
+import org.contract4j5.context.TestContextCache;
 import org.contract4j5.contract.Contract;
 import org.contract4j5.contract.Post;
 import org.contract4j5.contract.Pre;
@@ -121,27 +122,39 @@ public aspect ConstructorBoundaryConditions extends AbstractConditions {
 			String     annoTestExpr, 
 			String     testMessage,
 			DefaultTestExpressionMaker maker) {
-		Signature   signature = thisJoinPoint.getSignature();
-		ConstructorSignature cs = (ConstructorSignature) signature;
-		String[]    argNames  = cs.getParameterNames();
-		Class<?>[]  argTypes  = cs.getParameterTypes();
 		Object[]    argValues = thisJoinPoint.getArgs();
-		Instance[]  args      = InstanceUtils.makeInstanceArray(argNames, argTypes, argValues);
-		Class<?>    clazz     = signature.getDeclaringType();
-		SourceLocation loc    = thisJoinPoint.getSourceLocation(); 
-		Instance    instance  = new Instance (clazz.getName(), clazz, obj);
-		TestContext context   = 
-			new TestContextImpl (clazz.getName(), clazz.getSimpleName(), instance, null, args, null, null, 
-					loc.getFileName(), loc.getLine());
-		TestResult  result    = 
-			getParentTestExpressionFinder().findParentConstructorTestExpressionIfEmpty(
-					annoTestExpr, anno, cs.getConstructor(), context);
-		if (result.isPassed() == false) {
-			getContractEnforcer().fail(annoTestExpr, testTypeName, result.getMessage(),  
-					context, new TestSpecificationError());
+		TestContext context   = null;
+		String testExpr       = "";
+		SourceLocation loc    = thisJoinPoint.getSourceLocation();
+		String fileName = loc.getFileName();
+		int    lineNum  = loc.getLine();
+		TestContextCache.Key key = new TestContextCache.Key(testTypeName, fileName, lineNum);
+		TestContextCache.Entry entry = contextCache.get(key);
+		if (context != null) {
+			context = entry.testContext;
+			testExpr = entry.testExpression;
+			Instance[]  args = InstanceUtils.makeInstanceArray(entry.argNames, entry.argTypes, argValues);
+			context.setMethodArgs(args);
+		} else {
+			Signature   signature = thisJoinPoint.getSignature();
+			ConstructorSignature cs = (ConstructorSignature) signature;
+			Class<?>    clazz     = signature.getDeclaringType();
+			Instance    instance  = new Instance (clazz.getName(), clazz, obj);
+			String[]    argNames  = cs.getParameterNames();
+			Class<?>[]  argTypes  = cs.getParameterTypes();
+			Instance[]  args      = InstanceUtils.makeInstanceArray(argNames, argTypes, argValues);
+			context   = new TestContextImpl (clazz.getName(), clazz.getSimpleName(), 
+								instance, null, args, null, null, fileName, lineNum);
+			TestResult  result    = 
+				getParentTestExpressionFinder().findParentConstructorTestExpressionIfEmpty(
+						annoTestExpr, anno, cs.getConstructor(), context);
+			if (result.isPassed() == false) {
+				getContractEnforcer().fail(annoTestExpr, testTypeName, result.getMessage(),  
+						context, new TestSpecificationError());
+			}
+			testExpr = maker.makeDefaultTestExpressionIfEmpty (result.getMessage(), context);
+			contextCache.put(key, new TestContextCache.Entry(context, testExpr, argNames, argTypes, null, null));
 		}
-		String testExpr = result.getMessage(); 
-		testExpr = maker.makeDefaultTestExpressionIfEmpty (testExpr, context);
 		getContractEnforcer().invokeTest(testExpr, testTypeName, testMessage, context);
 	}
 }

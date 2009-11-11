@@ -23,6 +23,7 @@ import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.aspectj.lang.reflect.SourceLocation;
 import org.contract4j5.context.TestContext;
+import org.contract4j5.context.TestContextCache;
 import org.contract4j5.context.TestContextImpl;
 import org.contract4j5.contract.Contract;
 import org.contract4j5.contract.Invar;
@@ -71,27 +72,40 @@ public aspect InvariantMethodConditions extends AbstractConditions {
 	Object around (Contract contract, Invar invar, Object obj) : invarMethod (contract, invar, obj) {
 		Signature  signature  = thisJoinPointStaticPart.getSignature();
 		MethodSignature ms    = (MethodSignature) signature;
-		String     methodName = signature.getName();
-		Class<?>   clazz      = obj.getClass();
-		String[]   argNames   = ms.getParameterNames();
-		Class<?>[] argTypes   = ms.getParameterTypes();
-		Object[]   argValues  = thisJoinPoint.getArgs();
-		Instance[] args       = InstanceUtils.makeInstanceArray(argNames, argTypes, argValues);
-		SourceLocation loc    = thisJoinPointStaticPart.getSourceLocation(); 
-		Instance   instance   = new Instance (clazz.getName(), clazz, obj);
-		TestContext context   = 
-			new TestContextImpl (methodName, methodName, instance, null, args, null, null,
-				loc.getFileName(), loc.getLine());
-		TestResult result  = 
-			getParentTestExpressionFinder().findParentMethodTestExpressionIfEmpty(
-				invar.value(), invar, ms.getMethod(), context);
-		if (result.isPassed() == false) {
-			getContractEnforcer().fail(invar.value(), "Invar", result.getMessage(),  
-					context, new TestSpecificationError());
+		TestContext context   = null;
+		String testExpr       = "";
+		SourceLocation loc    = thisJoinPoint.getSourceLocation();
+		String fileName = loc.getFileName();
+		int    lineNum  = loc.getLine();
+		TestContextCache.Key key = new TestContextCache.Key("Invar", fileName, lineNum);
+		TestContextCache.Entry entry = contextCache.get(key);
+		if (context != null) {
+			testExpr = entry.testExpression;
+			context = entry.testContext;
+			Object[]   argValues  = thisJoinPoint.getArgs();
+			Instance[] args       = InstanceUtils.makeInstanceArray(entry.argNames, entry.argTypes, argValues);
+			context.setMethodArgs(args);
+		} else {
+			String     methodName = signature.getName();
+			Class<?>   clazz      = obj.getClass();
+			String[]   argNames   = ms.getParameterNames();
+			Class<?>[] argTypes   = ms.getParameterTypes();
+			Object[]   argValues  = thisJoinPoint.getArgs();
+			Instance[] args       = InstanceUtils.makeInstanceArray(argNames, argTypes, argValues);
+			Instance   instance   = new Instance (clazz.getName(), clazz, obj);
+			context = new TestContextImpl (methodName, methodName, instance, 
+							null, args, null, null, fileName, lineNum);
+			TestResult result  = 
+				getParentTestExpressionFinder().findParentMethodTestExpressionIfEmpty(
+					invar.value(), invar, ms.getMethod(), context);
+			if (result.isPassed() == false) {
+				getContractEnforcer().fail(invar.value(), "Invar", result.getMessage(),  
+						context, new TestSpecificationError());
+			}
+			testExpr = 
+				getDefaultMethodInvarTestExpressionMaker().makeDefaultTestExpressionIfEmpty(result.getMessage(), context);
+			contextCache.put(key, new TestContextCache.Entry(context, testExpr, argNames, argTypes, null, null));
 		}
-		String testExpr = result.getMessage(); 
-		testExpr = 
-			getDefaultMethodInvarTestExpressionMaker().makeDefaultTestExpressionIfEmpty(testExpr, context);
 		context.setOldValuesMap (determineOldValues (testExpr, context));
 		getContractEnforcer().invokeTest(testExpr, "Invar", invar.message(), context);
 		Object result2 = proceed (contract, invar, obj);
@@ -100,6 +114,4 @@ public aspect InvariantMethodConditions extends AbstractConditions {
 		getContractEnforcer().invokeTest(testExpr, "Invar", invar.message(), context);
 		return result2;
 	}
-
 }
-

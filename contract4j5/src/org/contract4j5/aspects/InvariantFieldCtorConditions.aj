@@ -21,18 +21,20 @@ package org.contract4j5.aspects;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.Map.Entry;
 
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.FieldSignature;
 import org.aspectj.lang.reflect.SourceLocation;
-import org.contract4j5.testexpression.DefaultFieldInvarTestExpressionMaker;
-import org.contract4j5.testexpression.DefaultTestExpressionMaker;
 import org.contract4j5.context.TestContext;
+import org.contract4j5.context.TestContextCache;
 import org.contract4j5.context.TestContextImpl;
 import org.contract4j5.contract.Contract;
 import org.contract4j5.contract.Invar;
 import org.contract4j5.instance.Instance;
+import org.contract4j5.testexpression.DefaultFieldInvarTestExpressionMaker;
+import org.contract4j5.testexpression.DefaultTestExpressionMaker;
 
 /** 
  * Test for field invariants in a constructor context. There is no pointcut 
@@ -82,7 +84,7 @@ public aspect InvariantFieldCtorConditions {
 		// Because the field may be assigned several times. In fact, the initial
 		// assignments in the declarations, which may be deliberately invalid, will
 		// also be picked up. Using a map, rather than a list, means me will only
-		// keep the last assignement, not any potentially-invalid intermediate
+		// keep the last assignment, not any potentially-invalid intermediate
 		// assignments.
 		private HashMap<String, ListElem> listOfAnnosFound = null;
 		
@@ -124,6 +126,15 @@ public aspect InvariantFieldCtorConditions {
 			listOfAnnosFound.put (name, new ListElem(invar, instance));
 		}
 		
+		static protected class Bucket {
+			public String testExpr;
+			public TestContext context;
+			public Bucket(String expr, TestContext context) {
+				this.testExpr = expr;
+				this.context = context;
+			}
+		}
+		
 		/**
 		 * After the c'tor completes, if there were any annotated fields set, 
 		 * then test them.
@@ -132,17 +143,39 @@ public aspect InvariantFieldCtorConditions {
 			if (listOfAnnosFound == null) {
 				return;
 			}
-			Instance instance = new Instance(obj.getClass().getName(), obj.getClass(), obj);
-			for (Map.Entry<String,ListElem> entry: listOfAnnosFound.entrySet()) {
+			for (Entry<String, ListElem> entry: listOfAnnosFound.entrySet()) {
 				ListElem elem = entry.getValue();
-				SourceLocation loc = thisJoinPointStaticPart.getSourceLocation(); 
-				TestContext context =
-					new TestContextImpl (entry.getKey(), entry.getKey(), instance, elem.field, null, null, null,
-							loc.getFileName(), loc.getLine());
-				String testExpr = InvariantFieldCtorConditions.aspectOf().getDefaultFieldInvarTestExpressionMaker()
-					.makeDefaultTestExpressionIfEmpty(elem.invar.value(), context);
+				Bucket bucket = getOrMakeTestContextAndTestExpr(thisJoinPointStaticPart, obj, entry.getKey(), elem);
+				TestContext context = bucket.context;
+				String testExpr = bucket.testExpr;
 				getContractEnforcer().invokeTest(testExpr, "Invar", elem.invar.message(), context);
 			}
+		}
+		
+		protected Bucket getOrMakeTestContextAndTestExpr(
+				JoinPoint.StaticPart thisJoinPointStaticPart, 
+				Object obj, String elemKey, ListElem elem) {
+			TestContext context   = null;
+			String testExpr       = "";
+			SourceLocation loc    = thisJoinPointStaticPart.getSourceLocation();
+			String fileName = loc.getFileName();
+			int    lineNum  = loc.getLine();
+			TestContextCache.Key key = new TestContextCache.Key("Invar", fileName, lineNum);
+			TestContextCache.Entry entry = contextCache.get(key);
+			if (context != null) {
+				context = entry.testContext;
+				testExpr = entry.testExpression;
+				Instance fieldInstance = new Instance(entry.fieldName, entry.fieldType, elem.field);
+				context.setField(fieldInstance);
+			} else {
+				Instance instance = new Instance(obj.getClass().getName(), obj.getClass(), obj);
+				context = new TestContextImpl (elemKey, elemKey, instance, 
+								elem.field, null, null, null, fileName, lineNum);
+				testExpr = InvariantFieldCtorConditions.aspectOf().getDefaultFieldInvarTestExpressionMaker()
+					.makeDefaultTestExpressionIfEmpty(elem.invar.value(), context);
+				contextCache.put(key, new TestContextCache.Entry(context, testExpr, null, null, null, null));
+			}
+			return new Bucket(testExpr, context);
 		}
 	}
 }

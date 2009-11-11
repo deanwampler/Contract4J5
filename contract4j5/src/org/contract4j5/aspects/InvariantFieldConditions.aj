@@ -30,9 +30,11 @@ import org.contract4j5.testexpression.DefaultTestExpressionMaker;
 import org.contract4j5.testexpression.ParentTestExpressionFinder;
 import org.contract4j5.context.TestContext;
 import org.contract4j5.context.TestContextImpl;
+import org.contract4j5.context.TestContextCache;
 import org.contract4j5.contract.Contract;
 import org.contract4j5.contract.Invar;
 import org.contract4j5.instance.Instance;
+import org.contract4j5.instance.InstanceUtils;
 
 /** 
  * Test for field invariants in non-constructor contexts.  
@@ -83,15 +85,25 @@ public aspect InvariantFieldConditions extends AbstractConditions {
 	void around (Contract contract, Invar invar, Object obj, Object arg) : 
 		invarSetField (contract, invar, obj, arg) {
 		// Set up the context so we can retrieve any "old" values, before proceeding.
-		TestContext context = doBeforeTest (thisJoinPoint, 
+		Bucket bucket = doBeforeTest (thisJoinPoint, 
 					obj, arg, "Invar", invar.value(), invar.message(),
 					getDefaultFieldInvarTestExpressionMaker());
-		String testExpr = getDefaultFieldInvarTestExpressionMaker().makeDefaultTestExpressionIfEmpty(context.getTestExpression(), context);
+		TestContext context = bucket.context;
+		String testExpr = bucket.testExpr;
 		context.setOldValuesMap (determineOldValues (testExpr, context));
 		proceed (contract, invar, obj, arg);
 		getContractEnforcer().invokeTest(testExpr, "Invar", invar.message(), context);
 	}
 
+	static protected class Bucket {
+		public String testExpr;
+		public TestContext context;
+		public Bucket(String expr, TestContext context) {
+			this.testExpr = expr;
+			this.context = context;
+		}
+	}
+	
 	/** 
 	 * Advice for field "gets". 
 	 * @note When we set up the context to retrieve "old" values, if any,
@@ -102,11 +114,11 @@ public aspect InvariantFieldConditions extends AbstractConditions {
 	 */
 	Object around (Contract contract, Invar invar, Object obj) : 
 		invarGetField (contract, invar, obj) {
-		TestContext context = doBeforeTest (thisJoinPoint, 
+		Bucket bucket = doBeforeTest (thisJoinPoint, 
 					obj, null, "Invar", invar.value(), invar.message(),
 					getDefaultFieldInvarTestExpressionMaker());
-		String testExpr = getDefaultFieldInvarTestExpressionMaker().makeDefaultTestExpressionIfEmpty(context.getTestExpression(), context);
-		context.setOldValuesMap (determineOldValues (testExpr, context));
+		TestContext context = bucket.context;
+		String testExpr = bucket.testExpr;
 		Object fieldValue2 = proceed (contract, invar, obj);
 		// Actually use the "new" value of the field for the test.
 		context.getField().setValue (fieldValue2);  // The field is the target...
@@ -115,7 +127,7 @@ public aspect InvariantFieldConditions extends AbstractConditions {
 		return fieldValue2;
 	}
 
-	protected TestContext doBeforeTest (
+	protected Bucket doBeforeTest (
 			JoinPoint   thisJoinPoint, 
 			Object      obj,
 			Object      fieldValue,
@@ -123,20 +135,36 @@ public aspect InvariantFieldConditions extends AbstractConditions {
 			String      annoTestExpr, 
 			String      testMessage,
 			DefaultTestExpressionMaker maker) {
-		Signature sig = thisJoinPoint.getSignature();
-		assert (sig instanceof FieldSignature);
-		String fieldName     = sig.getName();
-		Class<?> clazz       = sig.getDeclaringType();
-		SourceLocation loc   = thisJoinPoint.getSourceLocation(); 
-		// Get the "old" value of the field. We need it now, even though we
-		// don't test with it, so that the default test expression can be
-		// constructed properly.
-		Field  field        = ((FieldSignature) sig).getField();
-		Class<?> fieldClass = field.getType();
-		Instance instance   = new Instance(clazz.getName(), clazz, obj);
-		Instance fieldInstance = new Instance(fieldName, fieldClass, fieldValue);
-		TestContext context = new TestContextImpl(annoTestExpr, fieldName,
-				instance, fieldInstance, null, null, loc.getFileName(), loc.getLine());
-		return context;
+		TestContext context   = null;
+		String testExpr       = "";
+		SourceLocation loc    = thisJoinPoint.getSourceLocation();
+		String fileName = loc.getFileName();
+		int    lineNum  = loc.getLine();
+		TestContextCache.Key key = new TestContextCache.Key("Invar", fileName, lineNum);
+		TestContextCache.Entry entry = contextCache.get(key);
+		if (context != null) {
+			context = entry.testContext;
+			testExpr = entry.testExpression;
+			Instance fieldInstance = new Instance(entry.fieldName, entry.fieldType, fieldValue);
+			context.setField(fieldInstance);
+		} else {
+			Signature sig = thisJoinPoint.getSignature();
+			assert (sig instanceof FieldSignature);
+			String fieldName     = sig.getName();
+			Class<?> clazz       = sig.getDeclaringType();
+			// Get the "old" value of the field. We need it now, even though we
+			// don't test with it, so that the default test expression can be
+			// constructed properly.
+			Field  field        = ((FieldSignature) sig).getField();
+			Class<?> fieldClass = field.getType();
+			Instance instance   = new Instance(clazz.getName(), clazz, obj);
+			Instance fieldInstance = new Instance(fieldName, fieldClass, fieldValue);
+			context = new TestContextImpl(annoTestExpr, fieldName,
+					instance, fieldInstance, null, null, fileName, lineNum);
+			testExpr = getDefaultFieldInvarTestExpressionMaker().makeDefaultTestExpressionIfEmpty(context.getTestExpression(), context);
+			contextCache.put(key, new TestContextCache.Entry(context, testExpr, null, null, fieldName, fieldClass));
+		}
+		context.setOldValuesMap (determineOldValues (testExpr, context));
+		return new Bucket(testExpr, context);
 	}
 }

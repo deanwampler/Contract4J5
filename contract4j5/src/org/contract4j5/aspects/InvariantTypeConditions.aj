@@ -23,6 +23,7 @@ import org.aspectj.lang.reflect.ConstructorSignature;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.aspectj.lang.reflect.SourceLocation;
 import org.contract4j5.context.TestContext;
+import org.contract4j5.context.TestContextCache;
 import org.contract4j5.context.TestContextImpl;
 import org.contract4j5.contract.Contract;
 import org.contract4j5.contract.Invar;
@@ -113,20 +114,33 @@ public aspect InvariantTypeConditions extends AbstractConditions {
 	Object around (Contract contract, Invar invar, Object obj) : 
 		invarCommon(contract, invar) && (invarTypeMethod (obj) || invarTypeGetSet (obj)) {
 		MethodSignature ms   = (MethodSignature) thisJoinPointStaticPart.getSignature();
-		Class<?>   clazz     = obj.getClass();
-		String[]   argNames  = ms.getParameterNames();
-		Class<?>[] argTypes  = ms.getParameterTypes();
-		Object[]   argValues = thisJoinPoint.getArgs();
-		Instance[] args      = InstanceUtils.makeInstanceArray(argNames, argTypes, argValues);
-		SourceLocation loc   = thisJoinPointStaticPart.getSourceLocation(); 
-		Instance   instance  = new Instance (clazz.getName(), clazz, obj);
-		TestContext context  = 
-			new TestContextImpl (clazz.getName(), clazz.getSimpleName(), instance, null, args, null, null,
-					loc.getFileName(), loc.getLine());
-		TestResult result  = handleParentExpression(invar, clazz, context);
-		String testExpr = result.getMessage(); 
-		testExpr  = 
-			getDefaultTypeInvarTestExpressionMaker().makeDefaultTestExpressionIfEmpty(testExpr, context);
+		TestContext context   = null;
+		String testExpr       = "";
+		SourceLocation loc    = thisJoinPointStaticPart.getSourceLocation();
+		String fileName = loc.getFileName();
+		int    lineNum  = loc.getLine();
+		TestContextCache.Key key = new TestContextCache.Key("Invar", fileName, lineNum);
+		TestContextCache.Entry entry = contextCache.get(key);
+		if (context != null) {
+			testExpr = entry.testExpression;
+			context = entry.testContext;
+			Object[]   argValues  = thisJoinPoint.getArgs();
+			Instance[] args       = InstanceUtils.makeInstanceArray(entry.argNames, entry.argTypes, argValues);
+			context.setMethodArgs(args);
+		} else {
+			Class<?>   clazz     = obj.getClass();
+			String[]   argNames  = ms.getParameterNames();
+			Class<?>[] argTypes  = ms.getParameterTypes();
+			Object[]   argValues = thisJoinPoint.getArgs();
+			Instance[] args      = InstanceUtils.makeInstanceArray(argNames, argTypes, argValues);
+			Instance   instance  = new Instance (clazz.getName(), clazz, obj);
+			context  = new TestContextImpl (clazz.getName(), clazz.getSimpleName(), instance, 
+								null, args, null, null, fileName, lineNum);
+			TestResult result  = handleParentExpression(invar, clazz, context);
+			testExpr  = 
+				getDefaultTypeInvarTestExpressionMaker().makeDefaultTestExpressionIfEmpty(result.getMessage(), context);
+			contextCache.put(key, new TestContextCache.Entry(context, testExpr, argNames, argTypes, null, null));
+		}
 		context.setOldValuesMap (determineOldValues (testExpr, context));
 		getContractEnforcer().invokeTest(testExpr, "Invar", invar.message(), context);
 		Object result2 = proceed(contract, invar, obj);
@@ -139,25 +153,38 @@ public aspect InvariantTypeConditions extends AbstractConditions {
 		invarCommon(contract, invar) && invarTypeCtor (obj) {
 		ConstructorSignature cs = 
 			(ConstructorSignature) thisJoinPointStaticPart.getSignature();
-		Class<?>   clazz     = obj.getClass();
-		String[]   argNames  = cs.getParameterNames();
-		Class<?>[] argTypes  = cs.getParameterTypes();
-		Object[]   argValues = thisJoinPoint.getArgs();
-		Instance[] args      = InstanceUtils.makeInstanceArray(argNames, argTypes, argValues);
-		SourceLocation loc   = thisJoinPointStaticPart.getSourceLocation(); 
-		Instance   instance  = new Instance (clazz.getName(), clazz, obj);
-		TestContext context  = 
-			new TestContextImpl (clazz.getSimpleName(), clazz.getSimpleName(), instance, null, args, null, null,
-				loc.getFileName(), loc.getLine());
-		TestResult result  = handleParentExpression(invar, clazz, context);
-		String testExpr = result.getMessage(); 
-		testExpr  = 
-			getDefaultTypeInvarTestExpressionMaker().makeDefaultTestExpressionIfEmpty(testExpr, context);
+		TestContext context   = null;
+		String testExpr       = "";
+		SourceLocation loc    = thisJoinPointStaticPart.getSourceLocation();
+		String fileName = loc.getFileName();
+		int    lineNum  = loc.getLine();
+		TestContextCache.Key key = new TestContextCache.Key("Invar", fileName, lineNum);
+		TestContextCache.Entry entry = contextCache.get(key);
+		if (context != null) {
+			testExpr = entry.testExpression;
+			context = entry.testContext;
+			Object[]   argValues  = thisJoinPoint.getArgs();
+			Instance[] args       = InstanceUtils.makeInstanceArray(entry.argNames, entry.argTypes, argValues);
+			context.setMethodArgs(args);
+		} else {
+			Class<?>   clazz     = obj.getClass();
+			String[]   argNames  = cs.getParameterNames();
+			Class<?>[] argTypes  = cs.getParameterTypes();
+			Object[]   argValues = thisJoinPoint.getArgs();
+			Instance[] args      = InstanceUtils.makeInstanceArray(argNames, argTypes, argValues);
+			Instance   instance  = new Instance (clazz.getName(), clazz, obj);
+			context = new TestContextImpl (clazz.getSimpleName(), clazz.getSimpleName(), instance, 
+								null, args, null, null, fileName, lineNum);
+			TestResult result  = handleParentExpression(invar, clazz, context);
+			testExpr  = 
+				getDefaultTypeInvarTestExpressionMaker().makeDefaultTestExpressionIfEmpty(testExpr, context);
+			contextCache.put(key, new TestContextCache.Entry(context, testExpr, argNames, argTypes, null, null));
+		}
 		// Capture "old" data (even though there are no old data...).
 		context.setOldValuesMap (determineOldValues (testExpr, context));
 		getContractEnforcer().invokeTest(testExpr, "Invar", invar.message(), context);
 	}
-
+	
 	private TestResult handleParentExpression(Invar invar, Class<?> clazz, TestContext context) {
 		TestResult result = 
 			getParentTestExpressionFinder().findParentTypeInvarTestExpressionIfEmpty(
