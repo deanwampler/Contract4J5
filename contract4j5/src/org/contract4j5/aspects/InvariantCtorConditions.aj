@@ -66,11 +66,12 @@ public aspect InvariantCtorConditions extends AbstractConditions {
 		SourceLocation loc    = thisJoinPointStaticPart.getSourceLocation();
 		String fileName = loc.getFileName();
 		int    lineNum  = loc.getLine();
-		TestContextCache.Key key = new TestContextCache.Key("Invar", fileName, lineNum);
+		TestContextCache.Key key = new TestContextCache.Key("InvarCtor", fileName, lineNum);
 		TestContextCache.Entry entry = SystemCaches.testContextCache.get(key);
 		if (entry != null) {
 			context = entry.testContext;
-			Instance[]  args = InstanceUtils.makeInstanceArray(entry.argNames, entry.argTypes, argValues);
+			context.getInstance().setValue(obj);
+			Instance[] args = InstanceUtils.makeInstanceArray(entry.argNames, entry.argTypes, argValues);
 			context.setMethodArgs(args);
 		} else {
 			ConstructorSignature cs = (ConstructorSignature) thisJoinPointStaticPart.getSignature();

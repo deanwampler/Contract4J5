@@ -81,6 +81,7 @@ public aspect InvariantMethodConditions extends AbstractConditions {
 		TestContextCache.Entry entry = SystemCaches.testContextCache.get(key);
 		if (entry != null) {
 			context = entry.testContext;
+			context.getInstance().setValue(obj);
 			Object[]   argValues  = thisJoinPoint.getArgs();
 			Instance[] args       = InstanceUtils.makeInstanceArray(entry.argNames, entry.argTypes, argValues);
 			context.setMethodArgs(args);

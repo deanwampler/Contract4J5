@@ -30,6 +30,7 @@ import org.contract4j5.util.ExampleContractInterfaceImpl;
 
 public class ContractInterfaceImplTest extends TestCase {
 	private ExampleContractInterfaceImpl obj = null;
+	// Methods used by derived test class(es).
 	public ExampleContractInterfaceImpl getObj() {
 		return obj;
 	}

@@ -151,12 +151,14 @@ public aspect InvariantFieldCtorConditions {
 			SourceLocation loc    = thisJoinPointStaticPart.getSourceLocation();
 			String fileName = loc.getFileName();
 			int    lineNum  = loc.getLine();
-			TestContextCache.Key key = new TestContextCache.Key("Invar", fileName, lineNum);
+			// Use "invar" and the elements name, because there can be 2 or more fields
+			// set in the constructor.
+			TestContextCache.Key key = new TestContextCache.Key("Invar"+elem.field.getItemName(), fileName, lineNum);
 			TestContextCache.Entry entry = SystemCaches.testContextCache.get(key);
 			if (entry != null) {
 				context = entry.testContext;
-				Instance fieldInstance = new Instance(entry.fieldName, entry.fieldType, elem.field);
-				context.setField(fieldInstance);
+				context.getInstance().setValue(obj);
+				context.getField().setValue(elem.field);
 			} else {
 				Instance instance = new Instance(obj.getClass().getName(), obj.getClass(), obj);
 				String testExpr = elem.invar.value();
@@ -165,7 +167,7 @@ public aspect InvariantFieldCtorConditions {
 				String actualTestExpr = InvariantFieldCtorConditions.aspectOf().getDefaultFieldInvarTestExpressionMaker()
 					.makeDefaultTestExpressionIfEmpty(testExpr, context);
 				context.setActualTestExpression(actualTestExpr);
-				SystemCaches.testContextCache.put(key, new TestContextCache.Entry(context, null, null, null, null));
+				SystemCaches.testContextCache.put(key, new TestContextCache.Entry(context, null, null, elem.field.getItemName(), elem.field.getClazz()));
 			}
 			return context;
 		}

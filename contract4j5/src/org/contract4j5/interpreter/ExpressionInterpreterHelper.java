@@ -322,85 +322,7 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 			errStr  = "";
 		}
 		return makeValidateTestExpressionReturn (warnStr, errStr);
-	}
-	
-	// TODO DELETE
-	// For purposes of validation, we only need to save the test expression,
-	// file name, and line number. They form a sufficiently unique combination
-	// and take up less space than saving the full context.
-//	private static class TestCacheEntry {
-//		public String testExpression;
-//		public String fileName;
-//		public int    lineNumber;
-//		
-//		public TestCacheEntry(String testExpression, TestContext context) {
-//			this.testExpression = testExpression;
-//			this.fileName = context.getFileName();
-//			this.lineNumber = context.getLineNumber();
-//		}
-//
-//		@Override
-//		public int hashCode() {
-//			final int prime = 31;
-//			int result = 1;
-//			result = prime * result
-//					+ ((fileName == null) ? 0 : fileName.hashCode());
-//			result = prime * result + lineNumber;
-//			result = prime
-//					* result
-//					+ ((testExpression == null) ? 0 : testExpression.hashCode());
-//			return result;
-//		}
-//
-//		@Override
-//		public boolean equals(Object obj) {
-//			if (this == obj)
-//				return true;
-//			if (obj == null)
-//				return false;
-//			if (getClass() != obj.getClass())
-//				return false;
-//			final TestCacheEntry other = (TestCacheEntry) obj;
-//			if (fileName == null) {
-//				if (other.fileName != null)
-//					return false;
-//			} else if (!fileName.equals(other.fileName))
-//				return false;
-//			if (lineNumber != other.lineNumber)
-//				return false;
-//			if (testExpression == null) {
-//				if (other.testExpression != null)
-//					return false;
-//			} else if (!testExpression.equals(other.testExpression))
-//				return false;
-//			return true;
-//		}
-//
-//	}
-//	
-//	private boolean cacheTestExpressionValidations = false;
-//	public void setCacheTestExpressionValidations(boolean b) { cacheTestExpressionValidations = b; }
-//	
-//	private TestResult getTestCacheEntry(String testExpression, TestContext context) {
-//		TestResult result = getTestCache().get(new TestCacheEntry(testExpression, context));
-//		return result;
-//	}
-//
-//	private void putTestCacheEntry(String testExpression, TestContext context, TestResult testResult) {
-//		if (cacheTestExpressionValidations == false)
-//			return;
-//		getTestCache().put(new TestCacheEntry(testExpression, context), testResult);
-//	}
-//
-//	private HashMap<TestCacheEntry, TestResult> testCache;
-//
-//	private Map<TestCacheEntry, TestResult> getTestCache() {
-//		// Keep it from growing too big, with an arbitrary cutoff.
-//		// Better would be an LRU cache.
-//		if (testCache == null || testCache.size() > 10000)  
-//			testCache = new HashMap<TestCacheEntry, TestResult>();
-//		return testCache;
-//	}
+	}	
 
 	private TestResult makeValidateTestExpressionReturn (String warnStr, String errStr) {
 		boolean pass = (errStr.length() == 0) ? true : false;
@@ -575,7 +497,7 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 	 */
 	protected String saveDynamicContextData(TestContext context) {
 		Map<String, Object> ovmap = context.getOldValuesMap();
-		if (ovmap != null) {
+		if (ovmap != null && ! ovmap.isEmpty()) {
 			int magicSymbolCounter = 1;
 			// use a sorted set of keys so the generated var names are consistent
 			// with those used in expandStaticDollarKeywords().

@@ -19,6 +19,7 @@
  */
 package org.contract4j5.aspects;
 
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.ConstructorSignature;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.aspectj.lang.reflect.SourceLocation;
@@ -123,24 +124,11 @@ public aspect InvariantTypeConditions extends AbstractConditions {
 		TestContextCache.Key key = new TestContextCache.Key("Invar", fileName, lineNum);
 		TestContextCache.Entry entry = SystemCaches.testContextCache.get(key);
 		if (entry != null) {
-			context = entry.testContext;
-			Object[]   argValues  = thisJoinPoint.getArgs();
-			Instance[] args       = InstanceUtils.makeInstanceArray(entry.argNames, entry.argTypes, argValues);
-			context.setMethodArgs(args);
+			context = updateContext(thisJoinPoint, obj, entry);
 		} else {
-			Class<?>   clazz     = obj.getClass();
 			String[]   argNames  = ms.getParameterNames();
 			Class<?>[] argTypes  = ms.getParameterTypes();
-			Object[]   argValues = thisJoinPoint.getArgs();
-			Instance[] args      = InstanceUtils.makeInstanceArray(argNames, argTypes, argValues);
-			Instance   instance  = new Instance (clazz.getName(), clazz, obj);
-			context  = new TestContextImpl (clazz.getName(), clazz.getSimpleName(), instance, 
-								null, args, null, null, fileName, lineNum);
-			TestResult result  = handleParentExpression(invar.value(), clazz, context);
-			String testExpr  = 
-				getDefaultTypeInvarTestExpressionMaker().makeDefaultTestExpressionIfEmpty(result.getMessage(), context);
-			context.setActualTestExpression(testExpr);
-			SystemCaches.testContextCache.put(key, new TestContextCache.Entry(context, argNames, argTypes, null, null));
+			context = makeNewTestContext(thisJoinPoint, invar, obj, argNames, argTypes, fileName, lineNum, key);
 		}
 		context.setOldValuesMap (determineOldValues (context));
 		getContractEnforcer().invokeTest("Invar", invar.message(), context);
@@ -149,7 +137,7 @@ public aspect InvariantTypeConditions extends AbstractConditions {
 		getContractEnforcer().invokeTest("Invar", invar.message(), context);
 		return result2;
 	}
-	
+
 	after(Invar invar, Object obj) returning : 
 		invarCommon() && invarTypeCtor (obj, invar) {
 		ConstructorSignature cs = 
@@ -161,28 +149,42 @@ public aspect InvariantTypeConditions extends AbstractConditions {
 		TestContextCache.Key key = new TestContextCache.Key("Invar", fileName, lineNum);
 		TestContextCache.Entry entry = SystemCaches.testContextCache.get(key);
 		if (entry != null) {
-			context = entry.testContext;
-			Object[]   argValues  = thisJoinPoint.getArgs();
-			Instance[] args       = InstanceUtils.makeInstanceArray(entry.argNames, entry.argTypes, argValues);
-			context.setMethodArgs(args);
+			context = updateContext(thisJoinPoint, obj, entry);
 		} else {
-			Class<?>   clazz     = obj.getClass();
 			String[]   argNames  = cs.getParameterNames();
 			Class<?>[] argTypes  = cs.getParameterTypes();
-			Object[]   argValues = thisJoinPoint.getArgs();
-			Instance[] args      = InstanceUtils.makeInstanceArray(argNames, argTypes, argValues);
-			Instance   instance  = new Instance (clazz.getName(), clazz, obj);
-			context = new TestContextImpl (clazz.getSimpleName(), clazz.getSimpleName(), instance, 
-								null, args, null, null, fileName, lineNum);
-			TestResult result  = handleParentExpression(invar.value(), clazz, context);
-			String testExpr  = 
-				getDefaultTypeInvarTestExpressionMaker().makeDefaultTestExpressionIfEmpty(result.getMessage(), context);
-			context.setActualTestExpression(testExpr);
-			SystemCaches.testContextCache.put(key, new TestContextCache.Entry(context, argNames, argTypes, null, null));
+			context = makeNewTestContext(thisJoinPoint, invar, obj, argNames, argTypes, fileName, lineNum, key);
 		}
 		// Capture "old" data (even though there are no old data...).
 		context.setOldValuesMap (determineOldValues (context));
 		getContractEnforcer().invokeTest("Invar", invar.message(), context);
+	}
+	
+	private TestContext updateContext(JoinPoint thisJoinPoint, Object obj, TestContextCache.Entry entry) {
+		TestContext context = entry.testContext;
+		context.getInstance().setValue(obj);
+		Object[] argValues = thisJoinPoint.getArgs();
+		Instance[] args    = InstanceUtils.makeInstanceArray(entry.argNames, entry.argTypes, argValues);
+		context.setMethodArgs(args);
+		return context;
+	}
+
+	private TestContext makeNewTestContext(JoinPoint thisJoinPoint, Invar invar, Object obj,
+			String[] argNames, Class<?>[] argTypes, String fileName, int lineNum,
+			TestContextCache.Key key) {
+		TestContext context;
+		Class<?>   clazz     = obj.getClass();
+		Object[]   argValues = thisJoinPoint.getArgs();
+		Instance[] args      = InstanceUtils.makeInstanceArray(argNames, argTypes, argValues);
+		Instance   instance  = new Instance (clazz.getName(), clazz, obj);
+		context  = new TestContextImpl (invar.value(), clazz.getSimpleName(), instance, 
+							null, args, null, null, fileName, lineNum);
+		TestResult result  = handleParentExpression(invar.value(), clazz, context);
+		String testExpr  = 
+			getDefaultTypeInvarTestExpressionMaker().makeDefaultTestExpressionIfEmpty(result.getMessage(), context);
+		context.setActualTestExpression(testExpr);
+		SystemCaches.testContextCache.put(key, new TestContextCache.Entry(context, argNames, argTypes, null, null));
+		return context;
 	}
 	
 	private TestResult handleParentExpression(String testExpr, Class<?> clazz, TestContext context) {

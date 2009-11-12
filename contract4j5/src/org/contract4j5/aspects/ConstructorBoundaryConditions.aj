@@ -132,6 +132,7 @@ public aspect ConstructorBoundaryConditions extends AbstractConditions {
 		TestContextCache.Entry entry = SystemCaches.testContextCache.get(key);
 		if (entry != null) {
 			context = entry.testContext;
+			context.getInstance().setValue(obj);
 			Instance[]  args = InstanceUtils.makeInstanceArray(entry.argNames, entry.argTypes, argValues);
 			context.setMethodArgs(args);
 		} else {

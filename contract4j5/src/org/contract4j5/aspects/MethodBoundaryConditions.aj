@@ -168,10 +168,11 @@ public aspect MethodBoundaryConditions extends AbstractConditions {
 		SourceLocation loc    = thisJoinPoint.getSourceLocation();
 		String fileName = loc.getFileName();
 		int    lineNum  = loc.getLine();
-		TestContextCache.Key key = new TestContextCache.Key("Invar", fileName, lineNum);
+		TestContextCache.Key key = new TestContextCache.Key(testTypeName, fileName, lineNum);
 		TestContextCache.Entry entry = SystemCaches.testContextCache.get(key);
 		if (entry != null) {
 			context = entry.testContext;
+			context.getInstance().setValue(obj);
 			Object[]    argValues  = thisJoinPoint.getArgs();
 			Instance[]  args       = InstanceUtils.makeInstanceArray(entry.argNames, entry.argTypes, argValues);
 			context.setMethodArgs(args);

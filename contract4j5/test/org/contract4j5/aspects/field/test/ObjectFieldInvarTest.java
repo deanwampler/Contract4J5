@@ -60,6 +60,10 @@ public class ObjectFieldInvarTest extends TestCase {
 			this.name = n;
 			this.nameRW = false;
 		}
+		
+//		@Disabled public String toString() {
+//			return String.format("FieldInvarWithDefaultExpr(%s,%b)", name, nameRW);
+//		}
 	}
 	
 	@Contract
@@ -156,8 +160,9 @@ public class ObjectFieldInvarTest extends TestCase {
 			try {
 				t = new FieldInvarWithDefaultExpr(names[i]);
 				if (!pass) {
-					fail(msg);
+					fail(msg + " t = " + e2s(t));
 				}
+				assertFalse(msg, t.nameRW);
 			} catch (TestSpecificationError tse) {
 				if (empty && allowed)
 					fail(msg);
@@ -165,9 +170,6 @@ public class ObjectFieldInvarTest extends TestCase {
 				if (pass) {
 					fail(msg);
 				}
-			}
-			if (pass) {  // Only test if passed; otherwise "t" is null!
-				assertFalse(msg, t.nameRW);
 			}
 		}
 	}
@@ -183,8 +185,9 @@ public class ObjectFieldInvarTest extends TestCase {
 				t = fdefault[i];
 				t.setName(names[i]);
 				if (!pass) {
-					fail(msg);
+					fail(msg + " t = " + e2s(t));
 				}
+				assertTrue(msg, t.nameRW);
 			} catch (TestSpecificationError tse) {
 				if (empty && allowed)
 					fail(msg);
@@ -192,9 +195,6 @@ public class ObjectFieldInvarTest extends TestCase {
 				if (pass) {
 					fail(msg);
 				}
-			}
-			if (pass) {  // Only test if passed; otherwise "t" is null!
-				assertTrue(msg, t.nameRW);
 			}
 		}
 	}
@@ -219,8 +219,9 @@ public class ObjectFieldInvarTest extends TestCase {
 				t = fdefault[i];
 				t.getName();
 				if (!pass) {
-					fail(msg);
+					fail(msg + " t = " + e2s(t));
 				}
+				assertTrue(msg, t.nameRW);
 			} catch (TestSpecificationError tse) {
 				if (empty && allowed)
 					fail(msg);
@@ -228,9 +229,6 @@ public class ObjectFieldInvarTest extends TestCase {
 				if (pass) {
 					fail(msg);
 				}
-			}
-			if (pass) {  // Only test if passed; otherwise "t" is null!
-				assertTrue(msg, t.nameRW);
 			}
 		}
 	}
@@ -305,5 +303,9 @@ public class ObjectFieldInvarTest extends TestCase {
 		} catch (ContractError ce) {
 			fail();
 		}
+	}
+	
+	private String e2s(FieldInvarWithDefaultExpr e) {
+		return String.format("FieldInvarWithDefaultExpr(%s,%b)", e.name, e.nameRW);
 	}
 }

@@ -65,14 +65,10 @@ public class ExpressionInterpreterAdapterExpressionEvalTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		interpreter = (ExpressionInterpreterHelper) Contract4J.getInstance().getContractEnforcer().getExpressionInterpreter();
-		// TODO DELETE
-//		interpreter.setCacheTestExpressionValidations(false);
 	}
 
 	protected void tearDown() throws Exception {
 		super.tearDown();
-		// TODO DELETE
-//		interpreter.setCacheTestExpressionValidations(true);
 	}
 	
 	public void testExpandKeywordsWithValidExpressionsReplacesDollarKeywordsWithC4JKeywords() {

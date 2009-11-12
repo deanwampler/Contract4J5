@@ -84,6 +84,9 @@ public aspect InvariantFieldConditions extends AbstractConditions {
 		invarFieldCommon (invar, obj) && 
 		get (@Invar * *.*) && ! get (@Disabled * *.*); 
 
+	/**
+	 * Advice for field "sets".
+	 */
 	void around (Invar invar, Object obj, Object arg) : 
 		invarSetField (invar, obj, arg) {
 		// Set up the context so we can retrieve any "old" values, before proceeding.
@@ -124,20 +127,20 @@ public aspect InvariantFieldConditions extends AbstractConditions {
 			String      annoTestExpr, 
 			String      testMessage,
 			DefaultTestExpressionMaker maker) {
-		TestContext context   = null;
-		SourceLocation loc    = thisJoinPoint.getSourceLocation();
-		String fileName = loc.getFileName();
-		int    lineNum  = loc.getLine();
-		TestContextCache.Key key = new TestContextCache.Key("Invar", fileName, lineNum);
+		TestContext context = null;
+		SourceLocation loc  = thisJoinPoint.getSourceLocation();
+		Signature sig       = thisJoinPoint.getSignature();
+		String fieldName    = sig.getName();
+		String fileName     = loc.getFileName();
+		int    lineNum      = loc.getLine();
+		// Use the field name as part of the key.
+		TestContextCache.Key key = new TestContextCache.Key("Invar"+fieldName, fileName, lineNum);
 		TestContextCache.Entry entry = SystemCaches.testContextCache.get(key);
 		if (entry != null) {
 			context = entry.testContext;
-			Instance fieldInstance = new Instance(entry.fieldName, entry.fieldType, fieldValue);
-			context.setField(fieldInstance);
+			context.getInstance().setValue(obj);
+			context.getField().setValue(fieldValue);
 		} else {
-			Signature sig = thisJoinPoint.getSignature();
-			assert (sig instanceof FieldSignature);
-			String fieldName     = sig.getName();
 			Class<?> clazz       = sig.getDeclaringType();
 			// Get the "old" value of the field. We need it now, even though we
 			// don't test with it, so that the default test expression can be
