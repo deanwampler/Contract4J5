@@ -22,6 +22,8 @@ package org.contract4j5.interpreter.jexl;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.apache.commons.jexl.Expression;
 import org.apache.commons.jexl.ExpressionFactory;
@@ -50,7 +52,7 @@ public class JexlExpressionInterpreter extends ExpressionInterpreterHelper {
 	protected Object doDetermineOldValue (String exprStr, TestContext context2) {
 		Expression expr;
 		try {
-			expr = ExpressionFactory.createExpression (exprStr);
+			expr = getOrParseExpression(exprStr);
 		} catch (Throwable th) {
 			throw new TestSpecificationError("Failed to create the Jexl expression for \""+exprStr+"\".", th);
 		}
@@ -73,7 +75,7 @@ public class JexlExpressionInterpreter extends ExpressionInterpreterHelper {
 			TestContext context) {
 		Expression expr;
 		try {
-			expr = ExpressionFactory.createExpression (testExpression);
+			expr = getOrParseExpression(testExpression);
 		} catch (Throwable th) {
 			String msg = "Failed to create a Jexl Expression object.";
 			return new TestResult (false, msg, new TestSpecificationError(msg, th));
@@ -135,4 +137,15 @@ public class JexlExpressionInterpreter extends ExpressionInterpreterHelper {
 		// TODO what Jexl exceptions should we observe here?
 		return false;
 	}
+
+	private SortedMap<String,Expression> expressionCache = new TreeMap<String,Expression>();
+
+	private Expression getOrParseExpression(String exprStr) throws Throwable {
+		Expression script = expressionCache.get(exprStr);
+		if (script != null) return script;
+		script = ExpressionFactory.createExpression (exprStr);
+		expressionCache.put(exprStr, script);
+		return script;
+	}
+
 }

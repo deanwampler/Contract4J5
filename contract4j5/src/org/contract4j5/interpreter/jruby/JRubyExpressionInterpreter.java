@@ -57,7 +57,7 @@ public class JRubyExpressionInterpreter extends ExpressionInterpreterHelper {
 
 	@Override
 	protected void doRecordContextChange(String newSymbolName, Object newObject) {
-        if (newObject instanceof Class) {
+        if (newObject instanceof Class<?>) {
         	if (requiredJava == false) {
         		requiredJava = true;
         		IRubyObject result = runtime.evalScript("require \"java\"" + newline());

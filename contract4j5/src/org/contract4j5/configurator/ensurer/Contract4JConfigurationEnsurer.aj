@@ -25,6 +25,7 @@ import org.contract4j5.configurator.properties.PropertiesConfigurator;
 import org.contract4j5.controller.Contract4J;
 import org.contract4j5.enforcer.defaultimpl.DefaultContractEnforcer;
 import org.contract4j5.interpreter.bsf.BSFExpressionInterpreterAdapter;
+import org.contract4j5.interpreter.groovy.GroovyExpressionInterpreter;
 import org.contract4j5.reporter.Reporter;
 import org.contract4j5.reporter.Severity;
 import org.contract4j5.reporter.WriterReporter;
@@ -61,7 +62,7 @@ public aspect Contract4JConfigurationEnsurer {
 	/**
 	 * Last resort configuration; use a {@link PropertiesConfigurator}, then
 	 * if not initialized, use a {@link ContractEnforcerImpl}, with a {@link
-	 * JexlBSFExpressionInterpreter} and a {@link WriterReporter}. 
+	 * GroovyExpressionInterpreter} and a {@link WriterReporter}. 
 	 * @note Lots of ugly violations of the Law of Demeter here!
 	 */
 	protected void doDefaultConfiguration(Contract4J c4j) {
@@ -73,9 +74,9 @@ public aspect Contract4JConfigurationEnsurer {
 		configurator.configure();
 		if (c4j.getContractEnforcer() == null) {
 			try {
-				c4j.setContractEnforcer(new DefaultContractEnforcer(new BSFExpressionInterpreterAdapter("groovy"), true));
-			} catch (BSFException e) {
-				throw new Configurator.ConfigurationFailedException("Could not create a Groovy BSF interpreter.", e);
+				c4j.setContractEnforcer(new DefaultContractEnforcer(new GroovyExpressionInterpreter(), true));
+			} catch (Throwable th) {
+				throw new Configurator.ConfigurationFailedException("Could not create a Groovy interpreter.", th);
 			}
 		}
 		Reporter r = c4j.getReporter();

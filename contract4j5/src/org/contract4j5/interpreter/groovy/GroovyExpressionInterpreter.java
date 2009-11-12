@@ -2,10 +2,13 @@ package org.contract4j5.interpreter.groovy;
 
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
+import groovy.lang.Script;
 import groovy.lang.MissingPropertyException;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.contract4j5.context.TestContext;
 import org.contract4j5.errors.TestSpecificationError;
@@ -30,7 +33,8 @@ public class GroovyExpressionInterpreter extends ExpressionInterpreterHelper {
 	@Override
 	protected Object doDetermineOldValue(String exprStr, TestContext context) {
 		try {
-			return shell.evaluate(exprStr);
+			Script script = getOrParseScript(exprStr);
+			return script.run();
 		} catch (Exception e) {
 			TestResult result = makeExceptionThrownTestResult(exprStr, context, e);
 			throw new TestSpecificationError(result.getFailureCauseMessage());
@@ -59,7 +63,8 @@ public class GroovyExpressionInterpreter extends ExpressionInterpreterHelper {
 	@Override
 	protected TestResult doTest(String testExpression, TestContext context) {
 		try {
-			Object value = shell.evaluate(testExpression);
+			Script script = getOrParseScript(testExpression);
+			Object value = script.run();
 			if (value instanceof Boolean) 
 				return new TestResult(((Boolean) value).booleanValue());
 			return new TestResult(false, didNotReturnBooleanErrorMessage(testExpression, value));
@@ -74,4 +79,15 @@ public class GroovyExpressionInterpreter extends ExpressionInterpreterHelper {
 		// TODO what Groovy exceptions should we observe here?
 		return false;
 	}
+	
+	private SortedMap<String,Script> scriptCache = new TreeMap<String,Script>();
+
+	private Script getOrParseScript(String exprStr) {
+		Script script = scriptCache.get(exprStr);
+		if (script != null) return script;
+		script = shell.parse(exprStr);
+		scriptCache.put(exprStr, script);
+		return script;
+	}
+
 }

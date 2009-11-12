@@ -71,7 +71,7 @@ public class TestContextCache {
 	// This global flag is for performance testing the impact of caching. 
 	// When disabled, you get 100% cache misses!
 
-	private static boolean cachePutsEnabled = true;
+	private static boolean cachePutsEnabled = false;
 	public void enableCachePuts()  { cachePutsEnabled = true; }
 	public void disableCachePuts() { cachePutsEnabled = false; }
 	

@@ -29,7 +29,6 @@ import org.apache.bsf.util.BSFEngineImpl;
 
 public abstract class BSFEngineAdapter extends BSFEngineImpl {
 
-	@SuppressWarnings("unchecked")
 	public Object call(Object object, String methodName, Object[] argList)
 			throws BSFException {
        Map<String, Object> map = getVariableMap();
@@ -83,13 +82,11 @@ public abstract class BSFEngineAdapter extends BSFEngineImpl {
        }
    }
    
-   @SuppressWarnings("unchecked")
    public void declareBean(BSFDeclaredBean bean) throws BSFException {
 	   Map<String, Object> map = getVariableMap();
 	   map.put (bean.name, bean.bean);
    }
 
-   @SuppressWarnings("unchecked")
    public void undeclareBean(BSFDeclaredBean bean) throws BSFException {
 	   Map<String, Object> map = getVariableMap();
 	   map.remove (bean.name);
