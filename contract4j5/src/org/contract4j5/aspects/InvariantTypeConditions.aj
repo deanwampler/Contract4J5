@@ -25,8 +25,9 @@ import org.aspectj.lang.reflect.SourceLocation;
 import org.contract4j5.context.TestContext;
 import org.contract4j5.context.TestContextCache;
 import org.contract4j5.context.TestContextImpl;
-import org.contract4j5.contract.Contract;
+import org.contract4j5.contract.Disabled;
 import org.contract4j5.contract.Invar;
+import org.contract4j5.controller.SystemCaches;
 import org.contract4j5.errors.TestSpecificationError;
 import org.contract4j5.interpreter.TestResult;
 import org.contract4j5.testexpression.DefaultTestExpressionMaker;
@@ -59,7 +60,7 @@ public aspect InvariantTypeConditions extends AbstractConditions {
 	 * the annotation explicitly!!
 	 */
 	pointcut invarTypeMethodUsingInvarAnno() :
-		execution (!static * (@Invar *+).*(..)) &&
+		execution (!static * (@Invar *+).*(..)) && ! execution (!static * (@Disabled *+).*(..)) && 
 		! (execution (* (@Invar *+).get*(..)) || execution (* (@Invar *+).set*(..))) &&
 		! cflow (execution ((@Invar *+).new(..)));
 
@@ -72,15 +73,16 @@ public aspect InvariantTypeConditions extends AbstractConditions {
 	 * These cases are handled separately.
 	 * @note We prevent recursion into the aspect itself.
 	 */
-	pointcut invarTypeMethod(Object obj) :
+	pointcut invarTypeMethod(Object obj, Invar invar) :
 		!within (InvariantTypeConditions) &&
 		invarTypeMethodUsingInvarAnno() &&
-//		@this (invar) && 
+		@this (invar) && 
 		this (obj);
 
 	
 	pointcut invarTypeGetSetUsingInvarAnno () :
 		(execution (* (@Invar *+).get*(..)) || execution (* (@Invar *+).set*(..))) &&
+		! ((execution (* (@Disabled *+).get*(..)) || execution (* (@Disabled *+).set*(..)))) &&
 		! cflowbelow (execution ((@Invar *+).new(..)));
 
 	/**
@@ -89,40 +91,38 @@ public aspect InvariantTypeConditions extends AbstractConditions {
 	 * and are handled separately below.
 	 * @note We prevent recursion into the aspect itself.
 	 */
-	pointcut invarTypeGetSet (Object obj) :
+	pointcut invarTypeGetSet (Object obj, Invar invar) :
 		!within (InvariantTypeConditions) &&
 		invarTypeGetSetUsingInvarAnno() &&
-//		@this (invar) && 
+		@this (invar) && 
 		this (obj); 
 
 	
 	pointcut invarTypeCtorUsingInvarAnno () : 
-		execution ((@Invar *+).new(..));
+		execution ((@Invar *+).new(..)) && ! execution ((@Disabled *+).new(..));
 
 	/**
 	 * PCD for type (class, aspect, ...) invariant tests for after advice after
 	 * c'tor execution.
 	 * @note We prevent recursion into the aspect itself.
 	 */
-	pointcut invarTypeCtor (Object obj) : 
+	pointcut invarTypeCtor (Object obj, Invar invar) : 
 		!within (InvariantTypeConditions) &&
 		invarTypeCtorUsingInvarAnno() &&
-//		@this (invar) &&
+		@this (invar) &&
 		this (obj);
 
 	
-	Object around (Contract contract, Invar invar, Object obj) : 
-		invarCommon(contract, invar) && (invarTypeMethod (obj) || invarTypeGetSet (obj)) {
+	Object around (Invar invar, Object obj) : 
+		invarCommon() && (invarTypeMethod (obj, invar) || invarTypeGetSet (obj, invar)) {
 		MethodSignature ms   = (MethodSignature) thisJoinPointStaticPart.getSignature();
 		TestContext context   = null;
-		String testExpr       = "";
 		SourceLocation loc    = thisJoinPointStaticPart.getSourceLocation();
 		String fileName = loc.getFileName();
 		int    lineNum  = loc.getLine();
 		TestContextCache.Key key = new TestContextCache.Key("Invar", fileName, lineNum);
-		TestContextCache.Entry entry = contextCache.get(key);
-		if (context != null) {
-			testExpr = entry.testExpression;
+		TestContextCache.Entry entry = SystemCaches.testContextCache.get(key);
+		if (entry != null) {
 			context = entry.testContext;
 			Object[]   argValues  = thisJoinPoint.getArgs();
 			Instance[] args       = InstanceUtils.makeInstanceArray(entry.argNames, entry.argTypes, argValues);
@@ -136,32 +136,31 @@ public aspect InvariantTypeConditions extends AbstractConditions {
 			Instance   instance  = new Instance (clazz.getName(), clazz, obj);
 			context  = new TestContextImpl (clazz.getName(), clazz.getSimpleName(), instance, 
 								null, args, null, null, fileName, lineNum);
-			TestResult result  = handleParentExpression(invar, clazz, context);
-			testExpr  = 
+			TestResult result  = handleParentExpression(invar.value(), clazz, context);
+			String testExpr  = 
 				getDefaultTypeInvarTestExpressionMaker().makeDefaultTestExpressionIfEmpty(result.getMessage(), context);
-			contextCache.put(key, new TestContextCache.Entry(context, testExpr, argNames, argTypes, null, null));
+			context.setActualTestExpression(testExpr);
+			SystemCaches.testContextCache.put(key, new TestContextCache.Entry(context, argNames, argTypes, null, null));
 		}
-		context.setOldValuesMap (determineOldValues (testExpr, context));
-		getContractEnforcer().invokeTest(testExpr, "Invar", invar.message(), context);
-		Object result2 = proceed(contract, invar, obj);
+		context.setOldValuesMap (determineOldValues (context));
+		getContractEnforcer().invokeTest("Invar", invar.message(), context);
+		Object result2 = proceed(invar, obj);
 		context.setMethodResult (new Instance ("", ms.getReturnType(), result2));
-		getContractEnforcer().invokeTest(testExpr, "Invar", invar.message(), context);
+		getContractEnforcer().invokeTest("Invar", invar.message(), context);
 		return result2;
 	}
 	
-	after(Contract contract, Invar invar, Object obj) returning : 
-		invarCommon(contract, invar) && invarTypeCtor (obj) {
+	after(Invar invar, Object obj) returning : 
+		invarCommon() && invarTypeCtor (obj, invar) {
 		ConstructorSignature cs = 
 			(ConstructorSignature) thisJoinPointStaticPart.getSignature();
 		TestContext context   = null;
-		String testExpr       = "";
 		SourceLocation loc    = thisJoinPointStaticPart.getSourceLocation();
 		String fileName = loc.getFileName();
 		int    lineNum  = loc.getLine();
 		TestContextCache.Key key = new TestContextCache.Key("Invar", fileName, lineNum);
-		TestContextCache.Entry entry = contextCache.get(key);
-		if (context != null) {
-			testExpr = entry.testExpression;
+		TestContextCache.Entry entry = SystemCaches.testContextCache.get(key);
+		if (entry != null) {
 			context = entry.testContext;
 			Object[]   argValues  = thisJoinPoint.getArgs();
 			Instance[] args       = InstanceUtils.makeInstanceArray(entry.argNames, entry.argTypes, argValues);
@@ -175,22 +174,23 @@ public aspect InvariantTypeConditions extends AbstractConditions {
 			Instance   instance  = new Instance (clazz.getName(), clazz, obj);
 			context = new TestContextImpl (clazz.getSimpleName(), clazz.getSimpleName(), instance, 
 								null, args, null, null, fileName, lineNum);
-			TestResult result  = handleParentExpression(invar, clazz, context);
-			testExpr  = 
-				getDefaultTypeInvarTestExpressionMaker().makeDefaultTestExpressionIfEmpty(testExpr, context);
-			contextCache.put(key, new TestContextCache.Entry(context, testExpr, argNames, argTypes, null, null));
+			TestResult result  = handleParentExpression(invar.value(), clazz, context);
+			String testExpr  = 
+				getDefaultTypeInvarTestExpressionMaker().makeDefaultTestExpressionIfEmpty(result.getMessage(), context);
+			context.setActualTestExpression(testExpr);
+			SystemCaches.testContextCache.put(key, new TestContextCache.Entry(context, argNames, argTypes, null, null));
 		}
 		// Capture "old" data (even though there are no old data...).
-		context.setOldValuesMap (determineOldValues (testExpr, context));
-		getContractEnforcer().invokeTest(testExpr, "Invar", invar.message(), context);
+		context.setOldValuesMap (determineOldValues (context));
+		getContractEnforcer().invokeTest("Invar", invar.message(), context);
 	}
 	
-	private TestResult handleParentExpression(Invar invar, Class<?> clazz, TestContext context) {
+	private TestResult handleParentExpression(String testExpr, Class<?> clazz, TestContext context) {
 		TestResult result = 
 			getParentTestExpressionFinder().findParentTypeInvarTestExpressionIfEmpty(
-			invar.value(), clazz, context);
+					testExpr, clazz, context);
 		if (result.isPassed() == false) {
-			getContractEnforcer().fail(invar.value(), "Invar", result.getMessage(),  
+			getContractEnforcer().fail(testExpr, "Invar", result.getMessage(),  
 					context, new TestSpecificationError());
 		}
 		return result;

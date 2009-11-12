@@ -54,28 +54,28 @@ public class ExpressionsWithOtherObjectsTest extends TestCase {
 	public void testStaticReferencesWhenExplicitlyRegisteringClass() {
 		TestContext testContext = new TestContextImpl("org.contract4j5.interpreter.test.ExpressionsWithOtherObjectsTest.TestClass.validate() == true", "", null, null, new Instance[0], null, "", 0);
 		interpreter.registerContextObject("org.contract4j5.interpreter.test.ExpressionsWithOtherObjectsTest.TestClass", TestClass.class);
-		TestResult result = interpreter.invokeTest("org.contract4j5.interpreter.test.ExpressionsWithOtherObjectsTest.TestClass.validate() == true", testContext);
+		TestResult result = interpreter.invokeTest(testContext);
 		assertTrue(result.isPassed());		
 	}
 	
 	public void testStaticReferencesWhenNotRegisteringClassButUsingItsFullyQualifiedNameInstead() {
 		TestContext testContext = new TestContextImpl("TestClass.validate() == true", "", null, null, new Instance[0], null, "", 0);
 		interpreter.registerContextObject("TestClass", TestClass.class);
-		TestResult result = interpreter.invokeTest("TestClass.validate() == true", testContext);
+		TestResult result = interpreter.invokeTest(testContext);
 		assertTrue(result.isPassed());		
 	}
 	
 	public void testReferenceToObjectWhenExplicitlyRegisteringObject() {
 		TestContext testContext = new TestContextImpl("obj.valid() == true", "", null, null, new Instance[0], null, "", 0);
 		interpreter.registerContextObject("obj", new TestClass());
-		TestResult result = interpreter.invokeTest("obj.valid() == true", testContext);
+		TestResult result = interpreter.invokeTest(testContext);
 		assertTrue(result.isPassed());		
 	}
 	
 	public void testReferenceStaticMethodOnObjectWhenExplicitlyRegisteringObject() {
 		TestContext testContext = new TestContextImpl("obj.validate() == true", "", null, null, new Instance[0], null, "", 0);
 		interpreter.registerContextObject("obj", new TestClass());
-		TestResult result = interpreter.invokeTest("obj.validate() == true", testContext);
+		TestResult result = interpreter.invokeTest(testContext);
 		assertTrue(result.isPassed());		
 	}
 	

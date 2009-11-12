@@ -24,8 +24,9 @@ import org.aspectj.lang.reflect.SourceLocation;
 import org.contract4j5.context.TestContext;
 import org.contract4j5.context.TestContextImpl;
 import org.contract4j5.context.TestContextCache;
-import org.contract4j5.contract.Contract;
+import org.contract4j5.contract.Disabled;
 import org.contract4j5.contract.Invar;
+import org.contract4j5.controller.SystemCaches;
 import org.contract4j5.errors.TestSpecificationError;
 import org.contract4j5.interpreter.TestResult;
 import org.contract4j5.testexpression.DefaultTestExpressionMaker;
@@ -54,23 +55,21 @@ public aspect InvariantCtorConditions extends AbstractConditions {
 	 * Constructor invariant PCD.
 	 * @note We prevent recursion into the aspect itself.
 	 */
-	pointcut invarCtor (Contract contract, Invar invar, Object obj) : 
-		invarCommon(contract, invar) && !within (InvariantCtorConditions) &&
-		execution (@Invar *.new(..)) && 
-		this (obj);
+	pointcut invarCtor (Invar invar, Object obj) : 
+		invarCommon() && !within (InvariantCtorConditions) &&
+		execution (@Invar new (..)) && ! withincode (@Disabled new (..)) &&
+		this (obj) && @annotation(invar) ;
 
-	after (Contract contract, Invar invar, Object obj) returning : invarCtor (contract, invar, obj) {
+	after (Invar invar, Object obj) returning : invarCtor (invar, obj)  {
 		Object[]    argValues = thisJoinPoint.getArgs();
 		TestContext context   = null;
-		String testExpr       = "";
 		SourceLocation loc    = thisJoinPointStaticPart.getSourceLocation();
 		String fileName = loc.getFileName();
 		int    lineNum  = loc.getLine();
 		TestContextCache.Key key = new TestContextCache.Key("Invar", fileName, lineNum);
-		TestContextCache.Entry entry = contextCache.get(key);
-		if (context != null) {
+		TestContextCache.Entry entry = SystemCaches.testContextCache.get(key);
+		if (entry != null) {
 			context = entry.testContext;
-			testExpr = entry.testExpression;
 			Instance[]  args = InstanceUtils.makeInstanceArray(entry.argNames, entry.argTypes, argValues);
 			context.setMethodArgs(args);
 		} else {
@@ -80,7 +79,7 @@ public aspect InvariantCtorConditions extends AbstractConditions {
 			Class<?>[]  argTypes  = cs.getParameterTypes();
 			Instance[]  args      = InstanceUtils.makeInstanceArray(argNames, argTypes, argValues);
 			Instance    instance  = new Instance (clazz.getName(), clazz, obj);
-			context = new TestContextImpl (clazz.getSimpleName(), clazz.getSimpleName(), 
+			context = new TestContextImpl (invar.value(), clazz.getSimpleName(), 
 							instance, null, args, null, null, fileName, lineNum);
 			TestResult result = 
 				getParentTestExpressionFinder().findParentConstructorTestExpressionIfEmpty(
@@ -89,14 +88,15 @@ public aspect InvariantCtorConditions extends AbstractConditions {
 				getContractEnforcer().fail(invar.value(), "Invar", result.getMessage(),  
 						context, new TestSpecificationError());
 			}
-			testExpr = 
+			String testExpr = 
 				getDefaultCtorInvarTestExpressionMaker().makeDefaultTestExpressionIfEmpty(result.getMessage(), context);
+			context.setActualTestExpression(testExpr);
 			// Capture "old" data. There aren't any, but in case the expression uses "$old(..)" expressions
 			// we want to capture the "new" values as if old...
-			context.setOldValuesMap (determineOldValues (testExpr, context));
-			contextCache.put(key, new TestContextCache.Entry(context, testExpr, argNames, argTypes, null, null));
+			context.setOldValuesMap (determineOldValues (context));
+			SystemCaches.testContextCache.put(key, new TestContextCache.Entry(context, argNames, argTypes, null, null));
 		}
-		getContractEnforcer().invokeTest(testExpr, "Invar", invar.message(), context);
+		getContractEnforcer().invokeTest("Invar", invar.message(), context);
 	}
 }
 

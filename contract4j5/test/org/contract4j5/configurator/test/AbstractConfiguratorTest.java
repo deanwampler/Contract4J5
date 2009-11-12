@@ -45,13 +45,13 @@ import org.contract4j5.testexpression.ParentTestExpressionFinder;
 
 public class AbstractConfiguratorTest extends TestCase {
 	public static class StubExpressionInterpreter implements ExpressionInterpreter {
-		public Map<String, Object> determineOldValues(String testExpression, TestContext context) { return null; }
+		public Map<String, Object> determineOldValues(TestContext context) { return null; }
 		public Map<String, String> getOptionalKeywordSubstitutions() { return null;	}
 		public boolean getTreatEmptyTestExpressionAsValidTest() { return false;	}
-		public TestResult invokeTest(String testExpression, TestContext context) { return null; }
+		public TestResult invokeTest(TestContext context) { return null; }
 		public void setOptionalKeywordSubstitutions(Map<String, String> optionalKeywordSubstitutions) {}
 		public void setTreatEmptyTestExpressionAsValidTest(boolean emptyOK) {}
-		public TestResult validateTestExpression(String testExpression, TestContext context) { return null;	}
+		public TestResult validateTestExpression(TestContext context) { return null;	}
 		public void registerContextObject(String name, Object object) {}
 		public void registerGlobalContextObject(String name, Object object) {}
 		public void unregisterContextObject(String name) {}
@@ -68,7 +68,7 @@ public class AbstractConfiguratorTest extends TestCase {
 		private ExpressionInterpreter expressionInterpreter = new StubExpressionInterpreter();
 		public ExpressionInterpreter getExpressionInterpreter() { return expressionInterpreter;	}
 		public void setExpressionInterpreter(ExpressionInterpreter expressionInterpreter) {}
-		public void invokeTest(String testExpression, String testPrefix, String extraMessage, TestContext context)
+		public void invokeTest(String testPrefix, String extraMessage, TestContext context)
 			throws ContractError {}
 		public void fail(String testExpression, String testPrefix, String extraMessage, TestContext context, Throwable th)
 			throws ContractError { throw new ContractError(testExpression + ": " + extraMessage, th); }

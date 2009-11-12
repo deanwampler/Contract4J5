@@ -42,6 +42,12 @@ public class ExpressionInterpreterTest_ExpressionManipulationsTest extends TestC
 		public String getTestExpression() {
 			return null;
 		}
+		public String getActualTestExpression() {
+			return null;
+		}
+		public String getInternalTestExpression() {
+			return null;
+		}
 
 		public void setField(Instance target) {}
 		public void setFileName(String fileName) {}
@@ -52,6 +58,8 @@ public class ExpressionInterpreterTest_ExpressionManipulationsTest extends TestC
 		public void setMethodResult(Instance methodResult) {}
 		public void setOldValuesMap(Map<String, Object> map) {}
 		public void setTestExpression(String testExpression) {}
+		public void setActualTestExpression(String testExpression) {}
+		public void setInternalTestExpression(String testExpression) {}
 	}
 	
 	private static final String COLOR_FQN = "org.contract4j5.interpreter.test.Color";

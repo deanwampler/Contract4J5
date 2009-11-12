@@ -39,7 +39,7 @@ public class Contract4J {
 	 * An unavoidable singleton (UNLESS you're using Spring, which we can't assume...), 
 	 * but hopefully the only one required in C4J, except for the singleton aspects. 
 	 */
-	public static void       setInstance(Contract4J c4j) { 
+	public static void setInstance(Contract4J c4j) { 
 		systemInstance = c4j; 
 	}
 	public static Contract4J getInstance() { 

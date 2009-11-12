@@ -38,8 +38,8 @@ import org.contract4j5.reporter.Severity;
  */
 public class NullContractEnforcer implements ContractEnforcer {
 
-	public void invokeTest(String testExpression, String testPrefix,
-			String extraMessage, TestContext context) throws ContractError {}
+	public void invokeTest(String testPrefix, String extraMessage,
+			TestContext context) throws ContractError {}
 	public void fail(String testExpression, String testPrefix, 
 			String extraMessage, TestContext context, Throwable th) throws ContractError {
 		throw new ContractError(testExpression + ": " + extraMessage, th); 

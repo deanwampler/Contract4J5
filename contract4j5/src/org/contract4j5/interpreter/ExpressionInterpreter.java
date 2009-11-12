@@ -99,7 +99,7 @@ public interface ExpressionInterpreter {
 	 *   only fields in a field invariant test map to <code>$target</code></td></tr>
 	 *   <tr><td><code>$old(..)</code></td>
 	 *   <td>The "old" value of enclosed expression. See {@link 
-	 *   #determineOldValues(String, TestContext)} for valid contents.</td></tr>
+	 *   #determineOldValues(TestContext)} for valid contents.</td></tr>
 	 *   <tr><td><code>$return</code></td>
 	 *   <td>The object returned from a method. The corresponding value for this key should
 	 *   contain <code>$return</code>, like the <code>$this</code>.</td></tr>
@@ -176,12 +176,11 @@ public interface ExpressionInterpreter {
 	 * result in unpredictable results (depending on the implementation). Note 
 	 * that whitespace is ignored, except that there can be no whitespace
 	 * between the "$" characters and their keywords.
-	 * @param testExpression that may contain references to "old" values.
 	 * @param context of the test.
 	 * @return map of the old values and their corresponding names.
 	 * @note Only "$old(..)" are processed; other keywords are ignored.
 	 */
-	Map<String, Object> determineOldValues (String testExpression, TestContext context);
+	Map<String, Object> determineOldValues (TestContext context);
 
 	/**
 	 * Validate the input test expression. Checks that if it contains any of the 
@@ -208,7 +207,6 @@ public interface ExpressionInterpreter {
 	 * {@link TestResult#isPassed()} will return false. If all validations passed with no
 	 * warnings, the returned {@link TestResult#isPassed()} will be true and 
 	 * the failure message will be empty (but not null!).
-	 * @param testExpression
 	 * @param context
 	 * @return TestResult with any errors in the expression returned by
 	 * {@link TestResult#getMessage()} and {@link TestResult#isPassed()} will
@@ -218,19 +216,17 @@ public interface ExpressionInterpreter {
 	 * the array element references in the expression.
 	 */
 	TestResult validateTestExpression (
-			String      testExpression, 
 			TestContext context);
 
 	/**
 	 * Parse the test expression and invoke the test.
-	 * @param testExpression
 	 * @param context information required by the test.
 	 * @return TestResult indicating whether or not the test passed and an associated message
 	 *   and or Throwable.
 	 * @throws ExpressionInterpreterError if the expression can't be parsed or the resulting
 	 * test can't be executed.
 	 */
-	TestResult invokeTest (String testExpression, TestContext context);
+	TestResult invokeTest (TestContext context);
 
 	/**
 	 * The expression interpreters don't have the same visibility to classes and objects that 

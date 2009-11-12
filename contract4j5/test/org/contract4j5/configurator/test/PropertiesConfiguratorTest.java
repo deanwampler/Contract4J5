@@ -252,15 +252,15 @@ public class PropertiesConfiguratorTest extends TestCase {
 	
 	
 	public static class StubExpressionInterpreter implements ExpressionInterpreter {
-		public Map<String, Object> determineOldValues(String testExpression, TestContext context) {	return null; }
+		public Map<String, Object> determineOldValues(TestContext context) {	return null; }
 		private boolean empty = false;
 		public boolean getTreatEmptyTestExpressionAsValidTest() { return empty; }
 		public void    setTreatEmptyTestExpressionAsValidTest(boolean emptyOK) { empty=emptyOK; }
 		private Map<String, String> subs = null;
 		public Map<String, String> getOptionalKeywordSubstitutions() { return subs; }
 		public void setOptionalKeywordSubstitutions(Map<String, String> subs) { this.subs = subs; }
-		public TestResult invokeTest(String testExpression, TestContext context) { return null;	}
-		public TestResult validateTestExpression(String testExpression, TestContext context) { return null; }
+		public TestResult invokeTest(TestContext context) { return null;	}
+		public TestResult validateTestExpression(TestContext context) { return null; }
 		public void registerContextObject(String name, Object object) {}
 		public void registerGlobalContextObject(String name, Object object) {}
 		public void unregisterContextObject(String name) {}

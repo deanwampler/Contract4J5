@@ -19,10 +19,10 @@ public class JexlBSFExpressionInterpreterTest extends TestCase {
 	}
 	
 	public void testJexlInterpreterCanValidateTestExpressions() throws BSFException {
-		assertTrue(interpreter.validateTestExpression("1+1 == 2", context).isPassed());
+		assertTrue(interpreter.validateTestExpression(context).isPassed());
 	}
 	
 	public void testJexlInterpreterCanExecuteTestExpressions() throws BSFException {
-		assertTrue(interpreter.invokeTest("1+1 == 2", context).isPassed());
+		assertTrue(interpreter.invokeTest(context).isPassed());
 	}
 }

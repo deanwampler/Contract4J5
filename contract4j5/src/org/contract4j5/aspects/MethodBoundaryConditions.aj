@@ -29,9 +29,10 @@ import org.aspectj.lang.reflect.SourceLocation;
 import org.contract4j5.context.TestContext;
 import org.contract4j5.context.TestContextCache;
 import org.contract4j5.context.TestContextImpl;
-import org.contract4j5.contract.Contract;
+import org.contract4j5.contract.Disabled;
 import org.contract4j5.contract.Post;
 import org.contract4j5.contract.Pre;
+import org.contract4j5.controller.SystemCaches;
 import org.contract4j5.errors.TestSpecificationError;
 import org.contract4j5.interpreter.TestResult;
 import org.contract4j5.testexpression.DefaultPostTestExpressionMaker;
@@ -90,73 +91,61 @@ public aspect MethodBoundaryConditions extends AbstractConditions {
 	 * Method precondition PCD. Ignores static methods!
 	 * @note We prevent recursion into the aspect itself.
 	 */
-	pointcut preMethod (Contract contract, Pre pre, Object obj) :
-		preCommon(contract, pre) && !within (MethodBoundaryConditions) &&
-		execution (@Pre !static * *.*(..)) &&
-		this (obj);
+	pointcut preMethod (Pre pre, Object obj) :
+		preCommon() && !within (MethodBoundaryConditions) &&
+		execution (@Pre !static * *.*(..)) && ! execution (@Disabled !static * *.*(..)) &&
+		this (obj) && @annotation(pre);
 
 	/**
 	 * Method returning void w/ postcondition PCD. Ignores static methods!
 	 * @note We prevent recursion into the aspect itself.
 	 */
-	pointcut postVoidMethod (Contract contract, Post post, Object obj) :
-		postCommon(contract, post) && !within (MethodBoundaryConditions) &&
-		execution (@Post !static void *.*(..)) &&
-		this (obj);
+	pointcut postVoidMethod (Post post, Object obj) :
+		postCommon() && !within (MethodBoundaryConditions) &&
+		execution (@Post !static void *.*(..)) && ! execution (@Disabled !static void *.*(..)) &&
+		this (obj) && @annotation(post);
 
 	/**
 	 * Method postcondition PCD, excluding the void special case. Ignores
 	 * static methods!
 	 * @note We prevent recursion into the aspect itself.
 	 */
-	pointcut postMethod (Contract contract, Post post, Object obj) :
-		postCommon(contract, post) && !within (MethodBoundaryConditions) &&
-		execution (@Post !static !void *.*(..)) &&
-		this (obj);
-	
-	static protected class Bucket {
-		public String testExpr;
-		public TestContext context;
-		public Bucket(String expr, TestContext context) {
-			this.testExpr = expr;
-			this.context = context;
-		}
-	}
+	pointcut postMethod (Post post, Object obj) :
+		postCommon() && !within (MethodBoundaryConditions) &&
+		execution (@Post !static !void *.*(..)) && ! execution (@Disabled !static !void *.*(..)) &&
+		this (obj) && @annotation(post);
 	
 	/**
 	 * Before advice for methods, including methods returning void.
 	 */
-	before (Contract contract, Pre pre, Object obj) : preMethod (contract, pre, obj) {
-		Bucket bucket = doBeforeTest (thisJoinPoint, obj, pre, "Pre", pre.value(), pre.message(),
+	before (Pre pre, Object obj) : preMethod (pre, obj) {
+		TestContext context = doBeforeTest (thisJoinPoint, obj, pre, "Pre", pre.value(), pre.message(),
 				getDefaultPreTestExpressionMaker());
-		TestContext context = bucket.context;
-		getContractEnforcer().invokeTest (bucket.testExpr, "Pre", pre.message(), context);
+		getContractEnforcer().invokeTest ("Pre", pre.message(), context);
 	}
 
 	/**
 	 * After advice for methods, excluding methods returning void.
 	 */
-	Object around (Contract contract, Post post, Object obj) : postMethod (contract, post, obj) {
-		Bucket bucket = doBeforeTest (thisJoinPoint, obj, post, "Post", post.value(), post.message(),
+	Object around (Post post, Object obj) : postMethod (post, obj) {
+		TestContext context = doBeforeTest (thisJoinPoint, obj, post, "Post", post.value(), post.message(),
 				getDefaultPostTestExpressionMaker());
-		TestContext context = bucket.context;
-		context.setOldValuesMap (determineOldValues (context.getTestExpression(), context));
-		Object result = proceed (contract, post, obj);
+		context.setOldValuesMap (determineOldValues (context));
+		Object result = proceed (post, obj);
 		context.getMethodResult().setValue(result);
-		getContractEnforcer().invokeTest (bucket.testExpr, "Post", post.message(), context);
+		getContractEnforcer().invokeTest ("Post", post.message(), context);
 		return result;
 	}
 
 	/**
 	 * After advice for methods returning void.
 	 */
-	void around (Contract contract, Post post, Object obj) : postVoidMethod (contract, post, obj) {
-		Bucket bucket = doBeforeTest (thisJoinPoint, obj, post, "Post", post.value(), post.message(),
+	void around (Post post, Object obj) : postVoidMethod (post, obj) {
+		TestContext context = doBeforeTest (thisJoinPoint, obj, post, "Post", post.value(), post.message(),
 				getDefaultPostReturningVoidTestExpressionMaker());
-		TestContext context = bucket.context;
-		context.setOldValuesMap (determineOldValues (context.getTestExpression(), context));
-		proceed (contract, post, obj);
-		getContractEnforcer().invokeTest (bucket.testExpr, "Post", post.message(), context);
+		context.setOldValuesMap (determineOldValues (context));
+		proceed (post, obj);
+		getContractEnforcer().invokeTest ("Post", post.message(), context);
 	}
 	
 	/**
@@ -164,7 +153,7 @@ public aspect MethodBoundaryConditions extends AbstractConditions {
 	 * Java won't let us have our annotations implement an interface with these fields, nor any common
 	 * interface, so we have to pass everything in.
 	 */
-	protected Bucket doBeforeTest (
+	protected TestContext doBeforeTest (
 			JoinPoint   thisJoinPoint, 
 			Object      obj,
 			Annotation  anno,
@@ -176,15 +165,13 @@ public aspect MethodBoundaryConditions extends AbstractConditions {
 		MethodSignature ms     = (MethodSignature) signature;
 		
 		TestContext context   = null;
-		String testExpr       = "";
 		SourceLocation loc    = thisJoinPoint.getSourceLocation();
 		String fileName = loc.getFileName();
 		int    lineNum  = loc.getLine();
 		TestContextCache.Key key = new TestContextCache.Key("Invar", fileName, lineNum);
-		TestContextCache.Entry entry = contextCache.get(key);
-		if (context != null) {
+		TestContextCache.Entry entry = SystemCaches.testContextCache.get(key);
+		if (entry != null) {
 			context = entry.testContext;
-			testExpr = entry.testExpression;
 			Object[]    argValues  = thisJoinPoint.getArgs();
 			Instance[]  args       = InstanceUtils.makeInstanceArray(entry.argNames, entry.argTypes, argValues);
 			context.setMethodArgs(args);
@@ -208,10 +195,10 @@ public aspect MethodBoundaryConditions extends AbstractConditions {
 				getContractEnforcer().fail(annoTestExpr, testTypeName, result.getMessage(),  
 						context, new TestSpecificationError());
 			}
-			testExpr = maker.makeDefaultTestExpressionIfEmpty(result.getMessage(), context);
-			context.setTestExpression(testExpr);
-			contextCache.put(key, new TestContextCache.Entry(context, testExpr, argNames, argTypes, null, null));
+			String testExpr = maker.makeDefaultTestExpressionIfEmpty(result.getMessage(), context);
+			context.setActualTestExpression(testExpr);
+			SystemCaches.testContextCache.put(key, new TestContextCache.Entry(context, argNames, argTypes, null, null));
 		}
-		return new Bucket(testExpr, context);
+		return context;
 	}
 }

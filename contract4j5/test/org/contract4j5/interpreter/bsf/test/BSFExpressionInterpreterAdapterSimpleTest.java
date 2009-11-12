@@ -27,6 +27,7 @@ import junit.framework.TestCase;
 
 import org.apache.bsf.BSFException;
 import org.contract4j5.context.TestContextImpl;
+import org.contract4j5.instance.Instance;
 import org.contract4j5.interpreter.TestResult;
 import org.contract4j5.interpreter.bsf.BSFExpressionInterpreterAdapter;
 
@@ -56,20 +57,25 @@ public class BSFExpressionInterpreterAdapterSimpleTest extends TestCase {
 			}
 	}
 	public void testDetermineOldValue() {
-		Map<String,Object> map = interpreter.determineOldValues("$old(result)", TestContextImpl.emptyTestContext);
+		Instance thishere = new Instance("object", this.getClass(), this);
+		TestContextImpl context = new TestContextImpl("$old($this)", "", thishere, null, new Instance[0], null, "", 0);
+		Map<String,Object> map = interpreter.determineOldValues(context);
 		assertEquals(1, map.size());
-		assertEquals(bsfEngine.result, map.get(bsfEngine.result));
+		assertEquals(map.toString(), bsfEngine.result, map.get("$this"));
 	}
 	
 	public void testInvokeTestFailsWithNonBooleanTestExpression() {
-		assertFalse(interpreter.invokeTest("1+1", TestContextImpl.emptyTestContext).isPassed());
+		TestContextImpl context = new TestContextImpl("1+1", "", null, null, new Instance[0], null, "", 0);
+		assertFalse(interpreter.invokeTest(context).isPassed());
 	}
 	public void testInvokeTestPassesWithTrueBooleanTestExpression() {
-		TestResult result = interpreter.invokeTest("1+1==2", TestContextImpl.emptyTestContext);
+		TestContextImpl context = new TestContextImpl("1+1==2", "", null, null, new Instance[0], null, "", 0);
+		TestResult result = interpreter.invokeTest(context);
 		assertTrue(result.isPassed());
 	}
 	public void testInvokeTestFailsWithFalseBooleanTestExpression() {
-		TestResult result = interpreter.invokeTest("1+1!=2", TestContextImpl.emptyTestContext);
-		assertFalse(result.isPassed());
+		TestContextImpl context = new TestContextImpl("false", "", null, null, new Instance[0], null, "", 0);
+		TestResult result = interpreter.invokeTest(context);
+		assertFalse(result.getMessage(), result.isPassed());
 	}
 }

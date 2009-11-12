@@ -74,7 +74,6 @@ public abstract class ContractEnforcerHelper implements ContractEnforcer {
 	}
 	
 	public void invokeTest (
-			String      testExpression, 
 			String      testPrefix, 
 			String      extraMessage, 
 			TestContext context) throws ContractError {
@@ -86,10 +85,10 @@ public abstract class ContractEnforcerHelper implements ContractEnforcer {
 			}
 			return;
 		}
-		getReporter().report(Severity.DEBUG, this.getClass(), "Invoking \""+testPrefix+"\" test: \""+testExpression+"\".");
-		TestResult testResult = interpreter.invokeTest(testExpression, context);
+		getReporter().report(Severity.DEBUG, this.getClass(), "Invoking \""+testPrefix+"\" test: \""+context.getActualTestExpression()+"\".");
+		TestResult testResult = interpreter.invokeTest(context);
 		if (testResult.isPassed() == false) {
-			handleFailure(testExpression, testPrefix, extraMessage, context, testResult);
+			handleFailure(context.getActualTestExpression(), testPrefix, extraMessage, context, testResult);
 		}
 	}
 

@@ -47,6 +47,12 @@ public class EnableDisableContractsTest extends TestCase {
 		c4j.setEnabled(Contract4J.TestType.Invar, false);
 		baseTestClass = new BaseTestClass("baseTestClass");
 	}
+	protected void tearDown() throws Exception {
+		super.tearDown();
+		c4j.setEnabled(Contract4J.TestType.Pre, true);
+		c4j.setEnabled(Contract4J.TestType.Post, true);
+		c4j.setEnabled(Contract4J.TestType.Invar, true);		
+	}
 
 	public void testPreMethodOff() {
 		try {

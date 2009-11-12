@@ -31,10 +31,25 @@ import org.contract4j5.instance.Instance;
  */
 public interface TestContext {
 	/**
-	 * @return the raw test expression (i.e., before processing it).
+	 * @return the "raw" test expression, as it appears in the annotation.
 	 */
 	String getTestExpression();
 	void   setTestExpression(String testExpression);
+	
+	/**
+	 * @return the "actual" test expression, either the "raw" expression or the
+	 * default expression for tests of that type. (Defaults to the "raw" expression.)
+	 */
+	String getActualTestExpression();
+	void   setActualTestExpression(String testExpression);
+	
+	/**
+	 * @return the "internal" test expression, which is the "actual" expression
+	 * with substitutions made for implementation purposes. (Defaults to null
+	 * until the context object is processed through its first test run.)
+	 */
+	String getInternalTestExpression();
+	void   setInternalTestExpression(String testExpression);
 	
 	/**
 	 * @return the name of the item being tested, the class, method, or field.

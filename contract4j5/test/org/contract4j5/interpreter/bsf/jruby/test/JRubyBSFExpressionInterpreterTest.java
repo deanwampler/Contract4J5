@@ -25,19 +25,19 @@ public class JRubyBSFExpressionInterpreterTest extends TestCase {
 	
 	public void testJRubyInterpreterCanValidateTestExpressions() throws BSFException {
 		if (!SystemUtils.isJRuby())	return;
-		assertTrue(interpreter.validateTestExpression(testExpression, context).isPassed());
+		assertTrue(interpreter.validateTestExpression(context).isPassed());
 	}
 	
 	public void testJRubyInterpreterCanExecuteTestExpressions() throws BSFException {
 		if (!SystemUtils.isJRuby())	return;
-		assertFalse(interpreter.invokeTest(testExpression, context).isPassed());
+		assertFalse(interpreter.invokeTest(context).isPassed());
 	}
 	
 	public void testJRubyIsReallyInvoked1() {
 		if (!SystemUtils.isJRuby())	return;
 		String expression = "class Foo\ndef to_s\n'hello!'\nend\nend\nFoo.new.to_s.eql?('hello!')\n";
 		context = new TestContextImpl(expression, "foo", new Instance("foo", String.class, "foo"), null, new Instance[0], null, "NoFile", -1);
-		TestResult result = interpreter.invokeTest(expression, context);
+		TestResult result = interpreter.invokeTest(context);
 		assertTrue(result.toString(), result.isPassed());
 		assertEquals("", result.getMessage());
 	}
@@ -46,7 +46,7 @@ public class JRubyBSFExpressionInterpreterTest extends TestCase {
 		if (!SystemUtils.isJRuby())	return;
 		String expression = "global_variables\n";
 		context = new TestContextImpl(expression, "foo", new Instance("foo", String.class, "foo"), null, new Instance[0], null, "NoFile", -1);
-		TestResult result = interpreter.invokeTest(expression, context);
+		TestResult result = interpreter.invokeTest(context);
 		assertFalse(result.toString(), result.isPassed());
 		assertTrue(result.toString(), result.getMessage().contains("Test returned \"org.jruby.RubyArray\""));
 	}

@@ -20,12 +20,12 @@ public class JRubyExpressionInterpreterTest extends TestCase {
 	
 	public void testJRubyInterpreterCanValidateTestExpressions() throws Exception {
 		if (false)
-			assertTrue(interpreter.validateTestExpression("1+1 == 2", context).isPassed());
+			assertTrue(interpreter.validateTestExpression(context).isPassed());
 	}
 	
 	public void testJRubyInterpreterCanExecuteTestExpressions() throws Exception {
 		if (false)
-			assertTrue(interpreter.invokeTest("1+1 == 2", context).isPassed());
+			assertTrue(interpreter.invokeTest(context).isPassed());
 	}
 
 }

@@ -22,8 +22,7 @@ package org.contract4j5.aspects;
 import java.util.Map;
 
 import org.contract4j5.context.TestContext;
-import org.contract4j5.context.TestContextCache;
-import org.contract4j5.contract.RunFlag;
+import org.contract4j5.contract.Disabled;
 import org.contract4j5.contract.Contract;
 import org.contract4j5.contract.Invar;
 import org.contract4j5.contract.Pre;
@@ -33,7 +32,6 @@ import org.contract4j5.enforcer.ContractEnforcer;
 import org.contract4j5.interpreter.ExpressionInterpreter;
 import org.contract4j5.testexpression.ParentTestExpressionFinder;
 import org.contract4j5.testexpression.ParentTestExpressionFinderImpl;
-import org.contract4j5.context.TestContextCache;
 
 /**
  * An abstract aspect that supports Design by Contract tests by advising classes,
@@ -91,46 +89,39 @@ abstract public aspect AbstractConditions {
 	 * call has tests, for example.
 	 * Note that we match only on types annotated with @Contract and their subclasses.
 	 */
-	pointcut commonC4J(Contract contract) : 
-		within (@Contract *+) &&
-		@this(contract) && if (contract.run() != RunFlag.NEVER) &&
+	pointcut commonC4J() : 
+		within (@Contract *+) && ! within (@Disabled *+) &&
 		!cflow(execution (* ContractEnforcer+.*(..))) &&
 		!cflow(execution (ContractEnforcer+.new(..))); 
 	
 	/**
 	 * PCD common for all precondition tests.
 	 */
-	pointcut preCommon(Contract contract, Pre pre) : 
+	pointcut preCommon() : 
 		if (getContract4J().isEnabled(Contract4J.TestType.Pre)) &&
-		@annotation(pre) && if (pre.run() != RunFlag.NEVER) &&
-		commonC4J(contract);
+		commonC4J();
 	
 	/**
 	 * PCD common for all postcondition tests.
 	 */
-	pointcut postCommon(Contract contract, Post post) : 
+	pointcut postCommon() : 
 		if (getContract4J().isEnabled(Contract4J.TestType.Post)) &&
-		@annotation(post) && if (post.run() != RunFlag.NEVER) &&
-		commonC4J(contract);
+		commonC4J();
 	
 	/**
 	 * PCD common for all invariant tests.
 	 */
-	pointcut invarCommon(Contract contract, Invar invar) : 
+	pointcut invarCommon() : 
 		if (getContract4J().isEnabled(Contract4J.TestType.Invar)) &&
-		@annotation(invar) && if (invar.run() != RunFlag.NEVER) &&
-		commonC4J(contract);
+		commonC4J();
 	
 	/**
 	 * Find the "$old(..)" expressions in the test expression, determine the corresponding values
 	 * from the context and return those values in a map.
-	 * @see ExpressionInterpreter#determineOldValues(String, TestContext)
+	 * @see ExpressionInterpreter#determineOldValues(TestContext)
 	 */
-	public Map<String, Object> determineOldValues (String testExpression, TestContext context) {
+	public Map<String, Object> determineOldValues (TestContext context) {
 		ContractEnforcer ce = getContractEnforcer();
-		return ce.getExpressionInterpreter().determineOldValues(testExpression, context);
+		return ce.getExpressionInterpreter().determineOldValues(context);
 	}
-
-	TestContextCache contextCache = new TestContextCache();
-	
 }

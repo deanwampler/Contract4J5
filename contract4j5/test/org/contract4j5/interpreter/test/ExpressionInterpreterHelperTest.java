@@ -88,8 +88,7 @@ public class ExpressionInterpreterHelperTest extends TestCase {
 		doTestValidateTestExpression (true,  " old ",    ExpressionInterpreter.InvalidTestExpression.MISSING_DOLLAR_SIGN_IN_KEYWORD);
 	}
 	private void doTestValidateTestExpression (boolean shouldPass, String expr, ExpressionInterpreter.InvalidTestExpression expected) {
-		TestResult result = interpreter.validateTestExpression(expr, 
-				new TestContextImpl("", "", null, null, new Instance[0], null, "", 0));
+		TestResult result = interpreter.validateTestExpression(new TestContextImpl(expr, "", null, null, new Instance[0], null, "", 0));
 		String msg = result.getMessage();
 		assertEquals (shouldPass, result.isPassed());
 		assertTrue   (msg, msg.contains(expected.toString()));
@@ -103,29 +102,28 @@ public class ExpressionInterpreterHelperTest extends TestCase {
 		// "old_this", determineOldValues() won't use it, because in fact it is 
 		// called to create it in the first place, in normal usage. Instead,
 		// the "my_this" instance and "my_target" target will be used.
-		TestContext context = makeContext();
-		String expr = "$this $old($this) $target $old($target) $return, $args[0], $args[1]";
-		Map<String, Object> map = interpreter.determineOldValues(expr, context);
+		TestContext context = makeContext("$this $old($this) $target $old($target) $return, $args[0], $args[1]");
+		Map<String, Object> map = interpreter.determineOldValues(context);
 		assertEquals  (map.toString(), 2, map.size());
 		assertNotNull (map.toString(), map.get("$this"));
 		assertEquals  (map.toString(), "my_this", map.get("$this"));  
 		assertNotNull (map.toString(), map.get("$target"));
 		assertEquals  (map.toString(), "my_target", map.get("$target"));
 
-		expr = "$this $old($this) $target $return, $args[0], $args[1]";
-		map = interpreter.determineOldValues(expr, context);
+		context = makeContext("$this $old($this) $target $return, $args[0], $args[1]");
+		map = interpreter.determineOldValues(context);
 		assertEquals  (map.toString(), 1, map.size());
 		assertNotNull (map.toString(), map.get("$this"));
 		assertEquals  (map.toString(), "my_this", map.get("$this"));
 
-		expr = "$this $target $old($target) $return, $args[0], $args[1]";
-		map = interpreter.determineOldValues(expr, context);
+		context = makeContext("$this $target $old($target) $return, $args[0], $args[1]");
+		map = interpreter.determineOldValues(context);
 		assertEquals  (map.toString(), 1, map.size());
 		assertNotNull (map.toString(), map.get("$target"));
 		assertEquals  (map.toString(), "my_target", map.get("$target"));
 
-		expr = "$this $target $return, $args[0], $args[1]";
-		map = interpreter.determineOldValues(expr, context);
+		context = makeContext("$this $target $return, $args[0], $args[1]");
+		map = interpreter.determineOldValues(context);
 		assertEquals  (map.toString(), 0, map.size());
 	}
 		
@@ -133,17 +131,17 @@ public class ExpressionInterpreterHelperTest extends TestCase {
 	 * Test method for 'org.contract4j5.interpreter.ExpressionInterpreterHelper.expandKeywords(String, String, Object, Object[], Object)'
 	 */
 	public void testExpandKeywords() {
-		doTestExpandKeywords ("No test expression!", null,        false, makeContext());
-		doTestExpandKeywords ("No test expression!", "",          false, makeContext());
-		doTestExpandKeywords ("c4jThis",      "$this",            true,  makeContext());
-		doTestExpandKeywords ("c4jExprVar1",  "$old ($this)",     true,  makeContext());
-		doTestExpandKeywords ("c4jTarget",    "$target",          true,  makeContext());
-		doTestExpandKeywords ("c4jExprVar2",  "$old ($target)",   true,  makeContext());
-		doTestExpandKeywords ("c4jReturn",    "$return",          true,  makeContext());
-		doTestExpandKeywords ("c4jArgs[0]",   "$args[0]",         true,  makeContext());
-		doTestExpandKeywords ("c4jArgs[1]",   "$args[1]",         true,  makeContext());
-		doTestExpandKeywords ("c4jExprVar1.compareTo(c4jExprVar2) < 0", "$old($this).compareTo($old($target)) < 0", true, makeContext());
-		doTestExpandKeywords ("c4jThis.itemName", "itemName",     true,  makeContext());
+		doTestExpandKeywords (makeContext(null),             false, "No test expression!");
+		doTestExpandKeywords (makeContext(""),               false, "No test expression!");
+		doTestExpandKeywords (makeContext("$this"),          true,  "c4jThis");
+		doTestExpandKeywords (makeContext("$old ($this)"),   true,  "c4jExprVar2");
+		doTestExpandKeywords (makeContext("$target"),        true,  "c4jTarget");
+		doTestExpandKeywords (makeContext("$old ($target)"), true,  "c4jExprVar1");
+		doTestExpandKeywords (makeContext("$return"),        true,  "c4jReturn");
+		doTestExpandKeywords (makeContext("$args[0]"),       true,  "c4jArgs[0]");
+		doTestExpandKeywords (makeContext("$args[1]"),       true,  "c4jArgs[1]");
+		doTestExpandKeywords (makeContext("$old($this).compareTo($old($target)) < 0"), true, "c4jExprVar2.compareTo(c4jExprVar1) < 0");
+		doTestExpandKeywords (makeContext("itemName"),       true,  "c4jThis.itemName");
 	}
 	
 	public void testSubstituteInTestExpression() {
@@ -171,13 +169,13 @@ public class ExpressionInterpreterHelperTest extends TestCase {
 		assertEquals("gh\\\"i", ss[3]);
 	}
 	public void testExpandKeywordsDoesNotExpandContentsOfQuotedStrings() {
-		doTestExpandKeywords ("c4jThis.equals(\"$old($this)\")",  "$this.equals(\"$old($this)\")", true,  makeContext());
-		doTestExpandKeywords ("c4jThis.equals(\"$this\")",        "$this.equals(\"$this\")", true,  makeContext());
-		doTestExpandKeywords ("\"$this\" c4jArgs[0] \"$target\"", "\"$this\" $args[0] \"$target\"", true,  makeContext());
+		doTestExpandKeywords (makeContext("$this.equals(\"$old($this)\")"),  true,  "c4jThis.equals(\"$old($this)\")");
+		doTestExpandKeywords (makeContext("$this.equals(\"$this\")"),        true,  "c4jThis.equals(\"$this\")");
+		doTestExpandKeywords (makeContext("\"$this\" $args[0] \"$target\""), true,  "\"$this\" c4jArgs[0] \"$target\"");
 	}
 
 
-	private TestContext makeContext() {
+	private TestContext makeContext(String testExpr) {
 		Instance[] args = new Instance[] {
 				new Instance ("my_arg1", String.class, new String("my_arg1")), 
 				new Instance ("my_arg2", String.class, new String("my_arg2"))
@@ -191,13 +189,13 @@ public class ExpressionInterpreterHelperTest extends TestCase {
 		oldValuesMap.put ("$this",   oldInstance);
 		oldValuesMap.put ("$target", oldTarget);
 		TestContext context = 
-			new TestContextImpl("itemName", "itemName", thiz, target, args, returnz, oldValuesMap, "", 0);
+			new TestContextImpl(testExpr, "itemName", thiz, target, args, returnz, oldValuesMap, "", 0);
 		return context;
 	}
 	
-	private void doTestExpandKeywords (String expected, String key, boolean shouldPass, TestContext context) {
-		assertEquals (shouldPass, interpreter.expandKeywords(key, context).isPassed());
-		String msg = interpreter.expandKeywords(key, context).getMessage();
+	private void doTestExpandKeywords (TestContext context, boolean shouldPass, String expected) {
+		assertEquals (shouldPass, interpreter.expandKeywords(context).isPassed());
+		String msg = interpreter.expandKeywords(context).getMessage();
 		assertEquals ("Actual: \""+msg+"\". ", expected,   msg);
 	}
 
@@ -217,9 +215,9 @@ public class ExpressionInterpreterHelperTest extends TestCase {
 	}
 	
 	protected void doTestSubstituteArguments(String original, String expected) {
-		TestContext context = makeContext();
+		TestContext context = makeContext(original);
 		if (expected == null) { expected = original; }
-		String actual = interpreter.substituteArguments(original, context);
+		String actual = interpreter.substituteMethodArguments(original, context);
 		assertEquals (actual, expected, actual);
 	}
 
@@ -228,12 +226,12 @@ public class ExpressionInterpreterHelperTest extends TestCase {
 	 */
 	public void testInvokeTest() {
 		TestContext fooContext = new TestContextImpl("foo", "", null, null, new Instance[0], null, "", 0);
-		TestResult result = interpreter.invokeTest(null, fooContext);
+		TestResult result = interpreter.invokeTest(fooContext);
 		assertFalse (result.getMessage(), result.isPassed());
 		TestContext nullContext = new TestContextImpl(null, "", null, null, new Instance[0], null, "", 0);
-		result = interpreter.invokeTest("foo", nullContext);
+		result = interpreter.invokeTest(nullContext);
 		assertFalse (result.getMessage(), result.isPassed());
-		result = interpreter.invokeTest("foo", fooContext);
+		result = interpreter.invokeTest(fooContext);
 		assertFalse  (result.getMessage(), result.isPassed());
 	}
 	

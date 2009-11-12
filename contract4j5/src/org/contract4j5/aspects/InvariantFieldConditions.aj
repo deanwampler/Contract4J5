@@ -31,10 +31,10 @@ import org.contract4j5.testexpression.ParentTestExpressionFinder;
 import org.contract4j5.context.TestContext;
 import org.contract4j5.context.TestContextImpl;
 import org.contract4j5.context.TestContextCache;
-import org.contract4j5.contract.Contract;
+import org.contract4j5.contract.Disabled;
 import org.contract4j5.contract.Invar;
+import org.contract4j5.controller.SystemCaches;
 import org.contract4j5.instance.Instance;
-import org.contract4j5.instance.InstanceUtils;
 
 /** 
  * Test for field invariants in non-constructor contexts.  
@@ -71,39 +71,30 @@ public aspect InvariantFieldConditions extends AbstractConditions {
 	 * withincode(), because the constructor may call other methods.
 	 * @note We prevent recursion into the aspect itself.
 	 */
-	pointcut invarFieldCommon (Contract contract, Invar invar, Object obj) :
-		invarCommon(contract, invar) && ! cflowbelow (execution (*.new(..))) &&
-		!within (InvariantFieldConditions) &&
-		target (obj);
+	pointcut invarFieldCommon (Invar invar, Object obj) :
+		invarCommon() && ! cflowbelow (execution (*.new(..))) &&
+		! within (InvariantFieldConditions) &&
+		target (obj) && @annotation(invar);
 	
-	pointcut invarSetField (Contract contract, Invar invar, Object obj, Object arg) :
-		invarFieldCommon (contract, invar, obj) && set (@Invar * *.*) && args(arg); 
+	pointcut invarSetField (Invar invar, Object obj, Object arg) :
+		invarFieldCommon (invar, obj) && args(arg) &&
+		set (@Invar * *.*) && ! set (@Disabled * *.*); 
 
-	pointcut invarGetField (Contract contract, Invar invar, Object obj) :
-		invarFieldCommon (contract, invar, obj) && get (@Invar * *.*); 
+	pointcut invarGetField (Invar invar, Object obj) :
+		invarFieldCommon (invar, obj) && 
+		get (@Invar * *.*) && ! get (@Disabled * *.*); 
 
-	void around (Contract contract, Invar invar, Object obj, Object arg) : 
-		invarSetField (contract, invar, obj, arg) {
+	void around (Invar invar, Object obj, Object arg) : 
+		invarSetField (invar, obj, arg) {
 		// Set up the context so we can retrieve any "old" values, before proceeding.
-		Bucket bucket = doBeforeTest (thisJoinPoint, 
+		TestContext context = doBeforeTest (thisJoinPoint, 
 					obj, arg, "Invar", invar.value(), invar.message(),
 					getDefaultFieldInvarTestExpressionMaker());
-		TestContext context = bucket.context;
-		String testExpr = bucket.testExpr;
-		context.setOldValuesMap (determineOldValues (testExpr, context));
-		proceed (contract, invar, obj, arg);
-		getContractEnforcer().invokeTest(testExpr, "Invar", invar.message(), context);
+		context.setOldValuesMap (determineOldValues (context));
+		proceed (invar, obj, arg);
+		getContractEnforcer().invokeTest("Invar", invar.message(), context);
 	}
 
-	static protected class Bucket {
-		public String testExpr;
-		public TestContext context;
-		public Bucket(String expr, TestContext context) {
-			this.testExpr = expr;
-			this.context = context;
-		}
-	}
-	
 	/** 
 	 * Advice for field "gets". 
 	 * @note When we set up the context to retrieve "old" values, if any,
@@ -112,22 +103,20 @@ public aspect InvariantFieldConditions extends AbstractConditions {
 	 * make much sense to write a test expression with "old" and new values
 	 * for this field, at least.
 	 */
-	Object around (Contract contract, Invar invar, Object obj) : 
-		invarGetField (contract, invar, obj) {
-		Bucket bucket = doBeforeTest (thisJoinPoint, 
+	Object around (Invar invar, Object obj) : 
+		invarGetField (invar, obj) {
+		TestContext context = doBeforeTest (thisJoinPoint, 
 					obj, null, "Invar", invar.value(), invar.message(),
 					getDefaultFieldInvarTestExpressionMaker());
-		TestContext context = bucket.context;
-		String testExpr = bucket.testExpr;
-		Object fieldValue2 = proceed (contract, invar, obj);
+		Object fieldValue2 = proceed (invar, obj);
 		// Actually use the "new" value of the field for the test.
 		context.getField().setValue (fieldValue2);  // The field is the target...
 		context.setMethodResult (context.getField());  // ... and the return value!
-		getContractEnforcer().invokeTest(testExpr, "Invar", invar.message(), context);
+		getContractEnforcer().invokeTest("Invar", invar.message(), context);
 		return fieldValue2;
 	}
 
-	protected Bucket doBeforeTest (
+	protected TestContext doBeforeTest (
 			JoinPoint   thisJoinPoint, 
 			Object      obj,
 			Object      fieldValue,
@@ -136,15 +125,13 @@ public aspect InvariantFieldConditions extends AbstractConditions {
 			String      testMessage,
 			DefaultTestExpressionMaker maker) {
 		TestContext context   = null;
-		String testExpr       = "";
 		SourceLocation loc    = thisJoinPoint.getSourceLocation();
 		String fileName = loc.getFileName();
 		int    lineNum  = loc.getLine();
 		TestContextCache.Key key = new TestContextCache.Key("Invar", fileName, lineNum);
-		TestContextCache.Entry entry = contextCache.get(key);
-		if (context != null) {
+		TestContextCache.Entry entry = SystemCaches.testContextCache.get(key);
+		if (entry != null) {
 			context = entry.testContext;
-			testExpr = entry.testExpression;
 			Instance fieldInstance = new Instance(entry.fieldName, entry.fieldType, fieldValue);
 			context.setField(fieldInstance);
 		} else {
@@ -161,10 +148,11 @@ public aspect InvariantFieldConditions extends AbstractConditions {
 			Instance fieldInstance = new Instance(fieldName, fieldClass, fieldValue);
 			context = new TestContextImpl(annoTestExpr, fieldName,
 					instance, fieldInstance, null, null, fileName, lineNum);
-			testExpr = getDefaultFieldInvarTestExpressionMaker().makeDefaultTestExpressionIfEmpty(context.getTestExpression(), context);
-			contextCache.put(key, new TestContextCache.Entry(context, testExpr, null, null, fieldName, fieldClass));
+			String testExpr = getDefaultFieldInvarTestExpressionMaker().makeDefaultTestExpressionIfEmpty(context.getTestExpression(), context);
+			context.setActualTestExpression(testExpr);
+			SystemCaches.testContextCache.put(key, new TestContextCache.Entry(context, null, null, fieldName, fieldClass));
 		}
-		context.setOldValuesMap (determineOldValues (testExpr, context));
-		return new Bucket(testExpr, context);
+		context.setOldValuesMap (determineOldValues (context));
+		return context;
 	}
 }

@@ -35,8 +35,6 @@ public interface ContractEnforcer {
 	/**
 	 * Perform the test, given the test express and throw an exception if it
 	 * fails. Also perform any appropriate reporting, etc.
-	 * @param testExpression that implements the test, which must be valid, based
-	 * on the constraints of the {@link ExpressionInterpreter}. 
 	 * @param testPrefix for the corresponding test, <i>e.g.,</i> "pre"
 	 * @param extraMessage optional message printed with an error report
 	 * @param context containing context information about the method, etc.
@@ -44,9 +42,8 @@ public interface ContractEnforcer {
 	 * in error, then it throws the {@link TestSpecificationError} subclass.
 	 */
 	void invokeTest (
-			String      testExpression, 
 			String      testPrefix, 
-			String      extraMessage,
+			String      extraMessage, 
 			TestContext context) throws ContractError;
 	
 	/**

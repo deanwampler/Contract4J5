@@ -22,6 +22,8 @@ package org.contract4j5.interpreter;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -69,15 +71,13 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 	/* (non-Javadoc)
 	 * @see org.contract4j5.interpreter.ExpressionInterpreter#captureOldValues(java.lang.String, org.contract4j5.TestContext)
 	 */
-	public Map<String, Object> determineOldValues(
-		String      testExpression, 
-		TestContext context) {
+	public Map<String, Object> determineOldValues(TestContext context) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		// Find "$old()", "$old($this)", "$old($this.foo)", "$old($this.doFoo(bar,baz))", etc.
 		// See Javadocs for parent class declaration.
 		// Also handle quoted strings: remove them!
 		String regex = "\\$old\\s*\\([^\\(\\)]*(\\([^\\)]*\\))?[^\\(\\)]*\\)";
-		String expr2 = removeQuotedStrings(testExpression);
+		String expr2 = removeQuotedStrings(context.getActualTestExpression());
 		Pattern p = Pattern.compile(regex); 
 		Matcher m = p.matcher(expr2);
 		while (m.find()) {
@@ -130,28 +130,28 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 	/** 
 	 * Template method that provides some services, then calls abstract methods to complete
 	 * test string parsing and test invocation.
-	 * @see org.contract4j5.interpreter.ExpressionInterpreter#invokeTest(java.lang.String, org.contract4j5.context.TestContext)
+	 * @see org.contract4j5.interpreter.ExpressionInterpreter#invokeTest(org.contract4j5.context.TestContext)
 	 */
-	public TestResult invokeTest(
-			String      testExpression, 
-			TestContext context) {
-		TestResult testResult = validateTestExpression (testExpression, context);
+	public TestResult invokeTest(TestContext context) {
+		TestResult testResult = validateTestExpression (context);
 		if (testResult.getMessage().length() > 0) { 
 			// Log with INFO level, rather than WARN, because they may not be real issues.
 			getReporter().report(Severity.INFO, ExpressionInterpreterHelper.class,
 					testResult.getMessage());
 		}
-		if (testResult.isPassed() == false || empty (testExpression)) {
+		if (testResult.isPassed() == false || empty (context.getActualTestExpression())) {
 			return testResult;
 		} 
-		testResult = expandKeywords (testExpression, context);
+		
+		testResult = expandKeywords (context);
 		if (testResult.isPassed() == false) {
 			return testResult;
 		}
+		saveDynamicContextData(context);
 		
-		String expr = testResult.getMessage();
+		String expr = context.getInternalTestExpression();
 		getReporter().report(Severity.DEBUG, ExpressionInterpreterHelper.class,
-				"Invoking test (expanded): "+expr);
+				"Invoking test (expanded): " + expr);
 		testResult = doTest(expr, context);
 		cleanupContext();
 		return testResult;
@@ -160,20 +160,16 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 	/* (non-Javadoc)
 	 * @see org.contract4j5.interpreter.ExpressionInterpreter#validateTestExpression(java.lang.String, org.contract4j5.TestContext)
 	 */
-	public TestResult validateTestExpression (
-			String      testExpression, 
-			TestContext context) {
+	public TestResult validateTestExpression (TestContext context) {
 		String errStr = "";
 		String warnStr = "";
-		if (empty(testExpression)) {
+		if (context.getInternalTestExpression() != null)
+			return new TestResult(true, ""); // we've already been here for this test.
+
+		String expression = context.getActualTestExpression();
+		if (empty(expression)) {
 			return handleEmptyTestExpression();
 		} 
-		String expression = testExpression.trim();
-		// Cache the test expressions with their contexts, so we only validate
-		// an expression once.
-		TestResult cachedResult = getTestCacheEntry(expression, context);
-		if (cachedResult != null)
-			return cachedResult;
 		errStr = checkDollarThis(context, expression, errStr);
 		errStr = checkDollarTarget(context, expression, errStr);
 		errStr = checkFieldName(context, expression, errStr);
@@ -184,9 +180,7 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 		errStr = checkForUnrecognizedKeywords(expression, errStr);
 		warnStr = checkForMissingDollarSignsInPossibleKeywords(expression,
 				warnStr);
-		TestResult testResult = makeValidateTestExpressionReturn (warnStr, errStr);
-		putTestCacheEntry(expression, context, testResult);
-		return testResult;
+		return makeValidateTestExpressionReturn (warnStr, errStr);
 	}
 
 	private String checkForMissingDollarSignsInPossibleKeywords(
@@ -330,82 +324,83 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 		return makeValidateTestExpressionReturn (warnStr, errStr);
 	}
 	
+	// TODO DELETE
 	// For purposes of validation, we only need to save the test expression,
 	// file name, and line number. They form a sufficiently unique combination
 	// and take up less space than saving the full context.
-	private static class TestCacheEntry {
-		public String testExpression;
-		public String fileName;
-		public int    lineNumber;
-		
-		public TestCacheEntry(String testExpression, TestContext context) {
-			this.testExpression = testExpression;
-			this.fileName = context.getFileName();
-			this.lineNumber = context.getLineNumber();
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result
-					+ ((fileName == null) ? 0 : fileName.hashCode());
-			result = prime * result + lineNumber;
-			result = prime
-					* result
-					+ ((testExpression == null) ? 0 : testExpression.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			final TestCacheEntry other = (TestCacheEntry) obj;
-			if (fileName == null) {
-				if (other.fileName != null)
-					return false;
-			} else if (!fileName.equals(other.fileName))
-				return false;
-			if (lineNumber != other.lineNumber)
-				return false;
-			if (testExpression == null) {
-				if (other.testExpression != null)
-					return false;
-			} else if (!testExpression.equals(other.testExpression))
-				return false;
-			return true;
-		}
-
-	}
-	
-	private boolean cacheTestExpressionValidations = true;
-	public void setCacheTestExpressionValidations(boolean b) { cacheTestExpressionValidations = b; }
-	
-	private TestResult getTestCacheEntry(String testExpression, TestContext context) {
-		TestResult result = getTestCache().get(new TestCacheEntry(testExpression, context));
-		return result;
-	}
-
-	private void putTestCacheEntry(String testExpression, TestContext context, TestResult testResult) {
-		if (cacheTestExpressionValidations == false)
-			return;
-		getTestCache().put(new TestCacheEntry(testExpression, context), testResult);
-	}
-
-	private HashMap<TestCacheEntry, TestResult> testCache;
-
-	private Map<TestCacheEntry, TestResult> getTestCache() {
-		// Keep it from growing too big, with an arbitrary cutoff.
-		// Better would be an LRU cache.
-		if (testCache == null || testCache.size() > 10000)  
-			testCache = new HashMap<TestCacheEntry, TestResult>();
-		return testCache;
-	}
+//	private static class TestCacheEntry {
+//		public String testExpression;
+//		public String fileName;
+//		public int    lineNumber;
+//		
+//		public TestCacheEntry(String testExpression, TestContext context) {
+//			this.testExpression = testExpression;
+//			this.fileName = context.getFileName();
+//			this.lineNumber = context.getLineNumber();
+//		}
+//
+//		@Override
+//		public int hashCode() {
+//			final int prime = 31;
+//			int result = 1;
+//			result = prime * result
+//					+ ((fileName == null) ? 0 : fileName.hashCode());
+//			result = prime * result + lineNumber;
+//			result = prime
+//					* result
+//					+ ((testExpression == null) ? 0 : testExpression.hashCode());
+//			return result;
+//		}
+//
+//		@Override
+//		public boolean equals(Object obj) {
+//			if (this == obj)
+//				return true;
+//			if (obj == null)
+//				return false;
+//			if (getClass() != obj.getClass())
+//				return false;
+//			final TestCacheEntry other = (TestCacheEntry) obj;
+//			if (fileName == null) {
+//				if (other.fileName != null)
+//					return false;
+//			} else if (!fileName.equals(other.fileName))
+//				return false;
+//			if (lineNumber != other.lineNumber)
+//				return false;
+//			if (testExpression == null) {
+//				if (other.testExpression != null)
+//					return false;
+//			} else if (!testExpression.equals(other.testExpression))
+//				return false;
+//			return true;
+//		}
+//
+//	}
+//	
+//	private boolean cacheTestExpressionValidations = false;
+//	public void setCacheTestExpressionValidations(boolean b) { cacheTestExpressionValidations = b; }
+//	
+//	private TestResult getTestCacheEntry(String testExpression, TestContext context) {
+//		TestResult result = getTestCache().get(new TestCacheEntry(testExpression, context));
+//		return result;
+//	}
+//
+//	private void putTestCacheEntry(String testExpression, TestContext context, TestResult testResult) {
+//		if (cacheTestExpressionValidations == false)
+//			return;
+//		getTestCache().put(new TestCacheEntry(testExpression, context), testResult);
+//	}
+//
+//	private HashMap<TestCacheEntry, TestResult> testCache;
+//
+//	private Map<TestCacheEntry, TestResult> getTestCache() {
+//		// Keep it from growing too big, with an arbitrary cutoff.
+//		// Better would be an LRU cache.
+//		if (testCache == null || testCache.size() > 10000)  
+//			testCache = new HashMap<TestCacheEntry, TestResult>();
+//		return testCache;
+//	}
 
 	private TestResult makeValidateTestExpressionReturn (String warnStr, String errStr) {
 		boolean pass = (errStr.length() == 0) ? true : false;
@@ -429,7 +424,6 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 	 * Expands all keywords, using the user-supplied optional mappings, if defined, followed
 	 * by the substitution of the "dollar" keywords. Does <em>not</em> expand keywords within
 	 * quoted strings.
-	 * @param expression
 	 * @param context
 	 * @return TestResult with {@link TestResult#isPassed()} equals true and the new test 
 	 * expression returned by {@link TestResult#getMessage()} or, if an error occurred, 
@@ -438,31 +432,34 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 	 * substitutions, because they are just string substitutions without corresponding
 	 * objects.
 	 */
-	public TestResult expandKeywords (
-			String      testExpression, 
-			TestContext context) {
-		if (empty(testExpression)) {
+	public TestResult expandKeywords (TestContext context) {
+		if (empty(context.getActualTestExpression())) {
 			return new TestResult (false, "No test expression!");
 		}
-		String expression = testExpression.trim();
-		Map<String, String> keyWordSubs = getOptionalKeywordSubstitutions();
-		if (keyWordSubs == null || keyWordSubs.size() == 0)
-			return expandDollarKeywords(expression, context);
+		String internalExpression = context.getInternalTestExpression();
+		if (internalExpression == null) {
+			internalExpression = context.getActualTestExpression();
+			internalExpression = substituteOptionalKeywords(internalExpression);
+			internalExpression = expandStaticDollarKeywords(internalExpression, context);
+			context.setInternalTestExpression(internalExpression);
+		}
+		return new TestResult(true, internalExpression);
+	}
 
-		String newExpression = expression;
+	protected String substituteOptionalKeywords(String internalExpression) {
+		Map<String, String> keyWordSubs = getOptionalKeywordSubstitutions();
 		for (Map.Entry<String,String> entry: keyWordSubs.entrySet()) 
-			newExpression = substituteInTestExpression(newExpression, entry.getKey(), entry.getValue());
-		
-		return expandDollarKeywords(newExpression, context);
+			internalExpression = substituteInTestExpression(internalExpression, entry.getKey(), entry.getValue());
+		return internalExpression;
 	}
 
 	/**
-	 * After making the user-specified substitutions, substitute the <code>$this</code>,
+	 * Substitute the <code>$this</code>,
 	 * <code>$target</code>, <code>$args[n]</code>, <code>$return</code>, and 
 	 * <code>$old(..)</code> (with ".." equal to <code>$this...</code> or <code>$target...</code>)
 	 * with final expressions appropriate for most interpreters. Note that any other <code>$...</code>
 	 * words would be errors (e.g., mispellings), but they should have already been caught by
-	 * {@link #validateTestExpression(String, TestContext)}, so this method doesn't need to
+	 * {@link #validateTestExpression(TestContext)}, so this method doesn't need to
 	 * worry about them! Note that no substitutions are made within quoted strings.
 	 * <br/>On the assumption that some interpreters may not be able to handle <code>$foo</code>
 	 * keywords, we make the following substitutions:
@@ -486,10 +483,9 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 	 * </tr>
 	 * <tr>
 	 *   <td><code>$old(..)</code></td>
-	 *   <td><code>c4jExprVar</code>N, where "N" is an arbitrary number. A corresponding value
-	 *   must exist in the {@link TestContext#getOldValuesMap()}. If there is no corresponding
-	 *   value, <code>c4jThis...</code> or </code>c4jTarget...</code> is used, but this will
-	 *   be inaccurate, as these values reflect current, not past state!</td>
+	 *   <td><code>c4jExprVar</code>N, where "N" is an an ordered number that will be mapped
+	 *   keys in the old values map in the context object. (See also the note for 
+	 *   saveDynamicContextData().)</td>
 	 * </tr>
 	 * <tr>
 	 *   <td><i>itemName</i></td>
@@ -498,71 +494,121 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 	 *   preceeded by <code>c4jThis.</code>, to avoid potential scoping issues.</td>
 	 * </tr>
 	 * </table>
-	 * @param expression
 	 * @param context
-	 * @return TestResult with {@link TestResult#isPassed()} equals true and the new test 
-	 * expression returned by {@link TestResult#getMessage()} or, if an error occurred, 
-	 * an error message will be there and {@link TestResult#isPassed()} will return false.
+	 */
+	protected String expandStaticDollarKeywords(String internalTestExpression, TestContext context) {
+		internalTestExpression = substituteOldValueKeywords(internalTestExpression, context);
+		internalTestExpression = substituteUnhandledOldKeywords(internalTestExpression);
+		internalTestExpression = substituteKnownKeywords(internalTestExpression, context);
+		internalTestExpression = prependBareItemNamesWithObjectQualifier(internalTestExpression, context);
+        return internalTestExpression;
+	}
+
+	protected String substituteOldValueKeywords(String internalTestExpression,
+			TestContext context) {
+		Map<String, Object> ovmap = context.getOldValuesMap();
+		if (ovmap != null) {
+			int magicSymbolCounter = 1;
+			// use a sorted set of keys so the generated var names are consistent
+			// with those used in saveDynamicContextData().
+			SortedSet<String> keys = new TreeSet<String>(ovmap.keySet());
+			for (String key: keys) {
+				// Escape regex characters in key:
+				String key2 = Pattern.quote (key);
+				String magicSymbol = Matcher.quoteReplacement("c4jExprVar"+magicSymbolCounter);
+				magicSymbolCounter++;
+				internalTestExpression = 
+					substituteInTestExpression(internalTestExpression, "\\$old\\s*\\(\\s*"+key2+"\\s*\\)", magicSymbol);
+			}
+		}
+		return internalTestExpression;
+	}
+
+	/**
+	 *  There *should* be no $old(..) expressions remaining!!
+	 */
+	protected String substituteUnhandledOldKeywords(
+			String internalTestExpression) {
+		if (containsKeyword(internalTestExpression, "old")) {
+			getReporter().report(Severity.WARN, ExpressionInterpreterHelper.class, 
+					"One or more \"$old(..)\" strings remain in test expression \"" +
+					internalTestExpression +
+					"\" after previous substitutions of known values." +
+					" Test results may be inaccurate!");
+			internalTestExpression = substituteInTestExpression(internalTestExpression, "\\$old\\s*\\(\\s*\\$this([^\\(\\)]*(\\([^\\)]*\\))?[^\\(\\)]*)\\)",   "c4jThis$1");
+			internalTestExpression = substituteInTestExpression(internalTestExpression, "\\$old\\s*\\(\\s*\\$target([^\\(\\)]*(\\([^\\)]*\\))?[^\\(\\)]*)\\)", "c4jTarget$1");
+			// If $old(..) and ".." doesn't start with $target or $this, then assume "$this." prefix.
+			internalTestExpression = substituteInTestExpression(internalTestExpression, "\\$old\\s*\\(\\s*([^\\(\\)]*(\\([^\\)]*\\))?[^\\(\\)]*)\\)", "c4jThis.$1");
+		}
+		return internalTestExpression;
+	}
+
+	protected String substituteKnownKeywords(String internalTestExpression,
+			TestContext context) {
+		internalTestExpression = substituteInTestExpression(internalTestExpression, "\\$this",   "c4jThis");
+		internalTestExpression = substituteInTestExpression(internalTestExpression, "\\$target", "c4jTarget");
+		internalTestExpression = substituteInTestExpression(internalTestExpression, "\\$return", "c4jReturn");
+		internalTestExpression = substituteInTestExpression(internalTestExpression, "\\$args",   "c4jArgs"  );
+		internalTestExpression = substituteMethodArguments (internalTestExpression, context);
+		return internalTestExpression;
+	}
+
+	/**
+	 *  Look for "bare" items, matching "itemName", but without $this or $target; prepend $this.
+	 */
+	protected String prependBareItemNamesWithObjectQualifier(
+			String internalTestExpression, TestContext context) {
+		String itemName = context.getItemName();
+	    if (itemName != null && itemName.length() != 0) {
+	        internalTestExpression = substituteInTestExpression(internalTestExpression, "(?<!(c4jThis|c4jTarget)\\.)\\b"+itemName+"\\b", "c4jThis."+itemName);
+	    }
+		return internalTestExpression;
+	}
+
+	/**
+	 * Save the dynamic (runtime) data referenced in the final "internal" test expression, 
+	 * including the "$old(...)" values.
 	 * @note For every <code>$old(..)</code> expressions, there should be a corresponding 
 	 * mapping in {@link TestContext#getOldValuesMap()}. If not, a warning is issued
 	 * and an attempted substitution is made, but any expression evaluations will reflect the
 	 * current state, not the "old" state, thereby invalidating the test!
 	 */
-	protected TestResult expandDollarKeywords(
-			String      testExpression, 
-			TestContext context) {
+	protected String saveDynamicContextData(TestContext context) {
 		Map<String, Object> ovmap = context.getOldValuesMap();
-		int magicSymbolCounter = 1;
-		String expression = testExpression;
 		if (ovmap != null) {
-			for (Map.Entry<String, Object> entry: ovmap.entrySet()) {
-				Object obj = entry.getValue();
-				String key = Pattern.quote (entry.getKey());  // escape regex characters!!
-				String magicSymbol = Matcher.quoteReplacement("c4jExprVar"+magicSymbolCounter);
-				magicSymbolCounter++;
-				expression = 
-					substituteInTestExpression(expression, "\\$old\\s*\\(\\s*"+key+"\\s*\\)", magicSymbol);
-				recordContextChange (magicSymbol, obj, false);
+			int magicSymbolCounter = 1;
+			// use a sorted set of keys so the generated var names are consistent
+			// with those used in expandStaticDollarKeywords().
+			SortedSet<String> keys = new TreeSet<String>(ovmap.keySet());
+			for (String key: keys) {
+				Object obj = ovmap.get(key);
+				String contextKey = "c4jExprVar" + (magicSymbolCounter++);
+				recordContextChange (contextKey, obj, false);
 			}
 		}
-		
-		// There *should* be no $old(..) expressions remaining!!
-		if (containsKeyword(expression, "old")) {
-			getReporter().report(Severity.WARN, ExpressionInterpreterHelper.class, 
-					"One or more \"$old(..)\" strings remain in test expression \"" +
-					expression +
-					"\" after previous substitutions of known values." +
-					" Test results may be inaccurate!");
-			expression = substituteInTestExpression(expression, "\\$old\\s*\\(\\s*\\$this([^\\(\\)]*(\\([^\\)]*\\))?[^\\(\\)]*)\\)",   "c4jThis$1");
-			expression = substituteInTestExpression(expression, "\\$old\\s*\\(\\s*\\$target([^\\(\\)]*(\\([^\\)]*\\))?[^\\(\\)]*)\\)", "c4jTarget$1");
-			// If $old(..) and ".." doesn't start with $target or $this, then assume "$this." prefix.
-			expression = substituteInTestExpression(expression, "\\$old\\s*\\(\\s*([^\\(\\)]*(\\([^\\)]*\\))?[^\\(\\)]*)\\)", "c4jThis.$1");
+
+		String expression = context.getInternalTestExpression();
+		if (expression.contains("c4jThis")) { 
+			Instance i = context.getInstance();
+			recordContextChange ("c4jThis",   i != null ? i.getValue() : null, false);
 		}
-		expression = substituteInTestExpression(expression, "\\$this",   "c4jThis");
-		expression = substituteInTestExpression(expression, "\\$target", "c4jTarget");
-		expression = substituteInTestExpression(expression, "\\$return", "c4jReturn");
-		expression = substituteInTestExpression(expression, "\\$args",   "c4jArgs"  );
-		Instance i = context.getInstance();
-		Instance f = context.getField();
-		recordContextChange ("c4jThis",   i != null ? i.getValue() : null, false);
-		recordContextChange ("c4jTarget", f != null ? f.getValue() : null, false);
-		if (context.getMethodResult() != null) {
-			recordContextChange ("c4jReturn", context.getMethodResult().getValue(), false);
+		if (expression.contains("c4jTarget")) {
+			Instance f = context.getField();
+			recordContextChange ("c4jTarget", f != null ? f.getValue() : null, false);
 		}
-		recordContextChange ("c4jArgs", InstanceUtils.getInstanceValues(context.getMethodArgs()), false);
-
-		expression = substituteArguments (expression, context);
-
-		// Look for "bare" items, matching "itemName", but without $this or $target; prepend $this.
-		String itemName = context.getItemName();
-	    if (itemName != null && itemName.length() != 0) {
-	        expression = substituteInTestExpression(expression, "(?<!(c4jThis|c4jTarget)\\.)\\b"+itemName+"\\b", "c4jThis."+itemName);
-	    }
-
+		Instance methodResult = context.getMethodResult();
+		if (methodResult != null) {
+			recordContextChange ("c4jReturn", methodResult.getValue(), false);
+		}
+		Instance[] methodArgs = context.getMethodArgs();
+		if (methodArgs != null && methodArgs.length > 0) {
+			recordContextChange ("c4jArgs", InstanceUtils.getInstanceValues(methodArgs), false);
+		}
 	    findReferencedObjectsAndLoad(expression, context);
-        return new TestResult (true, expression);
-	}
 
+		return expression;
+	}
+	
 	public void findReferencedObjectsAndLoad(String expression, TestContext context) {
 	    Pattern pattern = Pattern.compile("([\\w\\.]+)");
 	    String message = "";
@@ -631,7 +677,7 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 	 * @param context
 	 * @return the new test expression
 	 */
-	public String substituteArguments (String testExpression, TestContext context) {
+	public String substituteMethodArguments (String testExpression, TestContext context) {
 		Instance[] args = context.getMethodArgs();
 		if (args == null || args.length == 0) {
 			return testExpression;
@@ -733,7 +779,7 @@ abstract public class ExpressionInterpreterHelper implements ExpressionInterpret
 	}
 
 	/**
-	 * A hook that is called when {@link #expandKeywords(String, TestContext)} substitutes 
+	 * A hook that is called when {@link #expandKeywords(TestContext)} substitutes 
 	 * an expression with a new symbol name and a corresponding object exists that holds its
 	 * value. for a particular interpreter, capture this information in the implementation 
 	 * of this method for later use in {@link #doTest(String, TestContext)}.

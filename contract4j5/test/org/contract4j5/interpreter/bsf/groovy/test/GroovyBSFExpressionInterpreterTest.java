@@ -19,10 +19,10 @@ public class GroovyBSFExpressionInterpreterTest extends TestCase {
 	}
 	
 	public void testGroovyInterpreterCanValidateTestExpressions() throws BSFException {
-		assertTrue(interpreter.validateTestExpression("1+1 == 2", context).isPassed());
+		assertTrue(interpreter.validateTestExpression(context).isPassed());
 	}
 	
 	public void testGroovyInterpreterCanExecuteTestExpressions() throws BSFException {
-		assertTrue(interpreter.invokeTest("1+1 == 2", context).isPassed());
+		assertTrue(interpreter.invokeTest(context).isPassed());
 	}
 }

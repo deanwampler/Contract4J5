@@ -27,7 +27,7 @@ import org.contract4j5.context.TestContext;
 
 /**
  * Uses the "Null Object Pattern" to define an interpreter that does nothing. It
- * effectively disables all tests because {@link #invokeTest(String, TestContext)}
+ * effectively disables all tests because {@link #invokeTest(TestContext)}
  * always succeeds. This object is primarily useful for eliminating the need for 
  * clients to always test for null.
  * @author Dean Wampler <mailto:dean@aspectprogramming.com>
@@ -41,16 +41,15 @@ public class NullExpressionInterpreter implements ExpressionInterpreter {
 	public void setOptionalKeywordSubstitutions(
 			Map<String, String> optionalKeywordSubstitutions) {}
 
-	public Map<String, Object> determineOldValues(String testExpression,
-			TestContext context) { 
+	public Map<String, Object> determineOldValues(TestContext context) { 
 		return new HashMap<String, Object>(); 
 	}
 
-	public TestResult validateTestExpression(String testExpression, TestContext context) {
+	public TestResult validateTestExpression(TestContext context) {
 		return new TestResult(true);
 	}
 	
-	public TestResult invokeTest(String testExpression, TestContext context) {
+	public TestResult invokeTest(TestContext context) {
 		return new TestResult(true);
 	}
 

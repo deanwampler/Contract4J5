@@ -29,9 +29,10 @@ import org.aspectj.lang.reflect.SourceLocation;
 import org.contract4j5.context.TestContext;
 import org.contract4j5.context.TestContextImpl;
 import org.contract4j5.context.TestContextCache;
-import org.contract4j5.contract.Contract;
+import org.contract4j5.contract.Disabled;
 import org.contract4j5.contract.Post;
 import org.contract4j5.contract.Pre;
+import org.contract4j5.controller.SystemCaches;
 import org.contract4j5.errors.TestSpecificationError;
 import org.contract4j5.interpreter.TestResult;
 import org.contract4j5.testexpression.DefaultPreTestExpressionMaker;
@@ -78,24 +79,24 @@ public aspect ConstructorBoundaryConditions extends AbstractConditions {
 	 * Constructor precondition PCD.
 	 * @note We prevent recursion into the aspect itself.
 	 */
-	pointcut preCtor (Contract contract, Pre pre) :
-		preCommon(contract, pre) && !within(ConstructorBoundaryConditions) &&
-		execution (@Pre new (..)) && 
-		target(Object);
+	pointcut preCtor (Pre pre) :
+		preCommon() && !within(ConstructorBoundaryConditions) &&
+		execution (@Pre new (..)) && ! withincode (@Disabled new (..)) &&
+		target(Object) && @annotation(pre);
 
 	/**
 	 * Constructor postcondition PCD.
 	 * @note We prevent recursion into the aspect itself.
 	 */
-	pointcut postCtor (Contract contract, Post post, Object obj) : 
-		postCommon(contract, post) && !within(ConstructorBoundaryConditions) &&
-		execution (@Post new (..)) &&
-		target(obj);
+	pointcut postCtor (Post post, Object obj) : 
+		postCommon() && !within(ConstructorBoundaryConditions) &&
+		execution (@Post new (..)) && ! withincode (@Disabled new (..)) &&
+		target(obj) && @annotation(post) ;
 
 	/**
 	 * Before advice for constructors.
 	 */
-	before (Contract contract, Pre pre): preCtor (contract, pre) {
+	before (Pre pre): preCtor (pre) {
 		doTest (thisJoinPoint, null, pre, "Pre", pre.value(), pre.message(),
 				getDefaultPreTestExpressionMaker());
 	}
@@ -103,7 +104,7 @@ public aspect ConstructorBoundaryConditions extends AbstractConditions {
 	/**
 	 * After advice for constructors.
 	 */
-	after (Contract contract, Post post, Object obj): postCtor (contract, post, obj) { 
+	after (Post post, Object obj): postCtor (post, obj) { 
 		doTest (thisJoinPoint, obj, post, "Post", post.value(), post.message(),
 				getDefaultPostReturningVoidTestExpressionMaker());
 	}
@@ -124,15 +125,13 @@ public aspect ConstructorBoundaryConditions extends AbstractConditions {
 			DefaultTestExpressionMaker maker) {
 		Object[]    argValues = thisJoinPoint.getArgs();
 		TestContext context   = null;
-		String testExpr       = "";
 		SourceLocation loc    = thisJoinPoint.getSourceLocation();
 		String fileName = loc.getFileName();
 		int    lineNum  = loc.getLine();
 		TestContextCache.Key key = new TestContextCache.Key(testTypeName, fileName, lineNum);
-		TestContextCache.Entry entry = contextCache.get(key);
-		if (context != null) {
+		TestContextCache.Entry entry = SystemCaches.testContextCache.get(key);
+		if (entry != null) {
 			context = entry.testContext;
-			testExpr = entry.testExpression;
 			Instance[]  args = InstanceUtils.makeInstanceArray(entry.argNames, entry.argTypes, argValues);
 			context.setMethodArgs(args);
 		} else {
@@ -143,7 +142,7 @@ public aspect ConstructorBoundaryConditions extends AbstractConditions {
 			String[]    argNames  = cs.getParameterNames();
 			Class<?>[]  argTypes  = cs.getParameterTypes();
 			Instance[]  args      = InstanceUtils.makeInstanceArray(argNames, argTypes, argValues);
-			context   = new TestContextImpl (clazz.getName(), clazz.getSimpleName(), 
+			context   = new TestContextImpl (annoTestExpr, clazz.getSimpleName(), 
 								instance, null, args, null, null, fileName, lineNum);
 			TestResult  result    = 
 				getParentTestExpressionFinder().findParentConstructorTestExpressionIfEmpty(
@@ -152,9 +151,10 @@ public aspect ConstructorBoundaryConditions extends AbstractConditions {
 				getContractEnforcer().fail(annoTestExpr, testTypeName, result.getMessage(),  
 						context, new TestSpecificationError());
 			}
-			testExpr = maker.makeDefaultTestExpressionIfEmpty (result.getMessage(), context);
-			contextCache.put(key, new TestContextCache.Entry(context, testExpr, argNames, argTypes, null, null));
+			String actualTestExpr = maker.makeDefaultTestExpressionIfEmpty (result.getMessage(), context);
+			context.setActualTestExpression(actualTestExpr);
+			SystemCaches.testContextCache.put(key, new TestContextCache.Entry(context, argNames, argTypes, null, null));
 		}
-		getContractEnforcer().invokeTest(testExpr, testTypeName, testMessage, context);
+		getContractEnforcer().invokeTest(testTypeName, testMessage, context);
 	}
 }

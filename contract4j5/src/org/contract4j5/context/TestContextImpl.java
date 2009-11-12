@@ -34,7 +34,36 @@ public class TestContextImpl implements TestContext {
 		return testExpression;
 	}
 	public void setTestExpression(String testExpression) {
-		this.testExpression = testExpression;
+		if(testExpression == null)
+			this.testExpression = "";
+		else
+			this.testExpression = testExpression.trim();
+	}
+
+	private String actualTestExpression = null;
+	public String getActualTestExpression() {
+		return actualTestExpression;
+	}
+
+	public void setActualTestExpression(String testExpression) {
+		if(testExpression == null)
+			this.actualTestExpression = "";
+		else
+			this.actualTestExpression = testExpression.trim();
+	}
+
+	// A null value is actually okay until set is called. In fact, it's used
+	// as a signal that the internal expression needs to be computed. UGLY, I know.
+	private String internalTestExpression = null;
+	public String getInternalTestExpression() {
+		return internalTestExpression;
+	}
+	
+	public void setInternalTestExpression(String testExpression) {
+		if(testExpression == null)
+			this.internalTestExpression = "";
+		else
+			this.internalTestExpression = testExpression.trim();
 	}
 
 	private String itemName = null;
@@ -111,6 +140,7 @@ public class TestContextImpl implements TestContext {
 			String     fileName,
 			int        lineNumber) {
 		setTestExpression(testExpression);
+		setActualTestExpression(testExpression);
 		setItemName(itemName);
 		setInstance(instance);
 		setField(field);
@@ -132,6 +162,7 @@ public class TestContextImpl implements TestContext {
 			String     fileName,
 			int        lineNumber) {
 		setTestExpression(testExpression);
+		setActualTestExpression(testExpression);
 		setItemName(itemName);
 		setInstance(instance);
 		setField(field);
@@ -144,6 +175,10 @@ public class TestContextImpl implements TestContext {
 	
 	public String toString() {
 		StringBuffer sb = new StringBuffer(1024);
+		sb.append("test expressions (raw, actual, internal) = (")
+			.append(getTestExpression()).append(", ")
+			.append(getActualTestExpression()).append(", ")
+			.append(getInternalTestExpression()).append(")");
 		sb.append("name = ").append(getItemName());
 		sb.append(", instance = ").append(getInstance());
 		sb.append(", field = ").append(getField());
@@ -165,5 +200,4 @@ public class TestContextImpl implements TestContext {
 
 	public static final TestContextImpl emptyTestContext = 
 			new TestContextImpl("", "", null, null, new Instance[0], null, "", 0);
-
 }

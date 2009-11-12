@@ -25,8 +25,9 @@ import org.aspectj.lang.reflect.SourceLocation;
 import org.contract4j5.context.TestContext;
 import org.contract4j5.context.TestContextCache;
 import org.contract4j5.context.TestContextImpl;
-import org.contract4j5.contract.Contract;
+import org.contract4j5.contract.Disabled;
 import org.contract4j5.contract.Invar;
+import org.contract4j5.controller.SystemCaches;
 import org.contract4j5.errors.TestSpecificationError;
 import org.contract4j5.interpreter.TestResult;
 import org.contract4j5.testexpression.DefaultTestExpressionMaker;
@@ -64,23 +65,21 @@ public aspect InvariantMethodConditions extends AbstractConditions {
 	 * Method invariant before and after PCD.
 	 * @note We prevent recursion into the aspect itself.
 	 */
-	pointcut invarMethod (Contract contract, Invar invar, Object obj) :
-		invarCommon(contract, invar) && !within (InvariantMethodConditions) &&
-		execution (@Invar !static * *.*(..)) && 
-		this (obj);
+	pointcut invarMethod (Invar invar, Object obj) :
+		invarCommon() && ! within (InvariantMethodConditions) &&
+		execution (@Invar ! static * *.*(..)) && ! execution (@Disabled ! static * *.*(..)) &&
+		this (obj) && @annotation(invar);
 
-	Object around (Contract contract, Invar invar, Object obj) : invarMethod (contract, invar, obj) {
+	Object around (Invar invar, Object obj) : invarMethod (invar, obj) {
 		Signature  signature  = thisJoinPointStaticPart.getSignature();
 		MethodSignature ms    = (MethodSignature) signature;
 		TestContext context   = null;
-		String testExpr       = "";
 		SourceLocation loc    = thisJoinPoint.getSourceLocation();
 		String fileName = loc.getFileName();
 		int    lineNum  = loc.getLine();
 		TestContextCache.Key key = new TestContextCache.Key("Invar", fileName, lineNum);
-		TestContextCache.Entry entry = contextCache.get(key);
-		if (context != null) {
-			testExpr = entry.testExpression;
+		TestContextCache.Entry entry = SystemCaches.testContextCache.get(key);
+		if (entry != null) {
 			context = entry.testContext;
 			Object[]   argValues  = thisJoinPoint.getArgs();
 			Instance[] args       = InstanceUtils.makeInstanceArray(entry.argNames, entry.argTypes, argValues);
@@ -93,7 +92,7 @@ public aspect InvariantMethodConditions extends AbstractConditions {
 			Object[]   argValues  = thisJoinPoint.getArgs();
 			Instance[] args       = InstanceUtils.makeInstanceArray(argNames, argTypes, argValues);
 			Instance   instance   = new Instance (clazz.getName(), clazz, obj);
-			context = new TestContextImpl (methodName, methodName, instance, 
+			context = new TestContextImpl (invar.value(), methodName, instance, 
 							null, args, null, null, fileName, lineNum);
 			TestResult result  = 
 				getParentTestExpressionFinder().findParentMethodTestExpressionIfEmpty(
@@ -102,16 +101,17 @@ public aspect InvariantMethodConditions extends AbstractConditions {
 				getContractEnforcer().fail(invar.value(), "Invar", result.getMessage(),  
 						context, new TestSpecificationError());
 			}
-			testExpr = 
+			String actualTestExpr = 
 				getDefaultMethodInvarTestExpressionMaker().makeDefaultTestExpressionIfEmpty(result.getMessage(), context);
-			contextCache.put(key, new TestContextCache.Entry(context, testExpr, argNames, argTypes, null, null));
+			context.setActualTestExpression(actualTestExpr);
+			SystemCaches.testContextCache.put(key, new TestContextCache.Entry(context, argNames, argTypes, null, null));
 		}
-		context.setOldValuesMap (determineOldValues (testExpr, context));
-		getContractEnforcer().invokeTest(testExpr, "Invar", invar.message(), context);
-		Object result2 = proceed (contract, invar, obj);
+		context.setOldValuesMap (determineOldValues (context));
+		getContractEnforcer().invokeTest("Invar", invar.message(), context);
+		Object result2 = proceed (invar, obj);
 		// Use "ms.getReturnType()", not "result2.getClass()", since result2 might be null!
 		context.setMethodResult (new Instance ("", ms.getReturnType(), result2));
-		getContractEnforcer().invokeTest(testExpr, "Invar", invar.message(), context);
+		getContractEnforcer().invokeTest("Invar", invar.message(), context);
 		return result2;
 	}
 }

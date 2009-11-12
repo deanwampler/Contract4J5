@@ -30,8 +30,9 @@ import org.aspectj.lang.reflect.SourceLocation;
 import org.contract4j5.context.TestContext;
 import org.contract4j5.context.TestContextCache;
 import org.contract4j5.context.TestContextImpl;
-import org.contract4j5.contract.Contract;
+import org.contract4j5.contract.Disabled;
 import org.contract4j5.contract.Invar;
+import org.contract4j5.controller.SystemCaches;
 import org.contract4j5.instance.Instance;
 import org.contract4j5.testexpression.DefaultFieldInvarTestExpressionMaker;
 import org.contract4j5.testexpression.DefaultTestExpressionMaker;
@@ -69,7 +70,7 @@ public aspect InvariantFieldCtorConditions {
 	}
 	
 	public static aspect InvariantFieldCtorConditionsPerCtor 
-		extends AbstractConditions percflow(invarFieldCtorCall (Contract, Invar, Object)) {
+		extends AbstractConditions percflow(invarFieldCtorCall (Object)) {
 
 		private static class ListElem {
 			public Invar    invar;
@@ -92,9 +93,10 @@ public aspect InvariantFieldCtorConditions {
 		 * The enclosing scope of a ctor call. 
 		 * @note We prevent recursion into the aspect itself.
 		 */
-		pointcut invarFieldCtorCall (Contract contract, Invar invar, Object obj) : 
-			invarCommon(contract, invar) && !within(InvariantFieldCtorConditions) &&
-			execution (*.new(..)) && target (obj);
+		pointcut invarFieldCtorCall (Object obj) : 
+			invarCommon() && !within(InvariantFieldCtorConditions) &&
+			execution (*.new(..)) && ! execution (@Disabled *.new(..)) &&
+			target (obj);
 				
 		/**
 		 * Field invariant pointcut within a constructor context. We match on 
@@ -103,17 +105,18 @@ public aspect InvariantFieldCtorConditions {
 		 * method calls within the c'tor will be ignored!
 		 * @note We prevent recursion into the aspect itself.
 		 */
-		pointcut invarFieldInCtor (Contract contract, Invar invar, Object obj, Object field) :
-			!within(InvariantFieldCtorConditions) &&
-			cflowbelow (invarFieldCtorCall (contract, invar, obj)) && 
-			set (@Invar * *.*) && args (field);
+		pointcut invarFieldInCtor (Invar invar, Object obj, Object field) :
+			invarCommon() && !within(InvariantFieldCtorConditions) &&
+			cflowbelow (invarFieldCtorCall (obj)) && 
+			set (@Invar * *.*)  && ! set (@Disabled * *.*) &&
+			args (field) && @annotation(invar);
 			
 		/**
 		 * Observe any annotated field sets within the c'tor and record the 
 		 * invariant specification.
 		 */
-		after (Contract contract, Invar invar, Object obj, Object newFieldValue) returning : 
-			invarFieldInCtor (contract, invar, obj, newFieldValue) {
+		after (Invar invar, Object obj, Object newFieldValue) returning : 
+			invarFieldInCtor (invar, obj, newFieldValue) {
 			if (listOfAnnosFound == null) {
 				listOfAnnosFound = new HashMap<String,ListElem>();
 			}
@@ -126,56 +129,45 @@ public aspect InvariantFieldCtorConditions {
 			listOfAnnosFound.put (name, new ListElem(invar, instance));
 		}
 		
-		static protected class Bucket {
-			public String testExpr;
-			public TestContext context;
-			public Bucket(String expr, TestContext context) {
-				this.testExpr = expr;
-				this.context = context;
-			}
-		}
-		
 		/**
 		 * After the c'tor completes, if there were any annotated fields set, 
 		 * then test them.
 		 */
-		after(Contract contract, Invar invar, Object obj) returning : invarFieldCtorCall(contract, invar, obj) {
+		after(Object obj) returning : invarFieldCtorCall(obj) {
 			if (listOfAnnosFound == null) {
 				return;
 			}
 			for (Entry<String, ListElem> entry: listOfAnnosFound.entrySet()) {
 				ListElem elem = entry.getValue();
-				Bucket bucket = getOrMakeTestContextAndTestExpr(thisJoinPointStaticPart, obj, entry.getKey(), elem);
-				TestContext context = bucket.context;
-				String testExpr = bucket.testExpr;
-				getContractEnforcer().invokeTest(testExpr, "Invar", elem.invar.message(), context);
+				TestContext context = getOrMakeTestContextAndTestExpr(thisJoinPointStaticPart, obj, entry.getKey(), elem);
+				getContractEnforcer().invokeTest("Invar", elem.invar.message(), context);
 			}
 		}
 		
-		protected Bucket getOrMakeTestContextAndTestExpr(
+		protected TestContext getOrMakeTestContextAndTestExpr(
 				JoinPoint.StaticPart thisJoinPointStaticPart, 
 				Object obj, String elemKey, ListElem elem) {
 			TestContext context   = null;
-			String testExpr       = "";
 			SourceLocation loc    = thisJoinPointStaticPart.getSourceLocation();
 			String fileName = loc.getFileName();
 			int    lineNum  = loc.getLine();
 			TestContextCache.Key key = new TestContextCache.Key("Invar", fileName, lineNum);
-			TestContextCache.Entry entry = contextCache.get(key);
-			if (context != null) {
+			TestContextCache.Entry entry = SystemCaches.testContextCache.get(key);
+			if (entry != null) {
 				context = entry.testContext;
-				testExpr = entry.testExpression;
 				Instance fieldInstance = new Instance(entry.fieldName, entry.fieldType, elem.field);
 				context.setField(fieldInstance);
 			} else {
 				Instance instance = new Instance(obj.getClass().getName(), obj.getClass(), obj);
-				context = new TestContextImpl (elemKey, elemKey, instance, 
+				String testExpr = elem.invar.value();
+				context = new TestContextImpl (testExpr, elemKey, instance, 
 								elem.field, null, null, null, fileName, lineNum);
-				testExpr = InvariantFieldCtorConditions.aspectOf().getDefaultFieldInvarTestExpressionMaker()
-					.makeDefaultTestExpressionIfEmpty(elem.invar.value(), context);
-				contextCache.put(key, new TestContextCache.Entry(context, testExpr, null, null, null, null));
+				String actualTestExpr = InvariantFieldCtorConditions.aspectOf().getDefaultFieldInvarTestExpressionMaker()
+					.makeDefaultTestExpressionIfEmpty(testExpr, context);
+				context.setActualTestExpression(actualTestExpr);
+				SystemCaches.testContextCache.put(key, new TestContextCache.Entry(context, null, null, null, null));
 			}
-			return new Bucket(testExpr, context);
+			return context;
 		}
 	}
 }

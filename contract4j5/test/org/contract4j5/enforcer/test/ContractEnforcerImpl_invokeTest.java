@@ -78,12 +78,11 @@ public class ContractEnforcerImpl_invokeTest extends TestCase {
 	public void testIfNoExpressionInterpreterSetThenOneIsCreated() {
 		try {
 			contractEnforcer.setExpressionInterpreter(null);
-			Instance dum = new Instance("name", Dummy.class, dummy);
+			Instance dum = new Instance("dummy", Dummy.class, dummy);
 			contractEnforcer.invokeTest(
-					"$this.name != null",	
-					"Invar", 
+					"Invar",	
 					"this.name invar. test", 
-					new TestContextImpl("name",	"", dum, null, null, null, "", 0));
+					new TestContextImpl("1 +1 == 2", "", dum, null, null, null, "", 0));
 //			WriterReporter wr = (WriterReporter) (reporter.getReporters().get(0));
 //			String str = wr.getWriter(Severity.ERROR).toString();
 			assertNotNull (contractEnforcer.getExpressionInterpreter());
@@ -95,10 +94,9 @@ public class ContractEnforcerImpl_invokeTest extends TestCase {
 	public void testNoThisDefinedIsAnErrorIfThisUsedInTest() {
 		try {
 			contractEnforcer.invokeTest(
-					"$this == bar",	// invalid test 
-					"Invar", 
+					"Invar",	// invalid test 
 					"this.name invar. test", 
-					new TestContextImpl("name",	"", null, null, null, null, "", 0));
+					new TestContextImpl("$this.name != null",	"name", null, null, null, null, "", 0));
 			fail();
 		} catch (TestSpecificationError tse) {
 			assertMessage (Severity.ERROR, ExpressionInterpreter.InvalidTestExpression.THIS_KEYWORD_WITH_NO_INSTANCE);
@@ -108,10 +106,9 @@ public class ContractEnforcerImpl_invokeTest extends TestCase {
 	public void testNoTargetDefinedIsAnErrorIfThisUsedInTest() {
 		try {
 			contractEnforcer.invokeTest(
-					"$target == bar",	// invalid test 
-					"Invar", 
+					"Invar",	// invalid test 
 					"this.name invar. test", 
-					new TestContextImpl("name",	"", null, null, null, null, "", 0));
+					new TestContextImpl("$target.name != null",	"", null, null, null, null, "", 0));
 			fail();
 		} catch (TestSpecificationError tse) {
 			assertMessage (Severity.ERROR, ExpressionInterpreter.InvalidTestExpression.TARGET_KEYWORD_WITH_NO_TARGET);
@@ -121,10 +118,9 @@ public class ContractEnforcerImpl_invokeTest extends TestCase {
 	public void testNoReturnDefinedIsAnErrorIfThisUsedInTest() {
 		try {
 			contractEnforcer.invokeTest(
-					"$return == bar",	// invalid test 
-					"Invar", 
+					"Invar",	// invalid test 
 					"this.name invar. test", 
-					new TestContextImpl("name",	"", null, null, null, null, "", 0));
+					new TestContextImpl("$return != null", "", null, null, null, null, "", 0));
 			fail();
 		} catch (TestSpecificationError tse) {
 			assertMessage (Severity.ERROR, ExpressionInterpreter.InvalidTestExpression.RETURN_KEYWORD_WITH_NO_RETURN);
@@ -134,10 +130,9 @@ public class ContractEnforcerImpl_invokeTest extends TestCase {
 	public void testNoArgsDefinedIsAnErrorIfThisUsedInTest() {
 		try {
 			contractEnforcer.invokeTest(
-					"$args[0] == bar",	// invalid test 
-					"Invar", 
+					"Invar",	// invalid test 
 					"this.name invar. test", 
-					new TestContextImpl("name",	"", null, null, null, null, "", 0));
+					new TestContextImpl("$args[0] != null", "", null, null, null, null, "", 0));
 			fail();
 		} catch (TestSpecificationError tse) {
 			assertMessage (Severity.ERROR, ExpressionInterpreter.InvalidTestExpression.ARGS_KEYWORD_WITH_NO_ARGS);
@@ -157,10 +152,9 @@ public class ContractEnforcerImpl_invokeTest extends TestCase {
 	private void doTestUnknownKeywordIsAnError(String badKeyword) {
 		try {
 			contractEnforcer.invokeTest(
-					badKeyword+" == bar",	// invalid test 
 					"Invar", 
 					"this.name invar. test", 
-					new TestContextImpl("name",	"", null, null, null, null, "", 0));
+					new TestContextImpl(badKeyword, "", null, null, null, null, "", 0));
 			fail(badKeyword);
 		} catch (TestSpecificationError tse) {
 			WriterReporter wr = (WriterReporter) (reporter.getReporters().get(0));
@@ -173,7 +167,6 @@ public class ContractEnforcerImpl_invokeTest extends TestCase {
 
 	public void testInvokeTestWithValidPreTestPasses() {
 		doTestInvokeTestWithValidPreTestPasses("name");
-		doTestInvokeTestWithValidPreTestPasses("foo");
 	}
 
 	private void doTestInvokeTestWithValidPreTestPasses(String name) {
@@ -183,10 +176,9 @@ public class ContractEnforcerImpl_invokeTest extends TestCase {
 			assertNotNull (dummy.getName());
 			assertTrue    (dummy.getName().length() > 0);
 			contractEnforcer.invokeTest(
-					"$target != null && $target.length() > 0", 
 					"Invar", 
 					"this.name invar. test", 
-					new TestContextImpl("name",	"", dum, foo, null, null, "", 0));
+					new TestContextImpl("$this." + name + " != null", "", dum, foo, null, null, "", 0));
 		} catch (ContractError ce) {
 			fail(ce.toString()+", name = "+dummy.getName());
 		}
@@ -196,10 +188,9 @@ public class ContractEnforcerImpl_invokeTest extends TestCase {
 		try {
 			Instance dum = new Instance ("dummy", Dummy.class, dummy);
 			contractEnforcer.invokeTest(
-					null, 
 					"Pre", 
 					"this.name invar. test", 
-					new TestContextImpl("name",	"", dum, null, null, null, "", 0));
+					new TestContextImpl("",	"", dum, null, null, null, "", 0));
 			fail();
 		} catch (TestSpecificationError tse) {
 		} catch (ContractError ce) {
@@ -211,10 +202,9 @@ public class ContractEnforcerImpl_invokeTest extends TestCase {
 		try {
 			Instance dum = new Instance ("dummy", Dummy.class, dummy);
 			contractEnforcer.invokeTest(
-					null, 
 					"Pre", 
 					"this.name invar. test", 
-					new TestContextImpl("name",	"", dum, null, null, null, "", 0));
+					new TestContextImpl("",	"", dum, null, null, null, "", 0));
 		} catch (ContractError ce) {
 			fail(ce.toString());
 		}
@@ -225,9 +215,8 @@ public class ContractEnforcerImpl_invokeTest extends TestCase {
 			Instance dum = new Instance ("dummy", Dummy.class,  dummy);
 			Instance foo = new Instance ("foo",   String.class, new String("foo"));
 			contractEnforcer.invokeTest(
-					"$target.length() == 0", 
-					"Invar", "this.name invar. test", 
-					new TestContextImpl("name",	"", dum, foo, null, null, null, "", 0));
+					"Invar", 
+					"this.name invar. test", new TestContextImpl("name",	"", dum, foo, null, null, null, "", 0));
 			fail();
 		} catch (TestSpecificationError tse) {
 			fail();
