@@ -3,8 +3,8 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.ajdt.core.ASPECTJRT_CONTAINER"/>
 	<classpathentry kind="src" path="test"/>
-	<classpathentry kind="lib" path="/Library/tools/java/spring/spring-framework-2.0/dist/spring.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/contract4j5"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3"/>
+	<classpathentry kind="lib" path="/Library/tools/java/spring/spring-framework-2.5/dist/spring.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
