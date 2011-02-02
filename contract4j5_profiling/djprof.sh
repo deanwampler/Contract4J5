@@ -14,12 +14,12 @@ export PATH="$PATH:$DJPROF_HOME/bin"
 date
 
 CLASSPATH=bin
-for f in $CONTRACT4J5_ROOT/contract4j5/bin $CONTRACT4J5_ROOT/contract4j5/lib/*.jar 
+for f in $CONTRACT4J5_HOME/bin $CONTRACT4J5_HOME/lib/*.jar 
 do
 	CLASSPATH=$CLASSPATH:$f
 done
 export CLASSPATH
-export ASPECTPATH="ASPECTPATH:$CONTRACT4J5_ROOT/contract4j5/contract4j5.jar"
+export ASPECTPATH="ASPECTPATH:$CONTRACT4J5_HOME/contract4j5.jar"
 
 which_opt=lifetime
 if [ $# -gt 0 ] ; then

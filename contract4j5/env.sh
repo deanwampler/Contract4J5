@@ -35,7 +35,8 @@ esac
 
 : ${CRUISECONTROLRB_HOME:=$TOOLS_HOME/cruisecontrolrb-1.1.0}  # If you use CC.rb...
 : ${JAVA_TOOLS_HOME:=$TOOLS_HOME/java}
-: ${CONTRACT4J5_ROOT:=$HOME/src/java/contract4j5_080/trunk}
+# : ${CONTRACT4J5_ROOT:=$HOME/src/java/contract4j5}   # example
+: ${CONTRACT4J5_ROOT:=../}
 : ${CONTRACT4J5_HOME:=$CONTRACT4J5_ROOT/contract4j5}
 : ${CONTRACT4J5_LIB:=$CONTRACT4J5_HOME/lib}
 : ${ANT_HOME:=$TOOLS_HOME/Apache/apache-ant-1.6.5}

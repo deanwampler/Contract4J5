@@ -26,7 +26,7 @@ esac
 date
 
 CLASSPATH=bin
-for f in $CONTRACT4J5_ROOT/contract4j5/contract4j5.jar $CONTRACT4J5_ROOT/contract4j5/lib/*.jar 
+for f in $CONTRACT4J5_HOME/contract4j5.jar $CONTRACT4J5_HOME/lib/*.jar 
 do
 	CLASSPATH=$CLASSPATH:$f
 done

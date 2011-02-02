@@ -8,10 +8,11 @@ set ASPECTJ_HOME=%DRIVE%\aspectj1.5.3
 rem Ignore the SPRING_HOME if you aren't building the separate Spring example
 set SPRING_HOME=%DRIVE%\Spring\spring-framework-1.2.5
 
-set CONTRACT4J5_ROOT=%HOME%\src\java\contract4j5
+rem set CONTRACT4J5_ROOT=%HOME%\src\java\contract4j5
+set CONTRACT4J5_ROOT=..\
 set CONTRACT4J5_HOME=%CONTRACT4J_ROOT%\contract4j5
 set CONTRACT4J5_LIB=%CONTRACT4J_HOME%\lib
-set CONTRACT4J5_SPRING_HOME=%HOME%\src\java\contract4j5\contract4j5WithSpring
+set CONTRACT4J5_SPRING_HOME=%CONTRACT4J5_ROOT%\contract4j5WithSpring
 
 rem The JRuby 1.0.1 libraries to the classpath (edit as needed...)
 CLASSPATH=%CONTRACT4J5_HOME%\lib\jruby-complete-1.0.1.jar;%CLASSPATH%
