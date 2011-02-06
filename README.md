@@ -8,28 +8,32 @@ A project of [Aspect Research Associates](http://aspectresearchassociates.com)
 
 ## Contents
 
-* Copyright
-* Where to Get Contract4J5
-* Naming and Versioning
-* Distribution Manifest
-* What Is "Contract4J5"?
- * What is Design by Contract?
- * Design by Contract and Aspect-Oriented Programming
- * How Does Contract4J5 Support Design by Contract?
- * Inheritance Behavior of Contracts
- * How Do I Use Contract4J5?
- * Distribution 
- * Building Contract4J5
- * Show Me the Code!
- * Details of Contract Specifications
- * Known Limitations
- * Miscellaneous Notes and Debugging Tips
- * Configuration of Contract4J5
-* TODO Items
-* Notes for Each Release
-* For Further Information...
+* <a href='#copyright'>Copyright</a>
+* <a href='#wheretogetc4j'>Where to Get Contract4J5</a>
+* <a href='#versioning'>Naming and Versioning</a>
+* <a href='#manifest'>Distribution Manifest</a>
+* <a href='#whatisc4j'>What Is "Contract4J5"?</a>
+  * <a href='#whatisdbc'>What is Design by Contract?</a>
+  * <a href='#dbcandaop'>Design by Contract and Aspect-Oriented Programming</a>
+  * <a href='#how'>How Does Contract4J5 Support Design by Contract?</a>
+  * <a href='#inherit'>Inheritance Behavior of Contracts</a>
+  * <a href='#usage'>How Do I Use Contract4J5?</a>
+  * <a href='#distribution'>Distribution</a>
+  * <a href='#building'>Building Contract4J5</a>
+  * <a href='#showme'>Show Me the Code!</a>
+  * <a href='#details'>Details of Contract Specifications</a>
+  * <a href='#limits'>Known Limitations</a>
+  * <a href='#tips'>Miscellaneous Notes and Debugging Tips</a>
+  * <a href='#config'>Configuration of Contract4J5</a>
+* <a href='#todo'>TODO Items</a>
+* <a href='#history'>History</a>
+* <a href='#notes'>Notes for Each Release</a>
+* <a href='#furtherinfo'>For Further Information...</a>
 
-**Impatient?** If you want to get started quickly, see the **Quick Example** section. To see what Java code looks like with Contract4J5 in action, go to **Show Me the Code!**.
+**Impatient?** If you want to get started quickly, go to
+  <a href='#showme'>Show Me the Code!</a>.
+
+<a name="copyright"></a>
 
 ## Copyright
 
@@ -54,18 +58,22 @@ Contract4J is open source software covered by the Eclipse Public License - v1.0.
     ==========================================================
 
 In addition, several third-party components are used by Contract4J5. Their licenses are described by the LICENSE.txt file.
+<a name='wheretogetc4j'></a>
 
 ## Where to Get Contract4J5
 
-Contract4J5 is hosted on [GitHub](https://github.com/deanwampler/Contract4J). Builds can be downloaded from [SourceForge](https://sourceforge.net/project/showfiles.php?group_id=130191). The home page is [polyglotprogramming.com/contract4j](http://polyglotprogramming.com/contract4j).
+Contract4J5 is hosted on [GitHub](https://github.com/deanwampler/Contract4J5) (note that the project is called *Contract4J5*). Builds can be downloaded from [SourceForge](https://sourceforge.net/project/showfiles.php?group_id=130191). The home page is [polyglotprogramming.com/contract4j](http://polyglotprogramming.com/contract4j).
 
 **NOTE:** The previous web site for Contract4J5 was contract4j.org.
+<a name='versioning'></a>
 
 ## Naming and Versioning
 
 The active development project is **Contract4J5**, which uses Java 5 annotations to define the contracts. There is a separate, dormant project called **Contract4JBeans**, which was an interesting, but not very successful experiment that required no Java 5 annotations, but relied on method naming conventions to define contracts for target methods and classes. The JavaBeans-like naming conventions were the origin of the Contract4JBeans name. Contract4JBeans can be found only as a jar distribution on the [SourceForge](https://sourceforge.net/project/showfiles.php?group_id=130191) site.
 
 The newest release of Contract4J5 described in these notes is version 0.9.0. As this is a "pre-1.0" release, it is possible that planned features and other changes may force API changes that break backwards-compatibility. However, at this point, we anticipate no such problems going forward (except where documented in the TODO Items).
+
+<a name='manifest'></a>
 
 ## Distribution Manifest
 
@@ -103,12 +111,16 @@ Inside the contract4j5 directory, you will find:
   <tr><td>lib</td><td>3rd-party libraries required by Contract4J5.</td></tr>
 </table>
 
+<a name='whatisc4j'></a>
+
 ## What Is "Contract4J5"?
 
 Contract4J5 supports "Design by Contract"&#174; programming in Java. a programming practice introduced by Bertrand Meyer and incorporated in the *Eiffel* programming language in the 1980's.
 
 The Contract4J5 project is sponsored by [Aspect Research Associates](http://aspectresearchassociates.com), a consulting firm specializing in Scala, Data Analytics, Aspect-Oriented Programming, Enterprise Java, and Ruby on Rails.
 
+<a name='whatisdbc'></a>
+  
 ### What is Design by Contract?
 
 *Design by Contract*&#174; (DbC) starts with the observation that, implicitly or explicitly, a component defines a "contract" with its clients. When a client invokes an operation on the component, it must agree to provide the component with appropriate inputs and context. Otherwise, the component can't perform its services. In return, if the input constraints are satisfied the component guarantees delivery of prescribed results.
@@ -123,6 +135,8 @@ As such, DbC is a wonderful complement to Test-Driven Development, which exercis
 
 For more information on Design by Contract, see the references below.
 
+<a name='dbcandaop'></a>
+
 ### Design by Contract and Aspect-Oriented Programming
 
 So what does DbC have to do with [Aspect-Oriented Software Development](http://www.aspectprogramming.com/home/aosd) (Aspect-Oriented Programming - AOP - for short)? On the one hand, the component's contract is an essential part of the complete, logical component specification that clients must support. For example, an interface for a bank account may have a contract requirement that all methods that return a balance must always return a non-negative number (ignoring overdraft features). However, in practical terms, contracts often include implementation concerns that may have little relationship to the domain logic of the application. For example, the code implementing the bank account may prohibit passing null values as method parameters.
@@ -134,6 +148,8 @@ More generally, AOP is a new approach to modularizing "concerns" that need to be
 AOP is a good approach to supporting DbC because it permits DbC concerns to be managed in a modular and minimally-intrusive way, without cluttering application logic, while still allowing the contracts to be integrated into the runtime environment for development and testing. Contract4J5 uses the best-known AOP language, AspectJ, to support DbC for Java.
 
 For more information on AOP, see the references below.
+
+<a name='how'></a>
 
 ### How Does Contract4J5 Support Design by Contract?
 
@@ -226,6 +242,8 @@ If you use the Contract4J `PropertiesConfigurator`, you can use the following pr
 
 For more information on the differences between the different scripting languages, see the V0.7.0 release notes.
 
+<a name='inherit'></a>
+
 ### Inheritance Behavior of Contracts
 
 In DbC, there are rules for proper behavior of inherited contracts, based on the *Lyskov Substitution Principle* (LSP), which is a minimal definition of inheritance. Class B is considered a child class of class A, if objects of type B caN be substituted for objects of type A without breaking the program. In DbC terms, this means that class B must obey A's contract, including all the class, method, and field tests.
@@ -250,6 +268,8 @@ To properly write contravariant precondition tests and covariant postcondition t
 However, since the parent test is always valid for the derived method override, if you don't need to modify the test, then you can simply use the `@Pre` or `@Post` annotation without a test expression and C4J5 will find the parent expression.
 
 We are considering ways to support the correct inheritance behavior before the 1.0 release of Contract4J5.
+
+<a name='usage'></a>
 
 ### How Do I Use Contract4J5?
 
@@ -302,6 +322,8 @@ To see how to do a binary weaving step, consult the `ant` build files in the dis
 
 You can use the installed `contract4j5.jar` file as is. If you want to rebuild Contract4J5, use the ant driver script `build.sh` or `build.bat`. First, edit the corresponding `env.sh` or `env.bat` file and change the environment variable definitions as appropriate for your environment. Or, you can define the appropriate environment variables in your environment and use the `build.xml` ant script directly.
 
+<a name='distribution'></a>
+
 ## Distribution
 
 The distribution has the following structure:
@@ -320,6 +342,8 @@ The distribution has the following structure:
   <tr><td>contract4j5.jar</td><td>The runtime deployment jar. It contains the build products from "src".</td></tr>
   <tr><td>contract4j5-test.jar</td><td>The jar containing the build products from "test". Not part of the normal runtime deployment.</td></tr>
 </table>
+
+<a name='building'></a>
 
 ## Building Contract4J5
 
@@ -403,6 +427,8 @@ Only Java, AspectJ, the libraries for one of the scripting engines, and the supp
 
 
 Next, we'll look at code examples, then return to a discussion of invoking and configuring Contract4J5.
+
+<a name='showme'></a>
 
 ## Show Me the Code!
 
@@ -674,6 +700,8 @@ The comments in this class should be self explanatory. More specific details on 
       }
     }
 
+<a name='details'></a>
+  
 ## Details of Contract Specifications
 
 Here are the rules for using Contract4J5, which clarify the examples just discussed.
@@ -902,6 +930,8 @@ You can define tests on interfaces and their methods. In fact, you are urged to 
 
 Unfortunately, you can't define contract tests for constructors, since they don't exist in an interface. You may be able to work around this using class invariants and tests on instance methods. Note that you can also implicitly define field invariant tests, either on declared accessor methods or as invariants on the class itself. You can refer to the (implied) bare field in the test, as long as you declare an appropriate accessor method for it.
 
+<a name='limits'></a>
+
 ### Known Limitations
 
 (New for V0.8.0) See also Miscellaneous Notes and Debugging Tips and Inheritance Behavior of Contracts.
@@ -954,6 +984,8 @@ For Groovy and JRuby (not Jexl), you can "preregister" classes or objects in you
 
 * It appears that Jexl and JRuby **can't handle Java 5 generic objects**. The Contract4J unit tests with generics are effectively "no-ops" except when Groovy is the interpreter.
 
+<a name='tips'></a>
+
 ### Miscellaneous Notes and Debugging Tips
 
 * All test expressions *must* evaluate to a **boolean** value.
@@ -996,7 +1028,9 @@ When using load-time weaving (LTW), if it appears that the tests aren't being ev
 * If you want to use a different language, the easiest approach is to create a subclass of `BSFExpressionInterpreterAdapter`. See e.g., `GroovyBSFExpressionInterpreter`.
 
 * To select a different language option, see the **Configuration** section (next).
- 
+
+<a name='config'></a>
+
 ### Configuration of Contract4J5
 
 To configure the behavior of Contract4J5, when the default behavior doesn't meet your needs, you have several options.
@@ -1074,6 +1108,8 @@ Here are more details about these component interfaces and implementing classes:
 
 For most properties currently defined, if a value is empty, it is ignored! In some cases, warnings are issued.
 
+<a name='todo'></a>
+
 ### TODO Items
 
 Here is a brief list of the most important "TODO" items that we want to complete before the V1.0 release, roughly in order of importance.
@@ -1093,6 +1129,31 @@ Here is a list of other possible enhancements.
 * Interface to scripting languages using the native scripting support in Java 6.
 * For the keywords:
  * Provide a "$field" alias for "$target", since the latter isn't used for anything other than fields. Keep "$target" for backwards compatibility.
+
+<a name='history'></a>
+
+## History
+
+### Contract4J5 (Annotation Form)
+
+ * v0.9.0.0	November 13, 2009
+ * v0.8.0.0	September 13, 2007
+ * v0.7.1.0	January 21, 2007
+ * v0.7.0.0	December 31, 2006
+ * v0.6.0.0	September 21, 2006
+ * v0.5.0.0	February 7, 2006
+ * v0.1.1.0	October 4, 2005
+ * v0.1.0.2	April 24, 2005
+ * v0.1.0.1	February 6, 2005
+ * v0.1.0.0	January 31, 2005
+
+ Contract4JBeans (Experimental)
+
+ * v0.3.0.0	February 20, 2006
+ * v0.2.0.0	October 5, 2005
+ * v0.2.0.0M1	August 15, 2005
+
+<a name='notes'></a>
 
 ## Notes for Each Release
 
@@ -1274,7 +1335,10 @@ Numerous minor enhancements.
 v1.0.1 February 6, 2005
 
 Minor bug fixes.
-For Further Information...
+
+<a name='furtherinfo'></a>
+
+## For Further Information...
 
 http://www.contract4j.org/ is the home page for Contract4J5 and Contract4JBeans. It is developed by Aspect Research Associates (ARA), a consulting company specializing in Aspect-Oriented Programming, enterprise Java, and Ruby on Rails. ARA also manages the Aspect Programming web site, where you will find more information and whitepapers on Contract4J5 and Aspect-Oriented Software Development (AOSD), in general.
 
@@ -1303,25 +1367,5 @@ Some more sophisticated approaches to program correctness include the J-LO tool 
 Another project is the Java Modeling Language (JML), which supports DbC for Java.
 
 
-## History
-
-### Contract4J5 (Annotation Form)
-
-* v0.9.0.0	November 13, 2009
-* v0.8.0.0	September 13, 2007
-* v0.7.1.0	January 21, 2007
-* v0.7.0.0	December 31, 2006
-* v0.6.0.0	September 21, 2006
-* v0.5.0.0	February 7, 2006
-* v0.1.1.0	October 4, 2005
-* v0.1.0.2	April 24, 2005
-* v0.1.0.1	February 6, 2005
-* v0.1.0.0	January 31, 2005
-
-Contract4JBeans (Experimental)
-
-* v0.3.0.0	February 20, 2006
-* v0.2.0.0	October 5, 2005
-* v0.2.0.0M1	August 15, 2005
 
 Copyright © 2003-2011 Aspect Research Associates. All Rights Reserved.
