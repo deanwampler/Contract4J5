@@ -1,0 +1,5 @@
+*/*.jar
+*/doc
+*/junit_reports
+*/src-classes
+*/test-classes
