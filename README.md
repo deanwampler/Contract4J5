@@ -64,7 +64,8 @@ In addition, several third-party components are used by Contract4J5. Their licen
 
 Contract4J5 is hosted on [GitHub](https://github.com/deanwampler/Contract4J5) (note that the project is called *Contract4J5*). Builds can be downloaded from [SourceForge](https://sourceforge.net/project/showfiles.php?group_id=130191). The home page is [polyglotprogramming.com/contract4j](http://polyglotprogramming.com/contract4j).
 
-**NOTE:** The previous web site for Contract4J5 was contract4j.org.
+**NOTE:** The previous web site for Contract4J5 was **contract4j.org**.
+
 <a name='versioning'></a>
 
 ## Naming and Versioning
@@ -1340,31 +1341,25 @@ Minor bug fixes.
 
 ## For Further Information...
 
-http://www.contract4j.org/ is the home page for Contract4J5 and Contract4JBeans. It is developed by Aspect Research Associates (ARA), a consulting company specializing in Aspect-Oriented Programming, enterprise Java, and Ruby on Rails. ARA also manages the Aspect Programming web site, where you will find more information and whitepapers on Contract4J5 and Aspect-Oriented Software Development (AOSD), in general.
+[polyglotprogramming.com/contract4j](http://polyglotprogramming.com/contract4j) is the home page for Contract4J5 and Contract4JBeans. It is developed by [Aspect Research Associates](http://aspectresearchassociates.com) (ARA), a consulting company specializing in *Polyglot* Programming technologies, such as Aspect-Oriented, Functional, and Object-Oriented Programming, "enterprise" Scala and Java, and Ruby on Rails. ARA also manages the [Aspect Programming](http://aspectprogramming.com) web site, where you will find more information and whitepapers on Contract4J5 and Aspect-Oriented Software Development (AOSD), in general.
 
-We recently released the first version of a new AOP framework for Ruby called Aquarium. The examples included with Aquarium include a basic Design-by-Contract module.
+We recently released the first version of a new AOP framework for Ruby called [Aquarium](http://aquarium.rubyforge.org/). The examples included with Aquarium include a basic Design-by-Contract module.
 
-The AOP@Work series at developerWorks.com contains an article about Contract4J5. It introduces Design by Contract and how Contract4J5 supports it in Java. The article concludes with a discussion of emerging trends in Aspect-Oriented Design.
+The [AOP@Work](http://www.ibm.com/developerworks/views/java/libraryview.jsp?search_by=aop@work:) series at [developerWorks.com](http://developerWorks.com) contains an [article about Contract4J5](http://www.ibm.com/developerworks/java/library/j-aopwork17.html). It introduces Design by Contract and how Contract4J5 supports it in Java. The article concludes with a discussion of emerging trends in Aspect-Oriented Design.
 
-The AOSD.06 Conference in Bonn, Germany (March 19-24) featured a talk in the Industry Track on Contract4J5, specifically on the lessoned learned about writing generic, reusable aspects in AspectJ while implementing Contract4J5. There was also a paper on aspect-oriented design patterns in Contract4J5 in the ACP4IS workshop. Both papers can be found here.
+The AOSD.06 Conference in Bonn, Germany (March 19-24) featured a talk in the Industry Track on Contract4J5, specifically on the lessoned learned about writing generic, reusable aspects in AspectJ while implementing Contract4J5. There was also a paper on aspect-oriented design patterns in Contract4J5 in the ACP4IS workshop. Both papers can be found at the conference [website](http://aosd.net/2006).
 
-The AOSD.07 Conference in Vancouver, British Columbia (March 12-16) featured a talk in the Industry Track on emerging principles of Aspect-Oriented Design, based on adaptations of well-known Object-Oriented Design principles. The paper can be found here.
+The AOSD.07 Conference in Vancouver, British Columbia (March 12-16) featured a talk in the Industry Track on emerging principles of Aspect-Oriented Design, based on adaptations of well-known Object-Oriented Design principles. The paper can be found at the conference [website](http://aosd.net/2007/).
 
-The definitive site on AOSD is http://www.aosd.net.
+The definitive site on AOSD is [aosd.net](http://www.aosd.net).
 
-See http://www.aspectj.org for information on AspectJ. Note that there are plans to incorporate Contract4J5 into the new standard library for AspectJ5 that is under development.
+See [aspectj.org](http://www.aspectj.org) for information on AspectJ, which was used to implement Contract4J.
 
-For more on Design by Contract, see Building bug-free O-O software: An introduction to Design by Contract(TM)" and the discussion of DbC in the larger context of Agile Methods in Martin, et al., "Agile Software Development: Principles, Patterns, and Practices", Prentice Hall, 2003 (ISBN 0-13-597444-5).
+For more on Design by Contract, see [Building bug-free O-O software: An introduction to Design by Contract(TM)](http://www.eiffel.com/developers/design_by_contract.html) and the discussion of DbC in the larger context of Agile Methods in Martin, et al., "Agile Software Development: Principles, Patterns, and Practices", Prentice Hall, 2003 (ISBN 0-13-597444-5).
 
-For alternative approaches to doing Design by Contract in Java, see the Barter project, which uses XDoclet and also generates AspectJ. Barter partially inspired Contract4J5.
+For alternative approaches to doing Design by Contract in Java, see the [Barter](http://www.google.com/url?sa=t&source=web&cd=1&ved=0CBsQFjAA&url=http%3A%2F%2Fbarter.sourceforge.net%2F&ei=cMhOTbPQGcatgQfXpMQL&usg=AFQjCNHvW-VD4TQh964pjIZZN2zSIEi5fA) project, which uses [XDoclet](http://www.google.com/url?sa=t&source=web&cd=1&sqi=2&ved=0CBkQFjAA&url=http%3A%2F%2Fxdoclet.sourceforge.net%2F&ei=ishOTbD_C87egQfB4pUg&usg=AFQjCNFXfXQantxoEPUiSvf_hjnw0lnSPQ) and also generates AspectJ. Barter was an inspiration for Contract4J5.
 
 JBoss AOP has basic support for contracts. Spring AOP may have similar support.
-
-There is a discussion group doing DbC in Java and possibly getting a future version of Java to support DbC natively. See http://dbc.dev.java.net/. However, this effort appears to be dead for the time being.
-
-Some more sophisticated approaches to program correctness include the J-LO tool for runtime checks of temporal assertions about the program.
-
-Another project is the Java Modeling Language (JML), which supports DbC for Java.
 
 
 
